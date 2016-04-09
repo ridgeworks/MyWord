@@ -6,10 +6,9 @@
 
 //    verbatim text elements...
 
-.tt    	= text <kbd>
 `      	= text <code>
-&style 	= text <style scoped>
-&script = text <script>
+:style 	= text <style scoped>
+:script = text <script>
 
 // useful document elements ......
 
