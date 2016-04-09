@@ -1,0 +1,109 @@
+/* Bootstrap tweaks. */
+body {
+  margin: 1em;
+  max-width: 50em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+}
+
+h1 {
+  font-size: 2.2em;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+h3 {
+  font-size: 1.2em;
+}
+
+h4 {
+  font-size: 1.0em;
+}
+
+h5 {
+  font-size: 0.9em;
+}
+
+h6 {
+  font-size: 0.9em;
+}
+
+h2, h3, h4, h5, h6 {
+  line-height: normal;
+  margin-top: 1.5em;
+  margin-bottom: 0.2em;
+}
+
+h2 {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+a, a:hover, a:visited {
+  color: #134079;
+}
+
+em {
+  color: #134079;
+}
+li, dd {
+  margin-bottom: 0.25em;
+}
+
+p, pre, ul, ol, dl {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+pre {
+  padding: 6px;
+  line-height: normal;
+}
+
+code {
+  color: inherit;
+  font-size: inherit;
+}
+
+*:not(pre) > code {
+  white-space: normal;
+  border: none;
+  background-color: #fafafa;
+}
+
+/* highlight.js tweaks. */
+pre > code {
+  background-color: inherit;
+  padding: 0;
+}
+
+pre span {
+  opacity: 1 !important;
+}
+
+/* Rimu styles. */
+.verse {
+  margin: 1.5em 20px;
+}
+
+div.verse p, p.verse {
+  font-family: serif;
+  white-space: pre;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+.sidebar {
+  border: 1px solid silver;
+  border-radius: 4px;
+  background: #ffffee;
+  padding: 10px;
+  margin: 1.5em 20px;
+}
+
+div.sidebar *:first-child {
+  margin-top: 0.2em;
+}
