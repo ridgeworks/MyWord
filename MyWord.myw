@@ -1,0 +1,433 @@
+#    MyWord Markup
+
+The essence of any markup language is to enables an author to ~[label] pieces of text to explain the intended meaning. In MyWord the authors can define their own markup labels, and embed any kind of markup language or notation. Markup labels can be defined by the author to be easy to read without distracting the reader.
+
+MyWord enables the first word in a line to be used as a markup label for a block of text. Inside different blocks of text different notations and markup languages can be used. Blocks of text without a markup label are paragraphs of prose by default. In prose pragraphs markup labels can be applied to text in brackets.
+
+Here is an example with a couple of MyWord markup labels. The `[##] symbol is used here to label a header, and the `[~] symbol is used for italics:
+
+.demo
+	##  A Header Line
+
+	The ~[Alice In Wonderland] story.
+
+On the left is the plain text source using MyWord markup, and on the right is an HTML presentation generated from the MyWord markup.
+
+Symbolic labels are neat and simple, but they are only practical for a small vocabulary. For a larger vocabulary key words labels are a more effective way to express the intended meaning. An author may choose to use the tag words that are defined in the HTML standard as part of their vocabulary of labels
+
+The next example uses the standard HTML `[h2] tag for a header, and the HTML `[cite] tag for a citation. A dot prefix is used by convention to indicate that these labels are HTML tag names:
+
+.demo
+	.h2  A Header Line
+
+	The .cite[Alice In Wonderland] story.
+
+The MyWord markup labels start with a symbol prefix called a sigil (a magic symbol). The sigil enables readers to easily distinguish a first word that is a markup label from a first word that is a normal prose word. The content of a first word markup label is the remainder of the line, plus any lines that are indented under the label line.
+
+In a paragraph of prose the sigil alerts the reader to the start of an inline markkup label, even if it is embedded in a longer word. The brackets clearly delimit the content.
+
+MyWord does not pre-define the markup labels, authors define their own vocabulary of markup labels. The sigil prefix can be used to indicate the genral nature of the label, such as using the dot for HTML tag names. The sigil also enables any undefined labels to be detected and flagged in a draft document.
+
+
+##	Label Vocabulary
+
+Simple documents only require a small set of common labels for: headings, italics, bold, lists, and a few other things.  These are the features provided in light-weight markup languages such as Markdown. They are also the basic features of a WYSIWYG (What You See Is What You Get) editor, as used for emails or blog notes and the like. A MyWord translator can be packaged together with a vocabulary of labels to meet these needs.
+
+Standard HTML tag names can be used:
+
+.demo
+	HTML tags for .i(italic), .b(bold) and .u(underline).
+
+	For more semantic meaning .em(emphasis) or .strong(bold words).
+
+	Keyboard .kbd(mono font) and .code(a = b+c;)
+
+	Hit the .button[return] key.
+
+Shorthand symbols such can be used for common labels:
+
+.demo
+	##  Level 2 Header
+	###  Level 3 Header
+	####    Level 4 Header
+
+	Shorthand symbols: ~(italic), !(bold words), and `(plain text).
+
+	Superscript^(above) and subscript_(below).
+
+	>   An HTML blockquote tag presents text that
+        is indented from the margin.
+
+Shorthand symbols can also be used for HTML lists and HTML links:
+
+.demo
+	-   Bullet point list.
+	-   Second bullet point.
+	    +   First numbered point.
+	    +   Second numbered point.
+	-   Third bullet point.
+
+	A web address URL link: @[http://csszengarden.com].
+
+
+##  Label Defintitions
+
+Markup labels are not pre-defined by the MyWord translator, any label can be defined to represent any HTML element.
+
+Here is a sample of a few of the definitions for labels seen in previous examples:
+
+.eg
+    &
+        .h2 = <h2>
+        .h3 = <h3>
+
+        > = <blockquote>
+
+        .i = <i>
+        .b = <b>
+        .cite = <cite>
+
+        ~ = <i>
+        ! = <b>
+        ` = <code>
+
+The special & label introduces a block of defintions. Each label is defined with the HTML element that it represent.
+
+Rather than write a block of definitons like this into every document an author can put them into a file that can be shared across many documents. A file of defintions can be used like this:
+
+.eg
+    &   @include  myWord.definitions.txt
+
+The `[@include] takes a URL for a file containing definitions of the vocabulary of labels that the author wants to use.
+
+
+##	Custom Label Definitions
+
+A shared file of defintions can provide a rich vocabulary of labels, but some document will require their own custom definitons.
+
+For example to define a `[.box] label could require an HTML `[<div class='box'>] element. By convention the dot prefix has been used for standard HTML elements, but let's extend that convention to include the use of an HTML class attribute:
+
+.demo
+	.box    A box of ~[prose]...
+
+    &   .box = <div class='box'>
+
+Inline labels have their content in brackets, but they can be defined in a similar way:
+
+.demo
+	The story by .author[Lewis Carroll].
+
+	&   .author = <span class=author style="color:firebrick">
+
+An HTML link element is  defined here using a label with an `[@] prefix:
+
+.demo
+	See the @zen[CSS Zen Garden] web site.
+
+	&   @zen = <a href='http://www.csszengarden.com'>
+
+An image uses the HTML `[<img>] element, and the label has been given a `[!] prefix:
+
+.demo
+	The GO gopher !go[gopher]
+
+	&   !go = <img src='Xtras/gopher.png' title='gopher'/>
+
+A footnote or end-note can be created from HTML components like this:
+
+.demo
+	The temperature above absolute^nb[Kelvin] zero.
+
+	:nb  Notes
+
+	    Kelvin -- Absolute zero is 0°K ....
+
+	&
+        :nb = <div class='nb' id='nb'>
+	    ^nb  = <a class='nb' href='#nb'>
+
+The `[:nb] label is a block label that is defined with the target ID `[nb]. The `[^nb] is an inline label that is defined as an HTML link to the target. The style sheet has presented this example in the form of a footnote.
+
+
+##  Plain Text Content
+
+The previous examples defined MyWord labels to represent different HTML elements. By default the content text is translated in the same way, so MyWord markup labels may contain nested labels. Just as the content of an HTML can contain nested HTML.
+
+Sometimes an author may want to quote the content text verbatim, without any translation. The content may be text written using any markup language or programming language. The author can define a label that uses a plain text translation, so that the content can be presented verbatim:
+
+.demo
+	Here is: `kbd[keyboard ~[literal] text].
+
+	&   `kbd = text <kbd>
+
+The `[kbd] label specifies a `[text] translation for the content text that will then be wrapped into a `[<kbd>] element. This means that any markup notations in the content text will not be translated, the source text will be quoted as literal text.
+
+Plain text translated verbatim may be presented with syntax higlighting:
+
+.demo
+    A snippet of Python code:
+
+	.py
+		# this a blob of Python code
+		if x > 42:
+			print 'end of </script>.'
+
+    &   .py = highlight <pre class=py>
+
+The `[.py] label applies the `[highlight] translator to its content, and wraps the result into an HTML `[<pre>] element. The `[highlight] function translates the content text into HTML element for the Python syntax which enables style sheet rules to present the syntax highlighting.
+
+The `[text] and `[higlight] translators preserve the content text and present it verbatim, but other translator functions can transform the content in different ways.
+
+
+##  Content Translation
+
+The ability to define a label that can translate its content enabels an author to use custom notations and  formats.
+
+For example:
+
+.demo
+	It starts on .date[2/3/2013].
+
+	&   .date = mdy <b class=date>
+
+&
+    mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
+        var dd = (d.length < 2)? '0'+d : d;
+        var mm = (m.length < 2)? '0'+m : m;
+        var ymd = y+'-'+mm+'-'+dd;
+        return '<time datetime="'+ymd+'">' +
+            (['Jan','Feb','Mar','Apr','May','Jun',
+            'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
+            ' ' + d + ', ' + y + '</time>'; }
+
+The content of the .date label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element. How the mdy transform function is defined will be discussed in the next section. For the moment lets just assume that transform functions like this are available.
+
+The content of a label can use any format that has an appropriate transform function. For example, the label for a table can specify that the format of its content text is tab-separated data fields, which are to be translated into cells in an HTML table element, like this:
+
+.demo
+	.table
+	    A    B    C
+	    1    2    3
+
+	&  .table = tsv <table>
+
+The label definition specifies that the tsv transform is to be applied to the content text. The tsv function will translate the tab separated fields into cells in an HTML table element.
+
+If you prefer to write your tables using a format more like some of the extensions to Markdown, then you can define the bar `[|] as a label that will use a `[bartab] translator:
+
+.demo
+	|  Name   | Lunch order  | Spicy  | Owes :
+	   Joan   | saag paneer  | medium | $11
+	   Sally  | vindaloo     | mild   | $14
+	   Erin   | lamb madras  | HOT    | $5
+
+	&   | = bartab <table>
+
+The `[bartab] function is very similar to the `[tsv] function but it uses the bar character | as a field separator, and it knows how to translate header line notations that can allign columns.
+
+An HTML link element requires a URL as an `[href] attribute value, so defining a label to represent an HTML link requires a transform function:
+
+.demo
+    @[http://csszengarden.com]
+
+    &   @ = linkURL
+
+The `[linkURL] transform function generates the required HTML wrapper: `[<a href='http://csszengarden.com'>].
+
+HTML link elements and target id elements can be created by transform functions:
+
+.demo
+    I saw @id[Tom] and @id[Harry] last night.
+
+    #id[Tom]: Thomas Bigfoot.
+
+    #id[Harry]: Harold Higgins
+
+    &
+        @id = idLink
+        #id = idTarget
+
+&
+    idLink :: (ref) => "<a href='#"+ref+"'>"+ref+"</a>"
+    idTarget :: (ref) => "<b id='"+ref+"'>"+ref+"</b>"
+
+
+A label for a list item can be defined by a translator that will compose a group of items into an HTML list:
+
+.demo
+	*  First bullet point...
+
+	*  Second point...
+
+	  +  First step in the second point.
+	  +  Second step..
+	  +  Third step.
+
+	*  Third point.
+
+	&   * = list <ul>
+	&   + = list <ol>
+
+&   // list :: (content) => markit('_group',content)
+
+The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
+
+A list of terms can be translated into an HTML defintion list using the `[terms] transform function. This transform wraps the content into either an HTML `[<dt>] or a `[<dd>] element, according to the indentation. The `[:] label then wraps the resulting content into an outer HTML `[<dl>] defintion list element:
+
+.demo
+    :
+      Tom
+
+        Thomas .em[the Tank Engine].
+
+      Dick
+
+        Richard .em[the Lion Heart].
+
+    &   : = terms <dl>
+
+& terms :: (content) => {
+            var dl = "";
+            var dd = "";
+            var lines = content.split('\n');
+            for (var i=0; i<lines.length; i++) {
+                var line = lines[i];
+                if (!line.match(/^\s/)) { // no indent
+                    if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; dd = ""; }
+                    dl += "<dt>"+line+"</dt>";
+                } else { // indented...
+                    dd += line.trim()+'\n';
+                }
+            }
+            return dl + "<dd>" + markit("myword",dd) + "</dd>";
+            }
+
+
+The `[.math] label is defined here using the `[ascii2mml] function to translate AsciiMath notation into HTML Math ML elements:
+
+.demo
+	.math
+		sum_(i=1)^n i^3=((n(n+1))/2)^2
+
+	&   .math = ascii2mml <math display=block>
+
+An author may wish to break a document up into parts to be edited as separate files. Separte parts can then be included into the main document body with an `[@include] label:
+
+.demo
+	@include MyWord.part.txt
+
+    & @include = import <div class='insert' style='border:solid thin grey'>
+
+The `[@include] label is defined in the same way as any other label, it uses a transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.txt] file is translated as text using MyWord markup by default.
+
+
+##  Translator Functions
+
+The previous examples showed how labels can be defined to use traslator functions. The translator functions may be JavaScript code, or they may be defined in MyWord with grammar rules.
+
+The `[@greet] markup label can be defined with a `[hello] transform function:
+
+.demo
+    The standard @greet[World] example.
+
+    &
+        @greet = hello <b style='color:magenta'>
+
+        hello :: (content) => "Hello "+content
+
+The `[hello] function is defined to simply add a "Hello " prefix to the content text.
+
+Here is the link example we saw earlier, this time showing how the translator functions are defined. These functions generate HTML elements with attribute values that contain the content text:
+
+.demo
+    I saw @id[Tom] and @id[Harry] last night.
+
+    #id[Tom]: Thomas Bigfoot.
+
+    #id[Harry]: Harold Higgins
+
+    &
+        @id = idLink
+        #id = idTarget
+
+        idLink :: (ref) => "<a href='#"+ref+"'>"+ref+"</a>"
+        idTarget :: (ref) => "<b id='"+ref+"'>"+ref+"</b>"
+
+
+The next example defines a `[tempF] translator functions to translate Celsius to Fahrenheit:
+
+.demo
+	It was .temp[42C] today.
+
+	&
+	   .temp = tempF <span class=temp>
+
+       tempF :~  ([+-]?\d+)\s*([CF]) :: (_,val,unit) =>
+
+            ((unit == 'C') ? Math.round((val*9/5+32)*10)/10 : val)+"ºF"
+
+The `[.temp] label is defined with a `[tempF] transform function. The `[tempF] transform is defined using the `[:~] symbol which introduces a regular expression rule to match the content text. The `[::] symbol introduces a semantic action that translates the matched text for the HTML presentation. The details do not matter, this example is just to illustrate how new custom markup translators can be defined. The details are explained in a separate document.
+
+The next example defines the `[mdy] transform function for date translation:
+
+.demo
+	The date was .date[2/3/2013].
+
+	&
+	   .date = mdy <span class=date>
+
+       mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
+                var dd = (d.length < 2)? '0'+d : d;
+                var mm = (m.length < 2)? '0'+m : m;
+                var ymd = y+'-'+mm+'-'+dd;
+                return '<time datetime="'+ymd+'">' +
+                    (['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
+	                ' ' + d + ', ' + y + '</time>'; }
+
+
+If labels and translator functions like this are defined in a separate file they can be shared across different documents, so that the author does not need to have these definitions in the source text.
+
+Third party markup translators, or domain specific language translators, may also be used as transltors for blocks of text in MyWord documents. The MyWord block labels do not impose any restrictions on the content text, there is no requirement to escape any special syntax characters. An author is free to employ any special purpose language as a translator.
+
+Authors can select labels and translator functions that suit their needs from a library of definition files. With a little programmaing knowledge it is simple and fun to define new custom translator functions. The details of this are discussed in a separate document.
+
+
+##  Wrapping It All Up
+
+A MyWord document can be translated into HTML on a server, or in a browser.
+
+One interesting way to deliver MyWord source text is inside an HTML script element. The `[myword.js] translator will translate the contents of a `[<script type=application/x-myword>] element into HTML.
+
+The MyWord source text in a `[<script type=application/x-myword>] element could be a complete MyWord document that defines its own labels. But any MyWord source file can import other MyWord source files and label defintitions. The source text and the label definitons can therefore be divided into separate files in any way the author wants.
+
+In this example the `[MyWord.into.txt] file contains the source text, and that imports the definition files that it needs:
+
+.eg
+    <!DOCTYPE HTML>
+    <html>
+    <head>
+        <meta lang=en charset="UTF-8">
+        <title>Introduction to MyWord</title>
+        <script src='myword.js'></script>
+    </head>
+    <body>
+    <script type=application/x-markit.myword>
+    @include  MyWord.intro.txt
+    </script>
+    </body>
+    </html>
+
+
+##	Conclusion
+
+MyWord has no predefined markup labels (other than the special label used to define a new label). Authors can define a set of labels to suit their language preferences and the needs of their documents. Any MyWord label can be defined to represent any HTML element the author requires.
+
+MyWord makes it very easy to define new markup labels that may contain any desired data formats or domain specific languages.
+
+&style
+    *.box {border:thin solid gray; background:lavenderblush; margin:0pt 10pt; padding: 0pt 10pt;}
+
+    div.nb { font-size: small; border-top: solid thin grey; }
+    a.nb { vertical-align:super; font-size: x-small;}
+
