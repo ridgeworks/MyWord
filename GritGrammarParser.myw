@@ -1,23 +1,17 @@
+
 #	Grit Grammar Parser
 
-Grit is a grammar language that can be used in a host programming language to define a parser. A Grit parser can be used to parse an input string in much the same way that a regular expression can be used to match an input string.
+Grit is a grammar language that can transform an input string into any data type that an application program requires.
 
-Grit makes programming with grammar rules as easy as programming with regular expressions. Which reminds me of that old joke: I had a problem with string matching, so I used a regular expression, then I had two problems! Fortunately the expressive power that regular expressions bring is usually worth the problems that they also bring.
-
-Grit uses regular expressions as pattern matching rules. It makes them a little simpler to use, and extends them with the power of grammar rules. Using a regular expression is a very fast and efficient way to match a pattern in a string, but a regular expression can not cope with iterative or recursive patterns. Grit adds grammar rules to enable a programmer to knit together regular expression rules that can match more general patterns.
-
-A Grit grammar can contain both PEG (Parser Expression Grammar) rules and RegExp (Regular Expression) rules. The PEG rules define sequences and choices of other rules. The PEG rules themselves do not match any input directly, it is only the RegExp rules that match a substring of the input and thereby advance the parse.
-
-The Grit grammar may include optional semantic actions to translate the grammar rule results. A Grit parser can transform an input string into any data type that an application program requires.
+A Grit grammar can contain both PEG (Parser Expression Grammar) rules, and RegExp (Regular Expression) rules. The rules can include optional semantic actions to translate the rule results.
 
 This note will discuss Grit as used in JavaScript, so some of the details will be specific to JavaScript, but the PEG rules, and the way that the Grit grammar language operates should be the same in any other host programming language.
-
 
 ##	Overview Example
 
 The first example shows a complete JavaScript program that can evaluate simple arithmetic expressions -- which is the "Hello World" example for grammar languages. Don't worry about the details, they will be explained shortly, but if you are familiar with regular expressions and the general idea of grammar rules then you will probably follow how it all works.
 
-In a Grit grammar the PEG grammar rules are introduced with a ':=' symbol, and the RegExp rules are introduced with a ':~'. The optional '::' introduces a semantic action to translate the rule result.
+In a Grit grammar the PEG grammar rules are introduced with a `[:=] symbol, and the RegExp rules are introduced with a `[:~]. The optional `[::] introduces a semantic action to translate the rule result.
 
 .eg
 	var Grit = require("./grit.js");
@@ -59,16 +53,16 @@ In a Grit grammar the PEG grammar rules are introduced with a ':=' symbol, and t
 	var x = arith.parse("1+2*(3+4)-5");
 	console.log(x); // 10
 
-JavaScript 2015 ES6 has tag template strings that can be used to embed DSLs (Domain Specific Languages), and this works well for Grit. The ability to quote a raw string in earlier versions of JavaScript is awkward and more verbose.
+JavaScript 2015 ES6 has tag template strings that can be used to embed DSLs (Domain Specific Languages), and this works well for Grit. Earlier versions of JavaScript are not quite as neat.
 
 The semantic action following the :: symbol is the name of a function to translate the rule result. A semantic action can be thought of as a type translator that transforms the parser rule result into the desired data type.
 
-The result of a parse using the .kbd[arith] grammar is a numeric value. A different grammar may use different semantic actions to translate an input string into an ouput string, or some other application data type. If there are no semantic actions then the rules will build a parse tree of JavaScript Array elements, which an application program may process in any way it wants.
+The result of a parse using the `[arith] grammar is a numeric value. A different grammar may use different semantic actions to translate an input string into an ouput string, or some other application data type. If there are no semantic actions then the rules will build a parse tree of JavaScript Array elements, which an application program may process in any way it wants.
 
 
 ##	RegExp Rules
 
-Lets start with a Grit grammar parser to match dates expressed in a month/day/year format, such as: "3/4/2015". This grammar is just a single RegExp rule:
+Lets start with a Grit grammar parser to match dates expressed in a `[month/day/year] format, such as: `[3/4/2015]. This grammar is just a single RegExp rule:
 
 .eg
 	var date = Grit`
@@ -93,7 +87,7 @@ The date RegExp is simple enough, but larger regular expressions can become quit
 		year  :~ \d{4}
 	`;
 
-The .kbd[%rule] is a placeholder that is replaced by the body of the named rule. This grammar has four rules, but only the .kbd[mdy] rule is needed to match the complete date format. This grammar and the previous single rule grammar will parse the input with exactly the same RegExp expression, so they will have identical performance, and generate the same result.
+The `[%rule] is a placeholder that is replaced by the body of the named rule. This grammar has four rules, but only the `[mdy] rule is needed to match the complete date format. This grammar and the previous single rule grammar will parse the input with exactly the same RegExp expression, so they will have identical performance, and generate the same result.
 
 The JavaScript regular expression engine is very fast, and it can express quite complex pattern matching rules. It is usually a good idea to match as much as possible with Regexp rules. On the other hand PEG rules make a better sepcification that is portable across host programming languges.
 
@@ -215,7 +209,7 @@ The parse tree result will now contain all the matched terms:
 	  rule: 'sum'
 	]
 
-The .kbd[sum] rule returns a match that is a sequence of rule matches as an array of results. The result starts with a .kbd[num] rule match, followed by any number of .kbd[plus] rule matches.
+The `[sum] rule returns a match that is a sequence of rule matches as an array of results. The result starts with a `[num] rule match, followed by any number of `[plus] rule matches.
 
 
 ##	White-space
@@ -287,7 +281,7 @@ An application program can access components of the parse tree. The next example
 
 A rule may be have an optional semantic action appended after a "::" symbol. The action can name a function to translate a rule match result. A rule match result is an Array by default, but a semantic action can be used as a type translator to transform that into any result type the application requires.
 
-For example, the .kbd[number] type translator is defined as a function that takes a RegExp match result and returns a numeric value:
+For example, the `[number] type translator is defined as a function that takes a RegExp match result and returns a numeric value:
 
 .eg
 	var integer = Grit`
@@ -298,7 +292,7 @@ For example, the .kbd[number] type translator is defined as a function that take
 
 	var n = integer.parse("42"); // => n = 42
 
-The calling convention is: .kbd[number(...result)], where .kbd[result] is the Array result from the RegExp rule, with it's terms "spread" into argument values (the ... is the spread operator in JavaScript ES6). In this case it is the first bracket field that is translated into a numeric value.
+The calling convention is: `[number(...result)], where `[result] is the Array result from the RegExp rule, with its terms "spread" into argument values (the ... is the spread operator in JavaScript ES6). In this case it is the first bracket field that is translated into a numeric value.
 
 The next example translates the date format: m/d/y into a: y-m-d format:
 
@@ -311,7 +305,7 @@ The next example translates the date format: m/d/y into a: y-m-d format:
 
 	var d = mdy.parse("3/4/2015"); // => "2015-3-4"
 
-The first argument will be the full RegExp match, but that is not required for this example. The other arguments supply the RegExp bracket group match result fields, which the .kbd[ymd] function has named .kbd[m, d, y].
+The first argument will be the full RegExp match, but that is not required for this example. The other arguments supply the RegExp bracket group match result fields, which the `[ymd] function has named `[m, d, y].
 
 In the next example the type translator returns a JavaScript Date object:
 
@@ -343,7 +337,7 @@ The next example translates the input string into an HTML time element (a string
 
 	var d = mdy.parse("3/4/2015"); // => "<time datetime='2015-3-4'>3/4/2015</time>"
 
-A JavaScript template string .kbd[`...`] can interpolate any JavaScript expressions enclosed in .kbd[${ ... }], so the function definition may contain a nested template string with it's own interpolation:
+A JavaScript template string `[`...`] can interpolate any JavaScript expressions enclosed in `[${ ... }], so the function definition may contain a nested template string with it's own interpolation:
 
 .eg
 	var mdy = Grit`
@@ -367,9 +361,9 @@ A type translator works in much the same way on PEG grammar rules. In this case 
 
 	var x = expr.parse("12 + 30"); // x = 42
 
-The custom function .kbd[calc] takes the result of the sum rule and calculates a numeric value from the component parts.
+The custom function `[calc] takes the result of the sum rule and calculates a numeric value from the component parts.
 
-The pattern in the .kbd[sum] rule is in the form of a binary infix operator, and a generic infix combinator can be defined to handle this pattern with helper functions for the required operators:
+The pattern in the `[sum] rule is in the form of a binary infix operator, and a generic infix combinator can be defined to handle this pattern with helper functions for the required operators:
 
 .eg
 	var expr = Grit`
@@ -383,7 +377,7 @@ The pattern in the .kbd[sum] rule is in the form of a binary infix operator, and
 	expr['+'] = (n, m) => n+m;
 	expr['-'] = (n, m) => n-m;
 
-The .kbd[infix] combinator uses the value of the .kbd[op] to select a custom function to perform the required operation. The infix combinator can be used with different application types and any number of operators can be defined.
+The `[infix] combinator uses the value of the `[op] to select a custom function to perform the required operation. The infix combinator can be used with different application types and any number of operators can be defined.
 
 Now consider a more general grammar that can match a list of infix operators:
 
@@ -407,7 +401,7 @@ Now consider a more general grammar that can match a list of infix operators:
 
 	consle.log( expr.parse("1+2-3+4") ); // => 4
 
-The .kbd[reduce] combinator works with left assciative operators, a similar .kbd[reduceRight] combinator can be defined for right associative operators.
+The `[reduce] combinator works with left assciative operators, a similar `[reduceRight] combinator can be defined for right associative operators.
 
 
 ##	Left Recursion
@@ -425,19 +419,19 @@ For example, the string "a•b•c•d" may be parsed with three different gramm
 
 All three grammar rules recognise the same input language, it is only the parse tree structures that differ. The Grit grammar does not support left recursion, but the same effect can be achieved by matching the input as a flat list, and then using a combinator to translate that into left associative list as required.
 
-The .kbd[reduce] combinator can be used to evaulate left (or right) associate operators:
+The `[reduce] combinator can be used to evaulate left (or right) associate operators:
 
 .eg
 	reduce       (a((•b)(•c)(•d)))  => (((a•b)•c)•d)
 
 	reduceRight  (a((•b)(•c)(•d)))  => (a•(b•(c•d)))
 
-The .kbd[reduce] combinator takes an application function to evaluates each (x•y) binary expression in order to reduce a flat list to a single value.
+The `[reduce] combinator takes an application function to evaluates each (x•y) binary expression in order to reduce a flat list to a single value.
 
 
 ## Result Types
 
-A semantic action may return almost any type except for a special value that is reserved to mean that the rule has failed. In JavaScript the .kbd[null] or .kbd[undefined] types will cause the rule to fail, any other value may be returned.
+A semantic action may return almost any type except for a special value that is reserved to mean that the rule has failed. In JavaScript the `[null] or `[undefined] types will cause the rule to fail, any other value may be returned.
 
 The ability for a type translator to cause a rule to fail is important in some applications. For example, let's assume that the grammar has a set of key words or symbols to match. A simple way to do that is with a RegExp rule:
 
@@ -485,7 +479,7 @@ Since this technique can use the host programming language to do anything you li
 
 A simple example of a context sensitive grammar is the use of indentation for nesting, where the indentation must be matched with a previous indentation inset. The standard way to avoid this problem in the grammar is to use a lexer that generates an INDENT token when the start of an indented block is found, and one or more DEDENT tokens at the end of indentation(s). Standard grammar rules can then use these tokens exactly like nested brackets are used. For example as a {...} block in a programming language grammar, or the parenthesis (...) in S-expressions grammar.
 
-Here is an example of a lexer that generates token objects for each line of input with its line number and indentation level. It also generates a failure if there is an error in the indentation. The indentation can be spaces or tabs, but it is an error if they are not consistent, the indentation of each line in each indented block must have exactly the same inset margin. The semantic action called .kbd[line] compares the inset of the current line with the current inset margin and maintains a stack of indentation levels.
+Here is an example of a lexer that generates token objects for each line of input with its line number and indentation level. It also generates a failure if there is an error in the indentation. The indentation can be spaces or tabs, but it is an error if they are not consistent, the indentation of each line in each indented block must have exactly the same inset margin. The semantic action called `[line] compares the inset of the current line with the current inset margin and maintains a stack of indentation levels.
 
 .eg
 	var lines = Grit(`
@@ -548,7 +542,7 @@ Here is an example of a lexer that generates token objects for each line of inpu
 	var tokens = lines.parse(txt);
 	console.log(tokens);
 
-The data for the line numbering and the stack of margin indentations are saved in the context of the parse (as .kbd[this.lnum], and .kbd[this.margins]). The input and the current position are also available in this context, but they are not needed for this particular example. This example could be used as a lexer to feed tokens into another grammar, or it could be embedded into a larger Grit grammar.
+The data for the line numbering and the stack of margin indentations are saved in the context of the parse (as `[this.lnum], and `[this.margins]). The input and the current position are also available in this context, but they are not needed for this particular example. This example could be used as a lexer to feed tokens into another grammar, or it could be embedded into a larger Grit grammar.
 
 
 
