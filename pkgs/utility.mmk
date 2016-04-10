@@ -6,10 +6,9 @@
 
 //    verbatim text elements...
 
-.tt    	= text <kbd>
 `      	= text <code>
-&style 	= text <style scoped>
-&script = text <script>
+:style 	= text <style scoped>
+:script = text <script>
 
 // useful document elements ......
 
@@ -17,18 +16,18 @@
 
 .demo	= demo <table class='demo'>
 
-demo    :: (content) => "<tr><td class='A1'>" + 
-                            content.replace(/</g,'&lt;') + 
+demo    :: (content) => "<tr><td class='A1'>" +
+                            content.replace(/</g,'&lt;') +
                             "</td><td class='B1'>" +
                             markit('myword',content) +
                             "</td></tr>"
-												
+
 .table	= tsv <table class=tsv>
 
 tsv         := header datarow*              :: (header, rows) => this.flatten(header.concat(rows)).join('')
 	header  := tsep* hdritem+               :: (_,hdr) => ["<tr>",hdr,"</tr>"]
 	hdritem := item tsep?                   :: (item) => ["<th>",this.flatten(item).join('').replace(/</g,'&lt;'),"</th>"]
-	datarow := newline tsep* datitem*       :: (_0,_1,data) => ["<tr>",data,"</tr>"] 
+	datarow := newline tsep* datitem*       :: (_0,_1,data) => ["<tr>",data,"</tr>"]
 	datitem := item tsep?                   :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
 	item    := (!delim char)+
 	delim   :~ %tsep | %newline
@@ -76,6 +75,4 @@ bartab		:: (content) => {
 _      = <sub>
 ^      = <sup>
 .bold  = <b>
-
-
 
