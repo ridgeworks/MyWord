@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta lang=en charset="UTF-8">
+    <title>MyWord Reader</title>
+    <script>
+        var updateMyWordContents = function() {
+            var doccontentElement
+
+            var myWorker = new Worker('lib/markit.js')	// worker is colocated with this script file
+            myWorker.onmessage = function (content) {
+                var elementID
+                if (doccontentElement) {                        //  user selected content
+                    doccontentElement.innerHTML = content.data
+                    elementID = "##doccontents"
+                } else {                                        //  Lingo
+                    initDocContent(content.data)
+                    elementID = "##mywordContents"
+                }
+                dispatchUpdate(document, elementID) // invoke listeners for update
+            }
+            myWorker.onerror = function (err) {
+                if (!doccontentElement) {                      // if Lingo, init doc content
+                    initDocContent("")
+                }
+                writeError(err)                             // then write error
+            }
+
+            loadLingo()
+
+            function loadLingo() {
+                // append relative .mmk path to location.href directory to get full URL for markit()
+                var lingoURL = location.href.substring(0, location.href.lastIndexOf('/') + 1) + "lib/x-markup.mmk"
+                //var lingoURL = "lib/x-markup.mmk"
+                var request = new XMLHttpRequest();
+                request.open("GET", lingoURL, true);
+                request.onload = function () {
+                    var status = 0
+                    status = ((status == 0) ? this.status : status )   //; console.log("status=",status)
+                    if ((status === 200 || status === 0)) {
+                        try {
+                            myWorker.postMessage([lingoURL, 'metamark', this.responseText])  //; console.log("posting ",type," ",tElement," to ",document)
+                        } catch (err) {
+                            initDocContent("")
+                            console.error(errorMessage([err.message, " posting ", type, " content to ", document]))
+                        }
+                    } else {
+                        initDocContent("")
+                        console.log("Error reading", lingoURL, " code=", status)
+                    }
+
+                }
+                request.onerror = function () {
+                    initDocContent("")
+                    console.log("Error reading", lingoURL, " code= 404")
+                }
+                request.send()	//; console.log(request.status,url,"["+request.responseText.length+"]")
+            }
+
+            function initDocContent(initialDefs) {
+                document.getElementById("##mywordContents").innerHTML = initialDefs + "<div id='##doccontents'></div>"
+                doccontentElement = document.getElementById("##doccontents")
+            }
+
+            function updateMyWordContents(file) {
+                var reader = new FileReader()
+                reader.onload = function (ev) {
+                    myWorker.postMessage([location.href, 'myword', ev.target.result])
+                }
+                reader.onerror = function (err) {
+                    writeError(err)
+                }
+                reader.readAsText(file)
+            } // updateMyWordContents(file)
+
+            function writeError(err) {
+                doccontentElement.innerHTML =
+                        ["<pre><mark style='color:blue'><br>Error: ", err.message, "<br></mark></pre>"].join('')
+                console.error("Error:", err.message)
+            }
+
+            function dispatchUpdate(document, elementID) {
+                var element = document.getElementById(elementID)
+                if (/*noMML &&*/ (typeof MathJax != 'undefined')) {	// if (MathJax) add it feature listeners
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, element])
+                }
+                if (!('scoped' in document.createElement('style'))) {
+                    scopeIt(document, element)
+                }
+            } // dispatchUpdate(document, element)
+            /* Polyfill for scoped styles - plagerized from (https://github.com/thomaspark/scoper)
+
+             Copyright (c) 2015 Thomas Park
+
+             Permission is hereby granted, free of charge, to any person obtaining a copy
+             of this software and associated documentation files (the "Software"), to deal
+             in the Software without restriction, including without limitation the rights
+             to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+             copies of the Software, and to permit persons to whom the Software is
+             furnished to do so, subject to the following conditions:
+
+             The above copyright notice and this permission notice shall be included in all
+             copies or substantial portions of the Software.
+
+             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+             IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+             FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+             AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+             LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+             OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+             SOFTWARE.
+             */
+            var scopeID
+
+            function scopeIt(document, element) {
+                if (!(scopeID)) scopeID = 0
+                var
+                        styles = element.querySelectorAll("style[scoped]");
+                if (styles.length > 0
+                ) {
+                    var head = document.head || document.getElementsByTagName("head")[0];
+                    var
+                            newstyle = document.createElement("style");
+                    var csses = "";
+                    for (var i = 0; i < styles.length; i++) {
+                        var style = styles[i];
+                        var css = style.innerHTML;
+                        if (css) {
+                            var parent = style.parentNode;
+                            // don't process any immediate decendants of body element (shouldn't wrap body element)
+                            if (parent.tagName.toLowerCase() != "body") {
+                                var id = "scoper-" + (scopeID++);
+                                var prefix = "#" + id;
+                                var wrapper = document.createElement("span");
+                                wrapper.id = id;
+                                var grandparent = parent.parentNode;
+                                grandparent.replaceChild(wrapper, parent);
+                                wrapper.appendChild(parent);
+                                style.parentNode.removeChild(style);
+                                csses = csses + scoper(css, prefix);
+                            }
+                        }
+                    }
+                    if (newstyle.styleSheet) {
+                        newstyle.styleSheet.cssText = csses;
+                    } else {
+                        newstyle.appendChild(document.createTextNode(csses));
+                    }
+                    head.appendChild(newstyle);
+                }
+
+                function scoper(css, prefix) {
+                    var re = new RegExp("([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)", "g");
+                    css = css.replace(re, function (g0, g1, g2) {
+                        if (g1.match(/^\s*(@media|@keyframes|to|from)/)) {
+                            return g1 + g2;
+                        }
+                        g1 = g1.replace(/^(\s*)/, "$1" + prefix + " ");
+                        return g1 + g2;
+                    });
+                    return css;
+                } // scoper(css, prefix)
+            } // scopeIt(document, element)
+
+        return updateMyWordContents
+    } ();
+    </script>
+</head>
+<body>
+<input type="file" accept=".myw,.txt" onchange="updateMyWordContents(this.files[0])">
+<hr/>
+<div id="##mywordContents"></div>
+</body>
