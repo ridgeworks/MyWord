@@ -12,7 +12,7 @@ For an in-depth look at MyWord see [Introduction to MyWord](http://ridgeworks.gi
 
 ### How It Works
 
-Authors write MyWord content in their favourite text editor just like other light-weight markup languages, e.g., MarkDown. However, the 'publishing' step is different. Rather than translating the source document to an HTML file using a separate tool, MyWord is translated in the browser environment; operationally, MyWord is more like [MathJax](https://www.mathjax.org) than [MarkDown](https://daringfireball.net/projects/markdown/). A simple HTML host file is constructed to reference the MyWord source document and the MyWord translator. Once this is done, the document can be updated just by replacing the source file.
+Authors write MyWord content in their favourite text editor just like other light-weight markup languages, e.g., MarkDown. However, the 'publishing' step is different. Rather than translating the source document to an HTML file using a separate tool, MyWord is translated in the browser environment so, operationally, MyWord is more like MathJax than MarkDown. A simple HTML host file is constructed to reference the MyWord source document and the MyWord translator. Once this is done, the document can be updated just by replacing the source file.
 
 The HTML host file links to the translation software using a standard script element in the document head:
 
@@ -51,5 +51,3 @@ A useful set of label definitions is provided in `lib/x-markup.mmk`, but users a
 The translation of MyWord content takes place in the browser, which imposes some minimal constraints. Since the translation step is performed in a separate browser thread to ensure the main page responsiveness is unaffected, the browser must support Web Workers as defined in the HTML5 standard. Most browsers released since .ca 2014 (e.g., Chrome 30.0, Firefox 30.0, Safari 8) provide this support.
 
 In some situations, translation can generate HTML5 scoped style elements. For browsers which do not support this feature, a 'polyfill' is built-in to the post translation phase.
-
-(Note: Since users can provide their own label definitions through JavaScript, care must be taken to avoid language/API features which inadvertently prevent content from being translated on targeted browsers.)
