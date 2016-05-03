@@ -4,7 +4,7 @@ MyWord is an extensible markup language, just like XML or HTML (with custom tags
 
 Myword does not require any reserved syntax characters, which means there are no restrictions on the content text in markup elements. This allows the author to write content text that can contain any data format, notation, markup, or programming language. A markup label can define any custom syntax for its content text.
 
-A document written with MyWord markup does not need to be translated into a separate HTML document, instead a standard HTML browser can be extended to read and present MyWord documents directly.
+A document written with MyWord markup does not need to be translated into a separate HTML document, instead a standard HTML browser can be empowered to read and present MyWord documents directly.
 
 In a nutshell:
 
@@ -20,7 +20,7 @@ In a nutshell:
 
 -	The translation of content into HTML (or XML) is determined by the definition of the markup label.
 
--   A standard browser can be extended to read MyWord documents and present them as HTML.
+-   A standard browser can be empowered to read MyWord documents and present them as HTML.
 
 
 ##	Blocks
@@ -93,11 +93,11 @@ Markup labels can be defined to represent any HTML elements, for example:
 
 A sigil is a magic symbol, and its purpose is to identify a markup label. The sigil symbols are ~[not] special reserved syntax characters. A sigil character inside text content has no particular significance.
 
-An unlimited number of markup labels can be defined, so a single sigil characters is all that is required. However a variety of different sigil characters is very convenient since it allows the author to indicate different kinds of markup labels. By convention labels with the same sigil can be used for similar purposes. This helps readers to quickly understand the authors intent.
+An unlimited number of markup labels can be defined, so a single sigil characters is all that is required. However a variety of different sigil characters is very convenient since it allows the author to indicate different kinds of markup labels. By convention labels with the same sigil can be used for similar purposes. This helps authors to understand and remember a vocabulary of markup labels.
 
 For example, a dictionary of markup labels can be defined to directly represent HTML tag names. A common convention for this lingo uses a colon sigil prefix to indicate a label that represents an HTML tag, for example `[:em] for `[<em>], and so on. This gives the author a small lingo based on a dictionary of labels with well defined semantics (i.e. the HTML tag specification).
 
-A bare sigil character can be used as a concise label. These shorthand labels are valuable for common labels (for example, to denote italics or bold text). This also allows MyWord to mimic lightweight markup notations, for example by defining the label `[#] as `[<h1>], `[##] as `[<h2>], and so on. It is useful to allow a variety of different sigil characters for this purpose too.
+A bare sigil character can be used as a concise label. These shorthand labels are valuable for common labels (for example, to denote italics or bold text). This also allows MyWord to mimic lightweight markup notations, for example by defining the label `[#] as `[<h1>], `[##] as `[<h2>], and so on. It is useful to allow a variety of different sigil characters for shorthand notations.
 
 The MyWord block label sigil prefix can be almost any punctuation character, other than bracket characters. The sigil characters can be used as normal chacters in text content, there is no need to escape them.
 
@@ -352,12 +352,12 @@ The details of label definitions are covered later, the point here is that the d
 .eg
     ~label[content text...]
 
-An inline element is a markup structure that must start with a label (which must start with a sigil character), followed by content text in brackets. The brackets are part of the marup sekelton, they are not part of the content text.
+An inline element is a markup structure that must start with a label (which must start with a sigil character), followed by content text in brackets. The brackets are part of the markup sekelton, they are not part of the content text.
 
 
 ### Prose Grammar
 
-The prose grammar follows the same scheme as the block grammar, it delimits the content text, but it does not parse it. This allows the label to define the grammar for the content text, although the prose grammar will be applied by default.
+The prose grammar follows the same scheme as the block grammar, it delimits the content text, but it does not parse the content. This allows the label to define the grammar for the content text. Most labels will apply the prose grammar recursively to the nested content.
 
 .eg
     prose   := (elem / text)*
@@ -377,7 +377,7 @@ This is a basic default prose grammar. Authors may substitute a different gramma
 
 For example, an author may prefer to use MarkDown notations rather than this default prose grammar, although that is rather limiting.
 
-A better option is to extend the default prose grammar with other shorthand notations. For example, a quote notation like `[*for emphasis*] may be defined if desired. On the other hand, a prose inline element could be used to define `[*[for emphasis]], which is just as easy to read, and almost as easy to write.
+A better option is to extend the default prose grammar with other shorthand notations. For example, a quote notation like `[*for emphasis*] may be defined if desired. Even without extending the prose grammar an inline element could be defined as: `[*[for emphasis]], which is just as easy to read, and almost as easy to write.
 
 The standard prose default inline markup has some useful properties:
 
@@ -385,13 +385,13 @@ The standard prose default inline markup has some useful properties:
 
     This allows undefined labels to be highlighted.
 
--   Brackets allow nested content.
+-   Brackets are clearly delimited and can be neatly nested.
 
     Becuse labels can define their content grammar this also allows markup to be quoted.
 
 -   An unlimted number of labels are available.
 
--   There are a good variety of concise sigil markup elements (three markup characters).
+-   There are a good variety of concise sigil markup elements (with only three markup characters).
 
 -   The choice of bracket characters allows almost unrestricted content text.
 
@@ -436,6 +436,42 @@ For example:
     &
         ~mark = <mark>
         ~sandbox = <div>
+
+### CSS Style
+
+A label defintion can specify an HTML element to represent the intended meaning for the label. Following standard practice the presentation style is normally treated as a separate matter, and defined with CSS style sheet rules. Style sheets can be used as usual.
+
+When a label is used to define a document component then it may be best to package the style rules together with the label definition.
+
+A `[<style>] element can be used together with a label defintion anywhere in the structure of an HTML document. The style rules can also use the CSS `[scoped] property to specify that the styles only apply to this element's parent element and that element's child elements (not the entire document). This makes the style scope very similar to the label definition scope.
+
+For example:
+
+.demo
+    ~box
+        This is an example box of text.
+
+        ~box
+            This is a nested box.
+
+            ~style
+                .box { border: thin solid red; }
+
+        More in the outer box.
+
+    ~style
+        .box { background: lightyellow;
+                margin:10pt; padding-left:5pt; }
+
+    &
+        ~box = <div class=box>
+        ~style = text <style scoped>
+
+The `[~style] rule itself is defined in this example for completness. It would be more typical to use a document wide lingo that defines HTML labels with the same name as HTML tag names, including a `[:style] label.
+
+
+
+
 
 ### Using A Lingo
 
@@ -630,7 +666,7 @@ The `[tsv] transform reads tab separated data fields and translates them into an
     & ~array = tsv <table class=array>
 
 :style
-    table.array {border-spacing:0pt 0pt;}
+    table.array {border-collapse:collapse;}
     .array td { border:thin solid gray; padding:2pt 10pt; }
 
 Here is the grammar that defines the `[tsv] transform:
@@ -651,9 +687,13 @@ Here is the grammar that defines the `[tsv] transform:
 
 ##  MyWord Translation
 
-A document using MyWord markup may be translated into an HTML source file, but it is often better to extend a browser with a MyWord translator so that the browser can translate any required MyWord document(s).
+A standard web browser reads text files with HTML markup, but MyWord markup must first be translated into HTML. This can result in two versions of the same document, one version of the document containing markup for authors to read, and another version that contains HTML markup for browsers to read.
 
-A browser can be extended with the abilty to translate a MyWord document by loading an HTML host file. For example:
+A better approach is to empower the browser with a markup translator so that the browser can read the MyWord markup source file directly. This avoids the need to separately translate documents, and it eliminates the need for different versions of the same document. The word "empower" is used to avoid confusion, there is no requirement for any particular browser "extension" or "plugin" technology.
+
+A standard browser can load an HTML page with JavaScript code, and that can empower the browser to read and translate documents written with MyWord markup. The core MyWord translator also needs a dictionary of label defintions for the vocabulary of the lingo that the author employs.
+
+Here is an example of an HTML file that can empower the browser to read MyWord documents:
 
 .eg
     <!DOCTYPE HTML>
@@ -666,23 +706,40 @@ A browser can be extended with the abilty to translate a MyWord document by load
     </body>
     </html>
 
-A web site is created with a directory of files that contain the MyWord documents(s) and the translator script, plus any other resource files that the documents(s) may require (e.g. CSS style sheets, lingo.mmk markup defintions, image files, and so on).
+The `[lib/x-markup.js] script will load all the translator machinery and lingo definitions. The authors MyWord document is in the `[index.myw] file. This file may include other files or link to other files. A web page often requires a collection of different files for content text, CSS style sheets, media files (such as images), and so on. A common convention is to name the initial root file `[index.html], and a similar convention is followed here for the initial root `[index.myw] MyWord file.
 
-By convention the starting point is the `[index.html] file, such as the one shown above. In this example the intitial MyWord web page is assumed to be in the file `[index.myw], the `[.myw] suffix indicates a MyWord document. Other documents may be linked from or included into the `[index.myw] document.
+All the required resource files are collected together in a `[my-document/] directory:
 
 .eg
-    my-site/
+    my-document/
         index.html
         index.myw
         lib/
             x-markup.js
             x-markup.mmk
-            grit.js
             markit.js
+            grit.js
 
-The `[x-markup.mmk] is the markup lingo that the `[x-markup.js] will load.
+The `[index.html] file is the initial root that contains the HTML shown previously.
 
-The core MyWord translator is the `[markit.js] file which uses the grammar parser in the `[grit.js] file. The markup lingo is defined in the `[x-markup.mmk] file. These files are automatically loaded by the `[x-markup.js] script.
+The `[lib/] directory contains all the MyWord translator machinery and the initial lingo markup definitions:
+
+-   `[x-markup.js] loads the translator resource files.
+
+-   `[x-markup.mmk] contains the initial markup lingo defintions.
+
+-   `[x-markit.js] is the core MyWord translator.
+
+-   `[x-grit.js] is a grammar parser used by `[x-markit.js].
+
+The author can directly edit the MyWord document(s) source text with any text editor. There is no requirement to "translate" or "build" or "make" any other files.
+
+A `[my-document/] directory is a self contained package with minimal external requirements. It is built on a standard browser and HTML standards. The World Wide Web relies on these standards and their backward compatiblity. There are millions of old HTML web pages that work the same as they ever did, despite rapid evolution and huge advances in the latest browser and HTML standards.
+
+MyWord documents published in a `[my-document/] directory like this can be expected to work the same way for decades into the future. All the translation code and the markup language defintions are preserved together with the authors work. Only standard browser features and HTML are required.
+
+Longevity is not something that can be said for even the most sucessful and popular commercial products. There is no guarantee that any word processor, web page editor, or other computer software will preserve an authors work. Too many have already come and gone. Plain text source, and HTML standards are about the best guarantee available.
+
 
 
 ---
