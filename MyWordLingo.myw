@@ -1,0 +1,346 @@
+#   MyWord Lingo
+
+In MyWord a lingo is a vocabulary of markup labels and transform functions. A small core vocabulary is all that is required to publish many small documents, but a larger vocabulary is needed for a book or a web-site. In addition some topics, such as mathematics, may need their own special lingo.
+
+Individual documents can define their own custom lingo, but most authors will adopt a standard lingo from a library of definitions and use the same lingo across many documents. This document describes a core lingo for simple documents. A library of additional feature packages can be used to extend the core lingo, and to add other special purpose lingos.
+
+##  Label Semantics
+
+It is generally a good idea for a markup label to have a semantic meaning without regard to its presentation. A label should have the same meaning as the HTML element that the label represents. The presentation can be defined with separate CSS style rules.
+
+Each markup label should have one and only one semantic meaning, the same as HTML tags names. In MyWord a label can be used for a block element, or for an inline element in prose content. Most HTML elements are either a block element or an inline element, but not both. It follows that a label will usually only represent a block element or an inline element.
+
+Popular light-weight markup languages break this rule and give some symbols more than one meaning. For example a star * may be used for both a bullet point and to quote a phrase of text for emphasis. In English it is common for a word to have more than one meaning, and this practice seems to have continued into markup symbols.
+
+Nice shorthand symbols are in short supply, so it is understandable that they may be given different meanings in a different contexts. On the other hand it would be unreasonable to define more than one semantic meaning for any given HTML tag name. MyWord can employ a rich variety of labels, so the core MyWord lingo defines only one semantic meaning for any given label. It follows tht most labels will only make sense as either a block element or as an inline element.
+
+Remember that an author can always define a local meaning for any label, so the core lingo can be extended and over-ridden in any way the author desires.
+
+
+##  Simple Documents
+
+Even a small lingo can be very useful. This is demonstrated by many light-weight markup languages, such as Markdown, that have become popular and widely used. The core MyWord lingo aims to provide equivalent capabilities.
+
+The core features include:
+
+-   Headers.
+
+-   Prose with emphasis.
+
+-   Plain text for code and data.
+
+-   Lists.
+
+-   HTML links and images.
+
+-   Custom HTML.
+
+This small set of features is sufficient for many documents, and extra needs can use custom HTML extensions.
+
+Light-weight markup languages such as Markdown define an easy to read notation for each of these features, but they fall back to standard HTML annotations for anything beyond the built-in features.
+
+MyWord is different. There are no built-in features, any markup label can be defined to represent any feature. This means that there is no need to fall back to standard HTML annotations, the author can define a new label to represent any require HTML element.
+
+The next sections will show how an author can define MyWord labels for each of the core features. Defintions like these are collected together into a vocabulary that defines a lingo for the core features.
+
+
+###   Headers
+
+First, labels may be defined to directly represent the corresponding HTML element:
+
+.demo
+    :h2  Header 2
+
+    :h3  Header 3
+
+    &
+        :h2 = <h2>
+        :h3 = <h3>
+
+The HTML headers :h1 to :h6 can all be befined the same way.
+
+Labels can also be defined to mimic the Markdown notations:
+
+.demo
+    ##  Header 2
+
+    ### Header 3
+
+    &
+        ##  = <h2>
+        ### = <h3>
+
+The header text is usually a single short line, but a block label can have multiple indented lines of content:
+
+.demo
+    ####
+        A Silly Long Header
+        That Keeps On Going
+
+A more elaborate header may include the header text as an ID to enable HTML links to refer to it:
+
+.demo
+    ###  Some Topic
+
+    &
+        ###  = header3
+        header3 :: (content) =>
+            "<h3 id='"+content+"'>"+content+"</h3>"
+
+
+###   Emphasis
+
+The inline HTML elements for emphasis and related tags can be defined directly like this:
+
+.demo
+    :i[italic]
+
+    :b[bold text]
+
+    :em[emphasis]
+
+    :strong[strong emphasis]
+
+    :cite[Alice In Wonderland]
+
+    &
+        :i = <i>
+        :b = <b>
+        :em = <em>
+        :strong = <strong>
+        :cite = <cite>
+
+Many similar HTML tags can be defined in the same way, from now on we will assume that a label like `[:tag] will be defined to represent the same name HTML element `[<tag>].
+
+The Markdown notations can be defined as labels too:
+
+.demo
+    *[emphasis]
+
+    **[strong emphasis]
+
+    &
+        * = <em>
+        ** = <strong>
+
+Of course there is no reason why these labels could not be defined to be italics and bold instead.
+
+The bracket notation avoids many of the complications that occur in the Markdown quote style notations.
+
+For example, consider:
+
+.demo
+    *[Some *x* **[thing]]
+
+&
+    * = <i>
+    ** = <b>
+
+
+###   Plain Text
+
+There are various HTML tags for plain text:
+
+.demo
+    :pre
+        A block    of
+            preformatted
+        :code[code or data]
+
+    :code[code or data]
+
+    :kbd[keyboard text]
+
+    &
+        :pre = text <pre>
+        :code = text <code>
+        :kbd = text <kbd>
+
+Plain text content for code or data should be presented verbatim, including any nested markup. The `[text] transform does this. In HTML itself there is no equivent way to quote text verbatim.
+
+Shorthand symbols like / and the Markdown ` notation can also be defined:
+
+.demo
+    /   A preformatted   block
+        of        `[code or data]
+
+    `[some :code[code or data] text]
+
+    &
+        / = text <pre>
+        ` = text <code>
+
+###   Lists
+
+There are three HTML list tags:
+
+.demo
+    :ul
+        :li An unordered list item.
+        :li Another list item.
+
+    :ol
+        :li An ordered list item.
+        :li Another list item.
+
+    :dl
+        :dt A term
+        :dd Definition of term.
+
+&
+    :ul = <ul>
+    :li = <li>
+    :ol = <ol>
+    :dl = <dl>
+    :dt = <dt>
+    :dd = <dd>
+
+An author may choose to define other labels:
+
+.demo
+    .points
+        . An unordered list item.
+        . Another list item.
+
+    .steps
+        . An ordered list item.
+        . Another list item.
+
+    .glossary
+        : Some term
+        :=  Definition of term.
+        : Another term
+        := Another definition ...
+
+    &
+        .points = <ul class=points>
+        . = <li>
+
+        .steps = <ol class=steps>
+
+        .glossary = <dl class=glossary>
+        : = <dt>
+        := = <dd>
+
+A transform function can be used to simplify lists:
+
+.demo
+    -   Unordered list item.
+    -   Another list item.
+
+    +   Ordered list item.
+    +   Another list item.
+
+    =   A Term
+        Definition of term.
+
+    &
+        - = list <ul>
+        + = list <ol>
+        = = terms <dl>
+
+The `[list] transform groups elements with the same label together as list item elements inside the given HTML list wrapper.
+
+The `[terms] transform is similar, but the first line of each item is wrapped into a term element with the remainder in a definition element.
+
+###   Links
+
+A URL can be translated into an HTML link, which is one of the few HTML elements that can be either a block or an inline element:
+
+.demo
+    @   http://csszengarden.com
+
+    @[http://csszengarden.com]
+
+    &
+        @ = linkURL
+
+        linkURL :: (content) =>
+          "<a href='"+content+"'>"+content+"</a>"
+
+In general custom defined links need to be defined directly:
+
+.demo
+    @zen[CSS Zen Garden]
+
+    &   @zen = <a href='http://csszengarden.com'>
+
+
+###   Images
+
+An image URL label ! can be defined similarly:
+
+.demo
+    ![gopher.png]
+
+    &   ! = image
+        image :: (content) =>
+          "<img src='"+content+"'/>"
+
+Images can also be defined directly:
+
+.demo
+    !go The Go language gopher.
+
+    &   !go = <img src='gopher.png' title='GO gopher'>
+
+
+### Custom HTML
+
+MyWord will escape any HTML syntax characters so that the source text is presented verbatim. However, the author may choose to define an `[:html] label to represent a feature that can present HTML. This `[:html] label will not translate its content text so that any standard HTML annotations will be presented as HTML elements.
+
+.demo
+    :html
+        <h3>Header <i>three</i></h3>
+
+    & :html = rawText
+        rawText :: (txt) => txt
+
+
+
+### More core features
+
+/
+    > blockquote
+    ~~ strike
+
+    emojis, -[ ], ... ?
+
+    references, end notes, terms glossary   @ref[1], @note[1], @[foo], ....
+
+    cross references  @ref[x] #def[x]  #see[x] #id[x]
+
+    code syntax highlighting
+
+    tables
+
+##  Rich Documents
+
+/
+    cross references
+
+    References
+
+    footnotes
+
+
+    tables
+
+    Maths
+
+    TOC
+
+    Index
+
+    Book or website features
+
+
+##  Component Modules
+
+/
+    &   .demo = myw/demo
+
+    @import myw/demo
+
+
+

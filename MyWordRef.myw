@@ -1,0 +1,843 @@
+# MyWord Reference
+
+MyWord is an extensible markup language, just like XML or HTML (with custom tags). A MyWord markup :em[label] is an easy-to-read shorthand that can represent any HTML element. A dictionary of label defintions establishes the vocabulary of a MyWord markup language, know as a :em[lingo].
+
+Myword does not require any reserved syntax characters, which means there are no restrictions on the content text in markup elements. This allows the author to write content text that can contain any data format, notation, markup, or programming language. A markup label can define any custom syntax for its content text.
+
+A document written with MyWord markup does not need to be translated into a separate HTML document, instead a standard HTML browser can be empowered to read and present MyWord documents directly.
+
+In a nutshell:
+
+-   A MyWord document is read as lines of text that are grouped into blocks.
+
+-   The first word in a block may be a markup label, the remainder is the content text.
+
+-   Lines that do not start with a markup label form normal paragraphs of prose.
+
+-	Authors can define a vocabulary of labels for their own markup language lingo.
+
+-	There are no special syntax characters, the text content can be used in any way the author desires.
+
+-	The translation of content into HTML (or XML) is determined by the definition of the markup label.
+
+-   A standard browser can be empowered to read MyWord documents and present them as HTML.
+
+
+##	Blocks
+
+A block that starts with a markup label is called a verse, otherwise the block of text is a paragraph of prose. A markup label starts with a sigil character (a magic symbol) so that it can be easily distinguished from a normal word of prose.
+
+The sigil characters have no inherent significance other than to designate a markup label. Here is an example of a MyWord document using the tilde ~ sigil character, the source text is on the left, and the HTML presentation is on the right:
+
+.demo
+	~title	The Title
+
+    ~author The Author
+
+	This is a one line paragraph of prose.
+
+	Another paragraph of prose. This
+	one has more than one line.
+	but there can be no blank lines
+	in a paragraph.
+
+	~foot
+	  This is a footer, it is a block of verse.
+
+	  A bock of verse can have any number of lines,
+	  including blank lines.
+
+This example has three blocks of verse, the ~title, ~author, and ~foot. These markup labels should be self evident, but they have not yet been defined, they are recognized as markup labels simply because they start with a ~ sigil character.
+
+Markup labels that are undefined are highlighted in the HTML presentation of the document, as shown on above. An author will normally employ a standard lingo, that is, a pre-defined vocabulary of labels. Other new markup labels can be invented as required and defined within the document. The HTML translation of a draft document will highlight any labels that remain undefined.
+
+A block of verse must start at the left margin, and can contain any number of indented lines of text. The block can contain blank lines, so the block of verse will continue until the next line that is not indented from the left margin, or the end of the document.
+
+When the markup label is undefined the label and its content text will be shown verbatim in the HTML translation.
+
+A paragraph of ~[prose] is any line of text that does ~[not] start with a markup label, that is, it does not start with a sigil character. A paragraph may contain any number of lines, provided the lines do not start with a sigil, and are not blank or empty.
+
+By default the lines of text inside a paragraph of prose flow together in the HTML translation. This is the standard way that HTML presents text in paragraph elements. The prose may contain inline markup labels, but there are none in this first example.
+
+Markup labels can be defined to represent any HTML elements, for example:
+
+:div
+    .demo
+        ~title  The Title
+
+        ~author The Author
+
+        This is a one line paragraph of prose.
+
+        Another paragraph of prose. This
+        one has more than one line.
+        but there can be no blank lines
+        in a paragraph.
+
+        ~foot
+          This is a footer, it is a block of verse.
+
+          A bock of verse can have any number of lines,
+          including blank lines.
+
+    &   ~title = <h2>
+        ~author = <h3>
+        ~foot = <div class=foot>
+
+    :style
+        h2, h3 { text-align: center; }
+        .foot { border-top: thin solid gray; font-size: small; }
+
+
+###	Sigils
+
+A sigil is a magic symbol, and its purpose is to identify a markup label. The sigil symbols are ~[not] special reserved syntax characters. A sigil character inside text content has no particular significance.
+
+An unlimited number of markup labels can be defined, so a single sigil characters is all that is required. However a variety of different sigil characters is very convenient since it allows the author to indicate different kinds of markup labels. By convention labels with the same sigil can be used for similar purposes. This helps authors to understand and remember a vocabulary of markup labels.
+
+For example, a dictionary of markup labels can be defined to directly represent HTML tag names. A common convention for this lingo uses a colon sigil prefix to indicate a label that represents an HTML tag, for example `[:em] for `[<em>], and so on. This gives the author a small lingo based on a dictionary of labels with well defined semantics (i.e. the HTML tag specification).
+
+A bare sigil character can be used as a concise label. These shorthand labels are valuable for common labels (for example, to denote italics or bold text). This also allows MyWord to mimic lightweight markup notations, for example by defining the label `[#] as `[<h1>], `[##] as `[<h2>], and so on. It is useful to allow a variety of different sigil characters for shorthand notations.
+
+The MyWord block label sigil prefix defines these symbols as sigil characters:
+
+.eg
+    ` ~ ! @ # % ^ & * _ + - = : < > ? / .
+
+
+These sigil symbols can be used as normal characters in text content, there is no need to escape them.
+
+In this document the tilde ~ will be used as a generic sigil for most example labels, without any particular significance. Common conventions for using different sigils in different lingos are a separate topic that is outside of this reference document.
+
+
+###	Block Grammar
+
+The block grammar matches only one level of indentation, since the syntax inside the content is determined by the defintion of the label. The default is to apply the myword grammar, which allows a myword document to be nested inside a myword block. But in general a block label can define the content to be any other grammar.
+
+The content lines in a block of verse are indented under the label. The indentation is not part of the content, it the skeleton format for the block of verse, and it is deleted. The content grammar will not see the indentation.
+
+The MyWord document block structure is defined by this grammar:
+
+.eg
+	myword	:= (blank / verse / prose)*
+	blank	:= (sp* nl)+
+	verse	:= label content
+	content := line (blank sp line)*
+	prose	:= line (nl !sigil sp* !nl line)*
+	label	:= sigil word
+	sigil   :~ [`~!@#$%^&*_+-=|:;<>,.?/]+
+	word    :~ [a-zA-Z][a-zA-Z0-9_:.-]*
+	sp      :~ [ \t]
+	line	:~ [^\n\r]*
+	nl      :~ \n | \r\n?
+
+Details of the Grit grammar rules can be found in @grit[The Grit Grammar Language].
+
+
+##	Block Content
+
+The first word of a block of verse is a markup label, and the content text is the remainder of the block. The block ends at the next line that is not indented under the markup label. This allows the content text to contain any characters without restriction, there are no special syntax characters to be escaped.
+
+This is different from most other markup languages, data languages, and programming languges. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This necessarily restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required). These languages can not quote themselves.
+
+A length count is a perfect way to denote the end of a block of text that can contain any characters without restriction (and can therefore quote itself). Unfortunately a length count is impractical in documents that can be manually edited in any plain text editor.
+
+### Indented Content
+
+The use of indentation to determine the end of a block of text is simple and intuitive, it is a good pragmatic alternative to a length count. This is a very valuable and unique property.
+
+So why is the use of indentation not common practice?
+
+One reason is that traditional grammar specifications for computer languages are based on the use of context free grammar specifcations. There are good practical reasons for this, but a context free grammar can not properly specify an indentation syntax.
+
+This has lead to a tradition that avoids the use of "significant white-space". That has been compounded by confusion and misuse of tab characters. There has also been passionate discussions on the merits of different styles and pactices for indentation. Some programmers have concluded that the use of significant white-space is bad practice and should be avoided.
+
+This is unfortunate because the use of indentation is the only practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. A block of verse may caotain text using any data format, markup, data language, or programming language.
+
+MyWord uses a very simple indentation scheme:
+
+-   A label must start at the left margin.
+
+-   An indented line starts with a white-space character (tab or space).
+
+-   To extract the content an inset of one tab, or 4 or less spaces, is deleted.
+
+-   The same inset deleted from earlier line of content is deleted from later lines.
+
+This allows an author to indent content using a tab, or 1, 2, 3, or 4 space characters. The inset deleted from the first line will determine the inset deleted from subsequent lines in a block of verse.
+
+The inset is part of a skeleton format that delimits the block, it is not part of the content text.
+
+Deleting the inset shifts the content text left, so the content text now starts at the left margin. Each level of indentation requires either one tab, or 4 or less space characters. The same inset should be used for every line in a block.
+
+The block structure is parsed breadth first, the content of a nested block is only parsed after the outer levels have been parsed. This is important since the myword block grammar is not necessarily the grammar that will be used for the content of a block. The content grammar is determined by the markup label definition.
+
+This breadth before depth parsing process enables the composite grammar to be context sensitive.
+
+
+### Content Syntax
+
+By default the myword block grammar is applied to the content of a block of verse.
+
+This allows myword documents to be nested:
+
+:div
+    .demo
+        ~title  The Title
+
+        ~author The Author
+
+        This is a one line paragraph of prose.
+
+        ~box
+            ~title  The Title
+
+            ~author The Author
+
+            This is a one line paragraph of prose.
+
+            Another paragraph of prose. This
+            one has more than one line.
+            but there can be no blank lines
+            in a paragraph.
+
+            ~foot
+              This is a footer, it is a block of verse.
+
+              A bock of verse can have any number of lines,
+              including blank lines.
+
+        Another paragraph of prose. This
+        one has more than one line.
+        but there can be no blank lines
+        in a paragraph.
+
+        ~foot
+          This is a footer, it is a block of verse.
+
+          A bock of verse can have any number of lines,
+          including blank lines.
+
+    &   ~title = <h2>
+        ~author = <h3>
+        ~foot = <div class=foot>
+        ~box = <div class=box>
+
+    :style
+        h2, h3 { text-align: center; }
+        .foot { border-top: thin solid gray; font-size: small; }
+        .box { border:thin solid gray; }
+
+This is the default myword grammar, but the ~box label can be replaced by a ~viz label to simply quote the source text:
+
+:div
+    .demo
+        ~title  The Title
+
+        ~author The Author
+
+        This is a one line paragraph of prose.
+
+        ~viz
+            ~title  The Title
+
+            ~author The Author
+
+            This is a one line paragraph of prose.
+
+            Another paragraph of prose. This
+            one has more than one line.
+            but there can be no blank lines
+            in a paragraph.
+
+            ~foot
+              This is a footer, it is a block of verse.
+
+              A bock of verse can have any number of lines,
+              including blank lines.
+
+        Another paragraph of prose. This
+        one has more than one line.
+        but there can be no blank lines
+        in a paragraph.
+
+        ~foot
+          This is a footer, it is a block of verse.
+
+          A bock of verse can have any number of lines,
+          including blank lines.
+
+    &   ~title = <h2>
+        ~author = <h3>
+        ~foot = <div class=foot>
+        ~viz = text <pre class=box>
+
+    :style
+        h2, h3 { text-align: center; }
+        .foot { border-top: thin solid gray; font-size: small; }
+        .box { border:thin solid gray; }
+
+Other content may have a custom format, a table for example:
+
+:div
+    .demo
+        ~array
+            1    One      Line
+            2    Two      Area
+            3    Three    Volume
+
+    &   ~array = tsv <table class=array>
+
+:style
+    table.array {border-collapse:collapse;}
+    .array td { border:thin solid gray; padding:2pt 10pt; }
+
+&
+    tsv := row*                   :: (rows) => this.flatten(rows).join('')
+        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        item  := (!delim char)+
+        delim :~ %tsep | %nl
+        tsep  :~ [\t]|[ ]{4,}
+        nl    :~ [\n\f]|([\r][\n]?)
+        char  :~ [\s\S]
+
+
+##  Prose Paragraphs
+
+Lines of prose (i.e. lines that do not begin with a label) are collected together into paragraphs which are separated by blank lines. This is a very natural way to write plain text paragraphs.
+
+The translation into HTML ignores line-breaks so that the lines flow into a line length that fits the width of the presentation. The HTML standard translates any number of white-space characters (space, tab, line-end) into a single space between words.
+
+.demo
+    This is a    paragraph with
+      lines that
+    flow          together.
+
+To preserve a line inside a paragraph a line may be labelled as an HTML block element:
+
+:div
+    .demo
+        This is the first line,
+        ~ the second line
+        and the third line.
+
+    &   ~ = prose <div class=line>
+
+    :style
+        p {margin:0pt;}
+
+This example has two paragraphs separated by a `[~] line bock, which style rules can present as a single paragraph.
+
+
+### Inline Elements
+
+Paragraph content uses a standard prose grammar by default. This grammar provides inline markup that uses the same sigil label format as the block labels, with the content text delimited by brackets. For example:
+
+:div
+    .demo
+        A ~bold[inline] markup element.
+
+    & ~bold = <b>
+
+The brackets may be either [...], or (...). The content may contain nested pairs of brackets, but if the content text contains an odd unmatched bracket character then the markup brackets must use a different style of bracket character.
+
+The content of inline elements uses the prose grammar by default, so elements can contain nested elements. But the label can define a custom grammar, for example to quote the content text verbatim:
+
+:div
+    .demo
+        Some ~em[nested ~bold[inline] markup] elements.
+
+        Or ~eg[nested ~bold[inline] markup] elements.
+
+    &   ~bold = <b>
+        ~em   = <em>
+        ~eg   = text <i>
+
+The details of label definitions are covered later, the point here is that the default prose grammar does not define any particular labels, it only defines the format for a markup structure:
+
+.eg
+    ~label[content text...]
+
+An inline element is a markup structure that must start with a label (which must start with a sigil character), followed by content text in brackets. The brackets are part of the markup sekelton, they are not part of the content text.
+
+
+### Prose Grammar
+
+The prose grammar follows the same scheme as the block grammar, it delimits the content text, but it does not parse the content. This allows the label to define the grammar for the content text. Most labels will apply the prose grammar recursively to the nested content.
+
+.eg
+    prose   := (elem / text)*
+    elem    := label content
+    content := paren / square
+    paren   := [(] (paren / notp)* [)]
+    square  := [\[] (square / nots)* [\]]
+    text    := char (!sigil char)*
+	label	:= sigil word
+	sigil   :~ [`~!@#$%^&*_+-=|$\\"':;<>,.?/]+
+	word    :~ [a-zA-Z][a-zA-Z0-9_:.-]*
+	notp    :~ [^()]+
+	nots    :~ [^\[\]]+
+    char    :~ [\s\S]
+
+This is a basic default prose grammar. Authors may substitute a different grammar for the content of their prose paragraphs.
+
+For example, an author may prefer to use MarkDown notations rather than this default prose grammar, although that is rather limiting.
+
+A better option is to extend the default prose grammar with other shorthand notations. For example, a quote notation like `[*for emphasis*] may be defined if desired. Even without extending the prose grammar an inline element could be defined as: `[*[for emphasis]], which is just as easy to read, and almost as easy to write.
+
+The standard prose default inline markup has some useful properties:
+
+-   It is very unlikely to occur in normal prose.
+
+    This allows undefined labels to be highlighted.
+
+-   Brackets are clearly delimited and can be neatly nested.
+
+    Becuse labels can define their content grammar this also allows markup to be quoted.
+
+-   An unlimted number of labels are available.
+
+-   There are a good variety of concise sigil markup elements (with only three markup characters).
+
+-   The choice of bracket characters allows almost unrestricted content text.
+
+    The content text in a block of verse is completely "syntax free", but this is not possible for an inline element. The use of brackets is a close apporximation since an unbalanced closing bracket is the only prohibited character. Allowing a choice of bracket characters allows the content to contain different bracket characters.
+
+
+
+##  Label Definitions
+
+The special label & is used to define new labels.
+
+Simple label defintions only need to specify the HTML tag that a label represents.
+
+.eg
+    &   ~label = <tag atts...>
+
+The translation of the ~label markup into HTML will wrap the content text into a <tag atts...> wrapper. This is all that is required to define a custom label in terms of any desired HTML.
+
+A standard lingo can pre-define labels with the same names as standard HTML tag names. Many common HTML tag names are useful without the need for any attribute values.
+
+.demo
+    For ~em[emphasis] and ~strong[bold words].
+
+    &
+        ~em = <em>
+        ~strong = <strong>
+
+Of course it is not possible to pre-define a label for every possible tag and every possible set of attributes. However it may still be useful to pre-define a small vocabulary of labels to represent partcular HTML tag names with specific attibutes.
+
+.demo
+    This is ~warn[dangerous].
+
+    &
+        ~warn = <span style='color:red'>
+
+Authors can define labels that are unique to a particular document, or even to a particular section of a document.
+
+
+### Label Scope
+
+The scope of a label definition includes all sibling blocks and their children. Therefore a label defined in a top level block will apply to the whole document. To resolve the definition of a label its sibling blocks will be consulted first, then siblings of its parent block, and so on.
+
+The first label definition found up the chain of parents will be used. This allows local labels to over-ride higher level labels. A label defined in a top level block will be the default for a label at any depth nested anywhere in the document, unless it is over-ridden by a local definition.
+
+For example:
+
+.demo
+    Some ~mark[top level] content.
+
+    ~sandbox
+        Some ~mark[second level] content.
+
+        & ~mark = <mark style="color:red">
+
+    ~sandbox
+        Some ~mark[other second level] text.
+
+    &
+        ~mark = <mark>
+        ~sandbox = <div>
+
+### CSS Style
+
+A label defintion can specify an HTML element to represent the semantic meaning for the label. Following standard practice the presentation style is normally treated as a separate matter, and defined with CSS style sheet rules. Style sheets can be used as usual.
+
+When a label is used to define a document component then it may be best to package the style rules together with the label definition.
+
+A `[<style>] element can be used together with a label defintion anywhere in the structure of an HTML document. The style rules can also use the CSS `[scoped] property to specify that the styles only apply to this element's parent element and that element's child elements (not the entire document). This makes the style scope very similar to the label definition scope.
+
+For example:
+
+.demo
+    ~box
+        This is an example box of text.
+
+        ~box
+            This is a nested box.
+
+            ~style
+                .box { border: thin solid red; }
+
+        More in the outer box.
+
+    ~style
+        .box { background: lightyellow;
+                margin:10pt; padding-left:5pt; }
+
+    &
+        ~box = <div class=box>
+        ~style = text <style scoped>
+
+The `[~style] rule itself is defined in this example for completness. It would be more typical to use a document wide lingo that defines HTML labels with the same name as HTML tag names, including a `[:style] label.
+
+
+###	Undesired Labels
+
+The sigil characters do not normally appear in normal prose, so it is rare for the first word of normal prose to begin with a sigil character. But it can happen, and the sigil word will appear to be an undefined label. The simpelest solution is just to wrap the line in an explicit label, say a ~ defined as a line of prose.
+
+For example:
+
+.demo
+    #hashtag is seen as a label.
+
+    ~ #hashtag in a line of prose.
+
+    & ~ = prose <div>
+
+A sigil word probably has some semantic meaning, so an even better solution is to define a specific markup element:
+
+.demo
+    #hashtag is seen as a label.
+
+    ~hash[#hashtag] in a line of prose.
+
+    & ~hash = <var class='hash'>
+
+
+
+### Using A Lingo
+
+A lingo is a defined vocabulary of labels. A lingo can be applied to a complete document (as the default) by including a copy of the lingo label defintions in a top level block of label defintions. But that is rather cumbersome, it is better to define a lingo in a separate file that can be shared across documents.
+
+A document can import a lingo file by using a `[@import file-url] instruction:
+
+.demo
+    ##  Hello World
+
+    There are lots of :em[riddles] in the
+    book :cite[Alice In Wonderland].
+.eg & @import my-lingo.mmk
+
+The ~[.mmk] suffix indicates a meta-markup file type. This file type contains label defintions just as if they are inside a & block:
+
+.file  file: my-lingo.mmk
+.body
+    ...
+    :cite = <cite>
+    :em = <em>
+    ...
+    ...
+    #   = <h1>
+    ##  = <h2>
+    ### = <h3>
+    ...
+
+&
+    .file = text <div class=file>
+    .body = text <div class=body>
+
+:style
+    .file { font-size:small; color:gray; font-style:italic; margin-left:10pt; }
+    .body { background:whitesmoke; margin-left:10pt; white-space:pre; font-family:monospace;}
+
+The MyWord markup language has no pre-defined labels other than the special & label for meta-markup definitions. This means that a lingo file is almost always required. For convenience a lingo file can be packaged together with the `[myword] translator. The author can therefore use a packaged version of MyWord just as if the lingo is built-in to the translator, without requiring an `[@import] instruction. How to package a MyWord translator into a browser will be discussed later.
+
+
+
+##  Content Translators
+
+When a label is defined simply as an HTML element, then the content text will be translated with the same translation as the outer text that contains this label. In other words if the document is being processed using the myword grammar then the content of the ~label block label will also be processed using the myword grammar. If the ~label is an inline element in prose, then the prose grammar will be the default grmmar for the content of the ~label.
+
+The full form of label defintion specifies an explicit transform function in addition to an HTML tag wrapper.
+
+.eg
+    &   ~label = transform <tag atts...>
+
+The translation of this ~label into HTML will apply the specified transform function (i.e. the content translator) before the content text is wrapped into a <tag atts...> HTML element.
+
+For example:
+
+:div
+    .demo
+        ~box
+            ~cap    Text in a ~em[Box]
+
+            Some ~bag[text in a ~em[bag]].
+
+        &
+            ~box = <div class=box>
+            ~cap = prose <h2>
+            ~bag = text <span class=bag>
+            ~em  = <em>
+
+    :style
+        .box { border:thin solid gray; padding-left:10pt; }
+        .bag { border:thin solid gray; padding:2pt; }
+
+The defintion for a block label uses the "myword" transform by default (e.g. the ~box label).
+
+The defintion of an inline label uses the "prose" transform by default (e.g. the ~em label).
+
+The standard transform function "text" translates the content text verbatim (e.g. the ~bag label).
+
+If the transform function generates HTML content that does not require an outer HTML wapper then the label definition may omit the HTML <tag> wrapper.
+
+
+
+##  Transform Functions
+
+There is a small library of built-in transform functions that can be extended with new custom transforms.
+
+### Built-in transform functions
+
+The built-in transform functions are defined by corresponding grammar rules.
+
+#terms
+
+    myword
+
+        The top level document block grammar, prose or verse.
+
+    prose
+
+        The grammar for inline markup in prose.
+
+    text
+
+        The grammar for verbatim text, this will escape any HTML syntax characters.
+
+    metamark
+
+        The grammar used for label defintions, applies to the content text in an & label.
+
+&   #terms = terms <dl class=terms>
+
+    terms :: (content) => {
+            var dl = "";
+            var dd = "";
+            var lines = content.split('\n');
+            for (var i=0; i<lines.length; i++) {
+                var line = lines[i];
+                if (!line.match(/^\s/)) { // no indent
+                    if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; dd = ""; }
+                    dl += "<dt><code>"+line+"</code></dt>";
+                } else { // indented...
+                    dd += line.trim()+'\n';
+                }
+            }
+            return dl + "<dd>" + markit("myword",dd) + "</dd>";
+            }
+
+
+
+###  Transform Definitions
+
+Transform functions can also be defined using the special & label.
+
+A basic transform function is simply a JavaScript function that takes the markup element's content text.
+
+.eg
+    transform :: (content) => function code...
+
+The transform is defined with the standard JavaScript ES6 () => ... arrow syntax for a function definition. This is translated into ES5 JavaScript to allow a little backward compatibility with browsers using ES5 that do not support the ES6 arrow functions syntax.
+
+For example:
+
+.demo
+    See the ~url[http://csszengarden.com] web site.
+
+    &
+        ~url = linkURL
+
+        linkURL :: (content) =>
+            "<a href='"+content+"'>"+content+"</a>"
+
+The `[~url] label is defined as a `[linkURL] transform function. This function takes the content text as a URL web address and generates an HTML link to target that URL.
+
+A local link may require a pair of transform functions, one for the link and another for the target. The label pair may use a common sigil with different key words, or different sigils with the same kwy word. For example:
+
+.demo
+    See ~ref[1] for example.
+
+    ### References
+
+    ~def[1] The first reference ...
+
+    &
+        ~ref = ref_def
+        ~def = def_ref
+
+        ref_def :: (key) =>
+            "<a class=ref href='#def-"+key+"'>"+key+"</a>"
+        def_ref :: (key) =>
+            "<b class=def id='def-"+key+"'>"+key+"</b>"
+
+
+###  Grammar Definitions
+
+
+A grammar can be used to define a transform function using the Grit grammar parser. The Grit grammar rules supports Parser Expressinon Grammar rules plus regular expression rules, together with JavaScript semantic actions. A small example is shown here to illustrate how a transfrom function can be defined with a grammar, for more information consult the Grit Reference document.
+
+The `[tsv] transform reads tab separated data fields and translates them into an HTML table. Each line of text represents a row of data cells separated by tabs (or 4 or more spaces).
+
+.demo
+    ~array
+        1    One      Line
+        2    Two      Area
+        3    Three    Volume
+
+    & ~array = tsv <table class=array>
+
+:style
+    table.array {border-collapse:collapse;}
+    .array td { border:thin solid gray; padding:2pt 10pt; }
+
+Here is the grammar that defines the `[tsv] transform:
+
+.eg
+  &
+    tsv := row*                   :: (rows) => this.flatten(rows).join('')
+        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        item  := (!delim char)+
+        delim :~ %tsep | %nl
+        tsep  :~ [\t]|[ ]{4,}
+        nl    :~ [\n\f]|([\r][\n]?)
+        char  :~ [\s\S]
+
+
+
+
+##  MyWord Translation
+
+A standard web browser reads text files with HTML markup, but MyWord markup must first be translated into HTML. This can result in two versions of the same document, one version of the document containing markup for authors to read, and another version that contains HTML markup for browsers to read.
+
+A better approach is to empower the browser with a markup translator so that the browser can read the MyWord markup source file directly. This avoids the need to separately translate documents, and it eliminates the need for different versions of the same document. The word "empower" is used to avoid confusion, there is no requirement for any particular browser "extension" or "plugin" technology.
+
+A standard browser can load an HTML page with JavaScript code, and that can empower the browser to read and translate documents written with MyWord markup. The core MyWord translator also needs a dictionary of label defintions for the vocabulary of the lingo that the author employs.
+
+Here is an example of an HTML file that can empower the browser to read MyWord documents:
+
+.eg
+    <!DOCTYPE HTML>
+    <html>
+    <head>
+        <meta lang=en charset="UTF-8">
+        <script src='lib/x-markup.js'></script>
+    <body>
+        <script type=text/x-markup.myword src="index.myw"></script>
+    </body>
+    </html>
+
+The `[lib/x-markup.js] script will load all the translator machinery and lingo definitions. The authors MyWord document is in the `[index.myw] file. This file may include other files or link to other files. A web page often requires a collection of different files for content text, CSS style sheets, media files (such as images), and so on. A common convention is to name the initial root file `[index.html], and a similar convention is followed here for the initial root `[index.myw] MyWord file.
+
+All the required resource files are collected together in a `[my-document/] directory:
+
+.eg
+    my-document/
+        index.html
+        index.myw
+        lib/
+            x-markup.js
+            x-markup.mmk
+            markit.js
+            grit.js
+
+The `[index.html] file is the initial root that contains the HTML shown previously.
+
+The `[lib/] directory contains all the MyWord translator machinery and the initial lingo markup definitions:
+
+-   `[x-markup.js] loads the translator resource files.
+
+-   `[x-markup.mmk] contains the initial markup lingo defintions.
+
+-   `[x-markit.js] is the core MyWord translator.
+
+-   `[x-grit.js] is a grammar parser used by `[x-markit.js].
+
+The author can directly edit the MyWord document(s) source text with any text editor. There is no requirement to "translate" or "build" or "make" any other files.
+
+A `[my-document/] directory is a self contained package with minimal external requirements. It is built on a standard browser and HTML standards. The World Wide Web relies on these standards and their backward compatiblity. There are millions of old HTML web pages that work the same as they ever did, despite rapid evolution and huge advances in the latest browser and HTML standards.
+
+MyWord documents published in a `[my-document/] directory like this can be expected to work the same way for decades into the future. All the translation code and the markup language defintions are preserved together with the authors work. Only standard browser features and HTML are required.
+
+Longevity is not something that can be said for even the most sucessful and popular commercial products. There is no guarantee that any word processor, web page editor, or other computer software will preserve an authors work. Too many have already come and gone. Plain text source, and HTML standards are about the best guarantee available.
+
+## Importing Resources
+
+A lingo can be imported as part of the HTML translation, as mentioned above. A lingo can also be imported directly in the document itself, using an `[@import] instruction as mentioned previously when discussing label defintions.
+
+The `[@import] instruction can also be used to import other resources too. For example style sheet rules:
+
+.demo
+    A ~var[sample] style.
+
+    &
+      @import stylesheets/github-dark.css
+      ~var = <span class='pl-ent'>
+
+The `[@import] instruction will read files with a `[.css] suffix as an CSS style sheet, and files with a `[.js] suffix will be loaded as a script. Other files will be read as metamark files, that is files that can contain label definitons, chained `[@import] instructions, and the defintion of transform functions (i.e. the content of a & label block).
+
+There is also an `[import] transform to read the content of a given URL. This allows a MyWord document to include content from separate files. For example:
+
+.demo
+    ~include MyWord.part.txt
+
+    & ~include = import <div class=include>
+
+A file read by the `[import] transform will be translated as a MyWord document by default, but if the file suffix is defined as a transform function then the file content will be translated by that transform function.
+
+For example, here is the same file being read as plain text:
+
+.demo
+    ~include MyWord.part.txt
+
+    &
+      ~include = import <div class=txt>
+      .txt = text <pre>
+
+The transform function can be any JavaScript translator. For example, a document containing Markdown markup can be translated with the `[marked.js] translator:
+
+.demo
+    ~include example.md
+
+    &
+      ~include = import <div class=example>
+      @import 3rdparty/marked.js
+      .md = marked <div class=md>
+
+The `[@import] imports the Markdown translator, and the `[.md] label is defined to use that translator. The `[import] transform sees the `[.md] label that matches the file suffix and translates the file as Markdown.
+
+
+
+
+---
+###  Notes
+
++   ` undefined labels, even if they are defined?? e.g. ~title
++   ` default &entity; -- & &amp; translation? prose option?
++   ` `[*for emphasis* and *[for emphasi], needs *[]] or some such def.
+
++   ` should sigils include §¶• etc..?
++   ` should brackets include {...}, « ... », ... ?
++   ` Grit rules [(] or '(' issue...
++   ` should labels be able to end with : or = ?
+
++ ` block sigil should NOT be $ \ ' "
++ ` label word starts with a letter, eliminates .5 #8 etc..
++ ` inline labels COULD allow $ \ ' "
+
++ ` metamark grammar
++ ` nested content left nesting (a(b(c))) not (((a)b)c)
