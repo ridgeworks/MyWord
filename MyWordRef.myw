@@ -1,6 +1,6 @@
 # MyWord Reference
 
-MyWord is an extensible markup language, just like XML or HTML (with custom tags). A MyWord markup :em[label] can be defined to represent any HTML element, which enables an easy-to-read shorthand label to stand for any HTHL tag and attributes. A dictionary of label defintions establishes the vocabulary of labels for a MyWord markup language, also know as a :em[lingo].
+MyWord is an extensible markup language, just like XML or HTML (with custom tags). A MyWord markup :em[label] is an easy-to-read shorthand that can represent any HTML element. A dictionary of label defintions establishes the vocabulary of a MyWord markup language, know as a :em[lingo].
 
 Myword does not require any reserved syntax characters, which means there are no restrictions on the content text in markup elements. This allows the author to write content text that can contain any data format, notation, markup, or programming language. A markup label can define any custom syntax for its content text.
 
@@ -49,7 +49,7 @@ The sigil characters have no inherent significance other than to designate a mar
 
 This example has three blocks of verse, the ~title, ~author, and ~foot. These markup labels should be self evident, but they have not yet been defined, they are recognized as markup labels simply because they start with a ~ sigil character.
 
-Markup labels that are undefined are highlighted in the HTML presentation of the document, as shown on above. An author will normally employ a standard lingo, that is, a pre-defined vocabulary of labels. New markup labels can be invented as required and defined within the document. The HTML translation of a draft document will highlight any labels that remain undefined.
+Markup labels that are undefined are highlighted in the HTML presentation of the document, as shown on above. An author will normally employ a standard lingo, that is, a pre-defined vocabulary of labels. Other new markup labels can be invented as required and defined within the document. The HTML translation of a draft document will highlight any labels that remain undefined.
 
 A block of verse must start at the left margin, and can contain any number of indented lines of text. The block can contain blank lines, so the block of verse will continue until the next line that is not indented from the left margin, or the end of the document.
 
@@ -105,7 +105,7 @@ The MyWord block label sigil prefix defines these symbols as sigil characters:
     ` ~ ! @ # % ^ & * _ + - = : < > ? / .
 
 
-These sigil characters can be used as normal chacters in text content, there is no need to escape them.
+These sigil symbols can be used as normal characters in text content, there is no need to escape them.
 
 In this document the tilde ~ will be used as a generic sigil for most example labels, without any particular significance. Common conventions for using different sigils in different lingos are a separate topic that is outside of this reference document.
 
@@ -839,3 +839,5 @@ The `[@import] imports the Markdown translator, and the `[.md] label is defined 
 + ` label word starts with a letter, eliminates .5 #8 etc..
 + ` inline labels COULD allow $ \ ' "
 
++ ` metamark grammar
++ ` nested content left nesting (a(b(c))) not (((a)b)c)
