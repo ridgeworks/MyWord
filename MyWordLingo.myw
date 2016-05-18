@@ -1,8 +1,8 @@
 #   MyWord Lingo
 
-In MyWord a lingo is a vocabulary of markup labels and transform functions. A small core vocabulary is all that is required to publish many small documents, but a larger vocabulary is needed for a book or a web-site. In addition some topics, such as mathematics, may need their own special lingo.
+In MyWord a lingo is a vocabulary of markup labels and transform functions. A small core vocabulary is all that is required to publish many small documents, but a larger vocabulary may be needed for a book or a web-site. In addition some topics, such as mathematics, may need their own special lingo.
 
-Individual documents can define their own custom lingo, but most authors will adopt a standard lingo from a library of definitions and use the same lingo across many documents. This document describes a core lingo for simple documents. A library of additional feature packages can be used to extend the core lingo, and to add other special purpose lingos.
+Individual documents can define their own custom lingo, but a lingo from a library of definitions can be shared across many documents. This document describes a core lingo for simple documents. A library of additional feature packages can be used to extend the core lingo, and to add other special purpose lingos.
 
 ##  Label Semantics
 
@@ -25,13 +25,15 @@ The core features include:
 
 -   Headers.
 
--   Prose with emphasis.
+-   Prose elements (bold, italics, etc).
+
+-   HTML links and images.
 
 -   Plain text for code and data.
 
 -   Lists.
 
--   HTML links and images.
+-   Tables.
 
 -   Custom HTML.
 
@@ -87,8 +89,17 @@ A more elaborate header may include the header text as an ID to enable HTML link
         header3 :: (content) =>
             "<h3 id='"+content+"'>"+content+"</h3>"
 
+Style rules can present headers in different ways, and they may use a border line as a horizonal rule to divide sections.
 
-###   Emphasis
+A simple horizontal rule may also be used.
+
+.demo
+    ---
+
+    &  --- = <hr>
+
+
+###   Prose Elements
 
 The inline HTML elements for emphasis and related tags can be defined directly like this:
 
@@ -112,7 +123,7 @@ The inline HTML elements for emphasis and related tags can be defined directly l
 
 Many similar HTML tags can be defined in the same way, from now on we will assume that a label like `[:tag] will be defined to represent the same name HTML element `[<tag>].
 
-The Markdown notations can be defined as labels too:
+Symbols similar to Markdown can be defined as labels too:
 
 .demo
     *[emphasis]
@@ -130,118 +141,37 @@ The bracket notation avoids many of the complications that occur in the Markdown
 For example, consider:
 
 .demo
-    *[Some *x* **[thing]]
+    *[Some x*y **[thing]]
 
 &
     * = <i>
     ** = <b>
 
-
-###   Plain Text
-
-There are various HTML tags for plain text:
+Other prose elements:
 
 .demo
-    :pre
-        A block    of
-            preformatted
-        :code[code or data]
+    >
+        Blockquote ...
 
-    :code[code or data]
+        this^[superscript]
 
-    :kbd[keyboard text]
+        that_[subscript]
+
+        But ~~[not] :q[another].
+
+        // and more...
 
     &
-        :pre = text <pre>
-        :code = text <code>
-        :kbd = text <kbd>
+        > = <blockquote>
+        ^ = <sup>
+        _ = <sub>
+        ~~ = <s>
+        // = <span hidden>
 
-Plain text content for code or data should be presented verbatim, including any nested markup. The `[text] transform does this. In HTML itself there is no equivent way to quote text verbatim.
-
-Shorthand symbols like / and the Markdown ` notation can also be defined:
-
-.demo
-    /   A preformatted   block
-        of        `[code or data]
-
-    `[some :code[code or data] text]
-
-    &
-        / = text <pre>
-        ` = text <code>
-
-###   Lists
-
-There are three HTML list tags:
-
-.demo
-    :ul
-        :li An unordered list item.
-        :li Another list item.
-
-    :ol
-        :li An ordered list item.
-        :li Another list item.
-
-    :dl
-        :dt A term
-        :dd Definition of term.
-
-&
-    :ul = <ul>
-    :li = <li>
-    :ol = <ol>
-    :dl = <dl>
-    :dt = <dt>
-    :dd = <dd>
-
-An author may choose to define other labels:
-
-.demo
-    .points
-        . An unordered list item.
-        . Another list item.
-
-    .steps
-        . An ordered list item.
-        . Another list item.
-
-    .glossary
-        : Some term
-        :=  Definition of term.
-        : Another term
-        := Another definition ...
-
-    &
-        .points = <ul class=points>
-        . = <li>
-
-        .steps = <ol class=steps>
-
-        .glossary = <dl class=glossary>
-        : = <dt>
-        := = <dd>
-
-A transform function can be used to simplify lists:
-
-.demo
-    -   Unordered list item.
-    -   Another list item.
-
-    +   Ordered list item.
-    +   Another list item.
-
-    =   A Term
-        Definition of term.
-
-    &
-        - = list <ul>
-        + = list <ol>
-        = = terms <dl>
-
-The `[list] transform groups elements with the same label together as list item elements inside the given HTML list wrapper.
-
-The `[terms] transform is similar, but the first line of each item is wrapped into a term element with the remainder in a definition element.
+    :style
+        blockquote {
+            border-left: 12pt solid whitesmoke;
+            padding-left:10pt; }
 
 ###   Links
 
@@ -285,6 +215,198 @@ Images can also be defined directly:
     &   !go = <img src='gopher.png' title='GO gopher'>
 
 
+###   Plain Text
+
+There are various HTML tags for plain text:
+
+.demo
+    :pre
+        A block    of
+            preformatted
+        :code[code or data]
+
+    :code[code or data]
+
+    :kbd[keyboard text]
+
+    &
+        :pre = text <pre>
+        :code = text <code>
+        :kbd = text <kbd>
+
+Plain text content for code or data should be presented verbatim, including any nested markup. The `[text] transform does this. In HTML itself there is no equivent way to quote text verbatim.
+
+Shorthand symbols like / and the Markdown ` notation can also be defined:
+
+.demo
+    /   A preformatted   block
+        of        `[code or data]
+
+    `[some :code[code or data] text]
+
+    &
+        / = text <pre>
+        ` = text <code>
+
+
+### Syntax Highlighting
+
+
+
+###   Lists
+
+There are three HTML list tags:
+
+.demo
+    :ul
+        :li An unordered list item.
+        :li Another list item.
+
+    :ol
+        :li An ordered list item.
+        :li Another list item.
+
+    :dl
+        :dt A term
+        :dd Definition of term.
+
+&
+    :ul = <ul>
+    :li = <li>
+    :ol = <ol>
+    :dl = <dl>
+    :dt = <dt>
+    :dd = <dd>
+
+An author may choose to define custom labels:
+
+.demo
+    .points
+        ~ An unordered list item.
+        ~ Another list item.
+
+    .steps
+        ~ An ordered list item.
+        ~ Another list item.
+
+    .glossary
+        = Some term
+            Definition of term.
+        = Another term
+            Another definition ...
+
+    &
+        .points = <ul class=points>
+        .steps = <ol class=steps>
+        ~ = <li>
+
+        .glossary = <dl class=glossary>
+        = = term
+        term :~ \s* ([^\n\r]+) ([\s\S]*) :: (_,t,d) =>
+            "<dt>"+t+"</dt><dd>"+markit('myword',d)+"</dd>"
+
+In the glossary the first line of each item is the term being defined, and the remainder is its definition.
+
+Defintion lists may also be used for a list of references, a list of notes, and other applications.
+
+A quick and easy way to write generic lists can be defined with list transform functions:
+
+.demo
+    -   Unordered list item.
+    -   Another list item.
+
+    +   Ordered list item.
+    +   Another list item.
+
+    =   Term
+        Definition of the term.
+    =   Another Term
+        Definition of another term.
+
+    &
+        - = list <ul>
+        + = list <ol>
+        = = terms <dl>
+
+The `[list] transform groups elements with the same label together as list item elements inside the given HTML list wrapper.
+
+The `[terms] transform is similar, but the first line of each item is wrapped into a term element with the remainder in a definition element.
+
+###   Tables
+
+Tables can be written using standard HTML table elements. This provides full flexibility, but it is rather verbose:
+
+.demo
+    :table
+      :tr
+        :th Unit
+        :th Shape
+        :th Dimension
+      :tr
+        :td 1
+        :td line
+        :td length
+      :tr
+        :td 2
+        :td plane
+        :td area
+      :tr
+        :td 3
+        :td space
+        :td volume
+
+&
+    :table = <table>
+    :tr = <tr>
+    :th = <th>
+    :td = <td>
+
+:style
+    th, td { padding-left: 10pt; }
+
+Simple tables like this one can use the source text layout as an array format. A line of text represents a table row, and column fields are simply separated by one or more tab characters, or two or more space characters:
+
+.demo
+    .array
+        1    One      Line
+        2    Two      Area
+        3    Three    Volume
+
+    & .array = array <table class=array>
+
+:style
+    table.array {border-collapse:collapse;}
+    .array td { border:thin solid gray; padding:2pt 10pt; }
+&
+    array := row*                 :: (rows) => this.flatten(rows).join('')
+        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        item  := (!delim char)+
+        delim :~ %tsep | %nl
+        tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
+        nl    :~ [\n\f]|([\r][\n]?)
+        char  :~ [\s\S]
+
+The `[array] transform is defined in the core lingo, so authors may define custom tables with their own style:
+
+.demo
+
+  .lunch
+    Name    Lunch order   Spicy    Owes
+    Joan    saag paneer   medium   $11
+    Sally   vindaloo      mild     $14
+    Erin    lamb madras   HOT      $5
+
+  &   .lunch = array <table class=lunch>
+
+  :style
+    table.lunch {border-collapse:collapse;}
+    .lunch td { border:thin solid gray; padding:2pt 10pt; }
+    .lunch tr:nth-child(1)  { font-weight:bold; background:whitesmoke; }
+    .lunch td:nth-child(4)  { text-align:right; }
+
+
+
 ### Custom HTML
 
 MyWord will escape any HTML syntax characters so that the source text is presented verbatim. However, the author may choose to define an `[:html] label to represent a feature that can present HTML. This `[:html] label will not translate its content text so that any standard HTML annotations will be presented as HTML elements.
@@ -296,23 +418,6 @@ MyWord will escape any HTML syntax characters so that the source text is present
     & :html = rawText
         rawText :: (txt) => txt
 
-
-
-### More core features
-
-/
-    > blockquote
-    ~~ strike
-
-    emojis, -[ ], ... ?
-
-    references, end notes, terms glossary   @ref[1], @note[1], @[foo], ....
-
-    cross references  @ref[x] #def[x]  #see[x] #id[x]
-
-    code syntax highlighting
-
-    tables
 
 ##  Rich Documents
 

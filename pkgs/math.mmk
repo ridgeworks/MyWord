@@ -1,4 +1,4 @@
-.math	= ascii2mml <math display=block>
+:math	= ascii2mml <math display=block>
 
 
 ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
