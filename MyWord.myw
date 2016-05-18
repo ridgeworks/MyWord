@@ -181,14 +181,42 @@ The `[text] and `[higlight] translators preserve the content text and present it
 
 ##  Content Translation
 
-The ability to define a label that can translate its content enabels an author to use custom notations and  formats.
+The ability to define a label that can translate its content enabels an author to use custom notations and formats.
 
-For example:
+For example, the source text layout format can be used to directly represent an array of elements in an HTML table. In an array format each line is a table row, and column fields are simply separated by white-space, either tabs or multiple space characters:
 
 .demo
-	It starts on .date[2/3/2013].
+	.array
+        1    One      Line
+        2    Two      Area
+        3    Three    Volume
 
-	&   .date = mdy <b class=date>
+    &  .array = array <table class=array>
+
+:style
+    table.array {border-collapse:collapse;}
+    .array td { border:thin solid gray; padding:2pt 10pt; }
+
+&
+    array := row*                 :: (rows) => this.flatten(rows).join('')
+        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        item  := (!delim char)+
+        delim :~ %tsep | %nl
+        tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
+        nl    :~ [\n\f]|([\r][\n]?)
+        char  :~ [\s\S]
+
+The label definition specifies that the array transform function is to be applied to the content text. This function translates the array of source text fields into cells in an HTML table element.
+
+The definition of transform functions is discussed in the next section. For the moment let's just assume that transform functions like this are available.
+
+Here is another example, for a month/day/year date format:
+
+.demo
+	It starts on .mdy[2/3/2013].
+
+	&   .mdy = mdy <b class=date>
 
 &
     mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
@@ -200,18 +228,12 @@ For example:
             'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
             ' ' + d + ', ' + y + '</time>'; }
 
-The content of the .date label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element. How the mdy transform function is defined will be discussed in the next section. For the moment lets just assume that transform functions like this are available.
+The content of the .mdy label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element.
 
-The content of a label can use any format that has an appropriate transform function. For example, the label for a table can specify that the format of its content text is tab-separated data fields, which are to be translated into cells in an HTML table element, like this:
+---
+How the mdy transform function is defined will be discussed in the next section. For the moment lets just assume that transform functions like this are available.
 
-.demo
-	.tsv
-	    A    B    C
-	    1    2    3
-
-	&  .tsv = tsv <table class=tsv>
-
-The label definition specifies that the tsv transform is to be applied to the content text. The tsv function will translate the tab separated fields into cells in an HTML table element.
+A label can use a transform function to parse any source text syntax.
 
 If you prefer to write your tables using a format more like some of the extensions to Markdown, then you can define the bar `[|] as a label that will use a `[bartab] translator:
 
@@ -224,6 +246,7 @@ If you prefer to write your tables using a format more like some of the extensio
 	&   | = bartab <table class=bartab>
 
 The `[bartab] function is very similar to the `[tsv] function but it uses the bar character | as a field separator, and it knows how to translate header line notations that can allign columns.
+---
 
 An HTML link element requires a URL as an `[href] attribute value, so defining a label to represent an HTML link requires a transform function:
 
@@ -311,7 +334,7 @@ The `[:math] label is defined here using the `[ascii2mml] function to translate 
 
 	&   :math = ascii2mml <math display=block>
 
-An author may wish to break a document up into parts to be edited as separate files. Separte parts can then be included into the main document body with an `[@include] label:
+An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[@include] label:
 
 .demo
 	@include MyWord.part.txt
