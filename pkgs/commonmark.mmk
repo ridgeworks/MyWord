@@ -21,6 +21,8 @@
 
 linkURL    :: (url) => { return "<a href='"+url+"'>"+url+"</a>"};
 
+linkID     :: (id) => { return "<a href='#"+id+"'>"+id+"</a>"};
+
 ^		= <sup>
 _		= <sub>
 

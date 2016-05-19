@@ -114,7 +114,7 @@ In this document the tilde ~ will be used as a generic sigil for most example la
 
 The block grammar matches only one level of indentation, since the syntax inside the content is determined by the defintion of the label. The default is to apply the myword grammar, which allows a myword document to be nested inside a myword block. But in general a block label can define the content to be any other grammar.
 
-The content lines in a block of verse are indented under the label. The indentation is not part of the content, it the skeleton format for the block of verse, and it is deleted. The content grammar will not see the indentation.
+A block of verse contains lines that are indented under the label. The indentation is not part of the content text, it is part of the skeleton format for the block of verse, and it is deleted. The content grammar will not see the indentation.
 
 The MyWord document block structure is defined by this grammar:
 
@@ -152,7 +152,7 @@ One reason is that traditional grammar specifications for computer languages are
 
 This has lead to a tradition that avoids the use of "significant white-space". That has been compounded by confusion and misuse of tab characters. There has also been passionate discussions on the merits of different styles and pactices for indentation. Some programmers have concluded that the use of significant white-space is bad practice and should be avoided.
 
-This is unfortunate because the use of indentation is the only practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. A block of verse may caotain text using any data format, markup, data language, or programming language.
+This is unfortunate because the use of indentation is the only practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. A block of verse may contain text using any data format, markup, data language, or programming language.
 
 MyWord uses a very simple indentation scheme:
 
@@ -379,7 +379,7 @@ The prose grammar follows the same scheme as the block grammar, it delimits the 
 
 This is a basic default prose grammar. Authors may substitute a different grammar for the content of their prose paragraphs.
 
-For example, an author may prefer to use MarkDown notations rather than this default prose grammar, although that is rather limiting.
+For example, an author may prefer to use Markdown notations rather than the default prose grammar, although that is rather limiting.
 
 A better option is to extend the default prose grammar with other shorthand notations. For example, a quote notation like `[*for emphasis*] may be defined if desired. Even without extending the prose grammar an inline element could be defined as: `[*[for emphasis]], which is just as easy to read, and almost as easy to write.
 
@@ -659,12 +659,16 @@ For example, the transform function to generate an HTML link for a URL:
     &
         ~url = linkURL
 
-        linkURL :: (content) =>
-            "<a href='"+content+"'>"+content+"</a>"
+        linkURL :: (content) => {
+            var url = markit('text', content);
+            return "<a href='"+url+"'>"+url+"</a>";
+            }
 
 The `[~url] label is defined to use the `[linkURL] transform function. This function takes the content text as a URL web address and generates an HTML link to target that URL.
 
-A local link requires a pair of transform functions, one for the reference and another for the target id. The label pair may use a common sigil with different key words, or different sigils with the same kwy word. For example:
+The special `[markit] function translates the content as `[text], which will escape any HTML syntax characters in the content text. The `[markit] function can apply any transform function to a text string.
+
+Another example. A local link requires a pair of transform functions, one for the reference and another for the target id. The label pair may use a common sigil with different key words, or different sigils with the same key word. For example:
 
 .demo
     See ~ref[1] for example.
@@ -677,14 +681,16 @@ A local link requires a pair of transform functions, one for the reference and a
         ~ref = ref_def
         ~def = def_ref
 
-        ref_def :: (key) =>
-            "<a class=ref href='#def-"+key+"'>"+key+"</a>"
-        def_ref :: (key) =>
-            "<b class=def id='def-"+key+"'>"+key+"</b>"
+        ref_def :: (content) => {
+            var key = markit('text', content);
+            return "<a class=ref href='#def-"+key+"'>"+key+"</a>";
+            }
+        def_ref :: (content) => {
+            var key = markit('text', content);
+            return "<b class=def id='def-"+key+"'>"+key+"</b>";
+            }
 
-In the previous transform functions the content text has been used as an argument that has not been translated. This is too simplistic, the content text should be translated as verbatim text (with HTML syntax escaped) or with a myword or prose transform.
-
-The examples in this document are generated with a demo transform to show the source text on the left and the HTML presentation on the right. The definition of this transform shows how content text is translated using the special `[markit] function:
+The examples in this document are generated with a demo transform to show the source text on the left and the HTML presentation on the right. The definition of this transform uses the `[markit] function to translate the content as `[text], and as `[myword] markup:
 
 .demo
     .demo
@@ -695,7 +701,7 @@ The examples in this document are generated with a demo transform to show the so
 
         demo    :: (content) =>
                 "<tr><td class='A1'>" +
-                content.replace(/</g,'&lt;') +
+                markit('text', content) +
                 "</td><td class='B1'>" +
                 markit('myword',content) +
                 "</td></tr>"
@@ -728,7 +734,7 @@ Here is the grammar that defines the `[array] transform:
     &
         array := row*                 :: (rows) => this.flatten(rows).join('')
             row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
-            cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+            cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
             item  := (!delim char)+
             delim :~ %tsep | %nl
             tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
@@ -738,18 +744,20 @@ Here is the grammar that defines the `[array] transform:
 &
     array := row*                 :: (rows) => this.flatten(rows).join('')
         row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
-        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
         item  := (!delim char)+
         delim :~ %tsep | %nl
         tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
         nl    :~ [\n\f]|([\r][\n]?)
         char  :~ [\s\S]
 
-The grammar rules define a parse tree, and the associated semantic actions translate the tree nodes into HTML elements. For more information consult the Grit Reference document
+The grammar rules define a parse tree, and the associated semantic actions translate the tree nodes into HTML elements. For more information consult the Grit Reference document.
+
+The `[array] transform translates the contents of each table cell using the `[prose] transform so that inline markup can be used.
 
 The array transform can be used with different style rules to present tables to suite the application. Transforms like this can be included as utility functions in the vocabulary of a core lingo that can be bundled together with the MyWord translator.
 
-More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[ascii2mml] function that translates AsciiMath notation into HTML Math ML elements. The grammar for this transform function is defined in a separate file `[pkgs/math.mmk]:
+More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[ascii2mml] function that translates AsciiMath notation into HTML Math ML elements. The grammar for this transform function is defined in a separate file `[pkgs/math.mmk], which can be used like this:
 
 .demo
 	:math
@@ -762,7 +770,7 @@ More complicated transform functions, such as the translation of AsciiMath, can 
 
 ## Importing Resources
 
-A simple MyWord document could define all the labels and transform functions that it requires, in other words it can define its own lingo. But most authors will employ a standard pre-defined library of markup features bundled together with their MyWord translator. This defines a common lingo, a core markup languge. Documents can extend this core lingo with their own label and transform definitions.
+A MyWord document can define all the labels and transform functions that it uses, in other words it can define its own markup lingo. But most authors will employ a standard pre-defined library to provide a core markup language, a common lingo. This lingo can be bundled together with the MyWord translator. Documents can extend this core lingo with their own label and transform definitions.
 
 Larger MyWord documents can include content from separate files by using an `[import] transform to read the content of a given URL. The lingo of the importing document is inhereted by the imported document (i.e. the defintions are shared). Included documents may also include further documents.
 
@@ -786,6 +794,11 @@ Here is the same file being read as plain text:
       ~include = import <div class=include>
       .txt = text <pre>
 
+The `[.myw] label is defined so that files with a `[.myw] suffix are translated as MyWord documents:
+
+.eg
+    &   .myw = myword
+
 The definitions of labels and transform fuunctions can be shared by imported documents, or definitions can be loaded from a separte file using the `[@import] instruction. As we saw in a previous example for AsciiMaths translation.
 
 Third party translators that are available as a JavaScript function can be used too. For example, a document containing Markdown markup can be translated with the `[marked.js] translator. This script defines a `[marked] function:
@@ -798,7 +811,7 @@ Third party translators that are available as a JavaScript function can be used 
       @import 3rdparty/marked.js
       .md = marked <div class=md>
 
-The `[@import] loads the Markdown translator as JavaScript from the file `[marked.js]. The `[.md] label is defined to use this translator. The `[import] transform sees the `[.md] label that matches the file suffix and translates the file as Markdown by using the `[marked] transform function`. The `[@import] can also be used to import a CSS style sheet from a file with a `[.css] suffix.
+The `[@import] loads the Markdown translator as JavaScript from the file `[marked.js]. The `[.md] label is defined to use this translator. The `[import] transform sees the `[.md] label that matches the file suffix and translates the file as Markdown by using the `[marked] transform function. The `[@import] instructioncan also be used to import a CSS style sheet from a file with a `[.css] suffix.
 
 
 ##  Translating MyWord Documents
@@ -842,7 +855,7 @@ The `[index.myw] file contains the MyWord document source text.
 
 The `[lib/] directory contains all the MyWord translator machinery and the initial lingo markup definitions:
 
--   `[x-markup.js] loads the translator resource files.
+-   `[x-markup.js] is the script that empowers the browser (it loads the other files).
 
 -   `[x-markup.mmk] contains the initial markup lingo defintions.
 
@@ -898,4 +911,3 @@ Longevity is not something that can be said for even the most sucessful and popu
 
 + ` feature compnents? How to pkg style rules with labels...
 
-+ ` ADD markit examples, .demo, .array/.tabular

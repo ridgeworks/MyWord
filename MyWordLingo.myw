@@ -12,7 +12,7 @@ Each markup label should have one and only one semantic meaning, the same as HTM
 
 Popular light-weight markup languages break this rule and give some symbols more than one meaning. For example a star * may be used for both a bullet point and to quote a phrase of text for emphasis. In English it is common for a word to have more than one meaning, and this practice seems to have continued into markup symbols.
 
-Nice shorthand symbols are in short supply, so it is understandable that they may be given different meanings in a different contexts. On the other hand it would be unreasonable to define more than one semantic meaning for any given HTML tag name. MyWord can employ a rich variety of labels, so the core MyWord lingo defines only one semantic meaning for any given label. It follows tht most labels will only make sense as either a block element or as an inline element.
+Nice shorthand symbols are in short supply, so it is understandable that they may be given different meanings in a different contexts. On the other hand it would be unreasonable to define more than one semantic meaning for any given HTML tag name. MyWord can employ a rich variety of labels, so the core MyWord lingo defines only one semantic meaning for any given label. It follows that most labels will only make sense as either a block element or as an inline element.
 
 Remember that an author can always define a local meaning for any label, so the core lingo can be extended and over-ridden in any way the author desires.
 
@@ -153,24 +153,30 @@ Other prose elements:
     >
         Blockquote ...
 
+        ~[underline]
+
         this^[superscript]
 
         that_[subscript]
 
-        But ~~[not] :q[another].
+        ~~[strike out]
+
+        ?[mark this]
 
         // and more...
 
     &
         > = <blockquote>
+        ~ = <u>
         ^ = <sup>
         _ = <sub>
         ~~ = <s>
+        ? = <mark>
         // = <span hidden>
 
     :style
         blockquote {
-            border-left: 12pt solid whitesmoke;
+            border-left: 5pt solid whitesmoke;
             padding-left:10pt; }
 
 ###   Links
@@ -236,7 +242,7 @@ There are various HTML tags for plain text:
 
 Plain text content for code or data should be presented verbatim, including any nested markup. The `[text] transform does this. In HTML itself there is no equivent way to quote text verbatim.
 
-Shorthand symbols like / and the Markdown ` notation can also be defined:
+The shorthand symbols / can be used for a :pre element, and ` for a :code element:
 
 .demo
     /   A preformatted   block
@@ -247,6 +253,13 @@ Shorthand symbols like / and the Markdown ` notation can also be defined:
     &
         / = text <pre>
         ` = text <code>
+
+The // label can be used for comments:
+
+.demo
+    // This is a comment ...
+
+    &  // = <div hidden>
 
 
 ### Syntax Highlighting
@@ -278,37 +291,6 @@ There are three HTML list tags:
     :dt = <dt>
     :dd = <dd>
 
-An author may choose to define custom labels:
-
-.demo
-    .points
-        ~ An unordered list item.
-        ~ Another list item.
-
-    .steps
-        ~ An ordered list item.
-        ~ Another list item.
-
-    .glossary
-        = Some term
-            Definition of term.
-        = Another term
-            Another definition ...
-
-    &
-        .points = <ul class=points>
-        .steps = <ol class=steps>
-        ~ = <li>
-
-        .glossary = <dl class=glossary>
-        = = term
-        term :~ \s* ([^\n\r]+) ([\s\S]*) :: (_,t,d) =>
-            "<dt>"+t+"</dt><dd>"+markit('myword',d)+"</dd>"
-
-In the glossary the first line of each item is the term being defined, and the remainder is its definition.
-
-Defintion lists may also be used for a list of references, a list of notes, and other applications.
-
 A quick and easy way to write generic lists can be defined with list transform functions:
 
 .demo
@@ -328,9 +310,33 @@ A quick and easy way to write generic lists can be defined with list transform f
         + = list <ol>
         = = terms <dl>
 
+&
+    - = list <ul>
+    + = list <ol>
+    = = terms <dl>
+
 The `[list] transform groups elements with the same label together as list item elements inside the given HTML list wrapper.
 
 The `[terms] transform is similar, but the first line of each item is wrapped into a term element with the remainder in a definition element.
+
+The `[terms] transform also defines an ID attribute for the term line. This allows links to reference terms:
+
+.demo
+    See @=[Flim] or @=[Flam].
+
+    #### Notes:
+
+    = Flim
+        A note about flim...
+
+    = Flam
+        A note about flam...
+
+    &
+        @= = linkID
+
+Definition lists can be used like this for a glossary of terms, or a bibliography, or end notes, and so on.
+
 
 ###   Tables
 
@@ -380,7 +386,7 @@ Simple tables like this one can use the source text layout as an array format. A
 &
     array := row*                 :: (rows) => this.flatten(rows).join('')
         row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
-        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
         item  := (!delim char)+
         delim :~ %tsep | %nl
         tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
@@ -392,12 +398,15 @@ The `[array] transform is defined in the core lingo, so authors may define custo
 .demo
 
   .lunch
-    Name    Lunch order   Spicy    Owes
-    Joan    saag paneer   medium   $11
-    Sally   vindaloo      mild     $14
-    Erin    lamb madras   HOT      $5
+    Name    Lunch order   Spicy     Owes
+    Joan    saag paneer   medium    $11
+    Sally   vindaloo      .g(mild)  $14
+    Erin    lamb madras   .r(hot)   $5
 
-  &   .lunch = array <table class=lunch>
+  &
+    .lunch = array <table class=lunch>
+    .g = <span style='color:green;'>
+    .r = <span style='color:red;'>
 
   :style
     table.lunch {border-collapse:collapse;}
