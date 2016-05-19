@@ -181,7 +181,7 @@ The `[text] and `[higlight] translators preserve the content text and present it
 
 ##  Content Translation
 
-The ability to define a label that can translate its content enabels an author to use custom notations and formats.
+A label can be defined to translate its content text. This enabels an author to use custom notations and formats.
 
 For example, the source text layout format can be used to directly represent an array of elements in an HTML table. In an array format each line is a table row, and column fields are simply separated by white-space, either tabs or multiple space characters:
 
@@ -211,6 +211,8 @@ The label definition specifies that the array transform function is to be applie
 
 The definition of transform functions is discussed in the next section. For the moment let's just assume that transform functions like this are available.
 
+A label can use a transform function to parse any source text syntax.
+
 Here is another example, for a month/day/year date format:
 
 .demo
@@ -230,24 +232,6 @@ Here is another example, for a month/day/year date format:
 
 The content of the .mdy label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element.
 
----
-How the mdy transform function is defined will be discussed in the next section. For the moment lets just assume that transform functions like this are available.
-
-A label can use a transform function to parse any source text syntax.
-
-If you prefer to write your tables using a format more like some of the extensions to Markdown, then you can define the bar `[|] as a label that will use a `[bartab] translator:
-
-.demo
-	|  Name   | Lunch order  | Spicy  | Owes :
-	   Joan   | saag paneer  | medium | $11
-	   Sally  | vindaloo     | mild   | $14
-	   Erin   | lamb madras  | HOT    | $5
-
-	&   | = bartab <table class=bartab>
-
-The `[bartab] function is very similar to the `[tsv] function but it uses the bar character | as a field separator, and it knows how to translate header line notations that can allign columns.
----
-
 An HTML link element requires a URL as an `[href] attribute value, so defining a label to represent an HTML link requires a transform function:
 
 .demo
@@ -256,24 +240,6 @@ An HTML link element requires a URL as an `[href] attribute value, so defining a
     &   @ = linkURL
 
 The `[linkURL] transform function generates the required HTML wrapper: `[<a href='http://csszengarden.com'>].
-
-HTML link elements and target id elements can be created by transform functions:
-
-.demo
-    I saw @id[Tom] and @id[Harry] last night.
-
-    #id[Tom]: Thomas Bigfoot.
-
-    #id[Harry]: Harold Higgins
-
-    &
-        @id = idLink
-        #id = idTarget
-
-&
-    idLink :: (ref) => "<a href='#"+ref+"'>"+ref+"</a>"
-    idTarget :: (ref) => "<b id='"+ref+"'>"+ref+"</b>"
-
 
 A label for a list item can be defined by a translator that will compose a group of items into an HTML list:
 
@@ -295,36 +261,18 @@ A label for a list item can be defined by a translator that will compose a group
 
 The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
 
-A list of terms can be translated into an HTML defintion list using the `[terms] transform function. This transform wraps the content into either an HTML `[<dt>] or a `[<dd>] element, according to the indentation. The `[:] label then wraps the resulting content into an outer HTML `[<dl>] defintion list element:
+The `[terms] transform generates an HTML definition list. This transform wraps the first line of the content into an HTML `[<dt>] and the remainder into a `[<dd>] element. The `[=] label then wraps the resulting content for a group of term defintions into an outer HTML `[<dl>] defintion list element:
 
 .demo
-    :
-      Tom
+    =  Tom
 
         Thomas ~[the Tank Engine].
 
-      Dick
+    =  Dick
 
         Richard ~[the Lion Heart].
 
-    &   : = terms <dl>
-
-& terms :: (content) => {
-            var dl = "";
-            var dd = "";
-            var lines = content.split('\n');
-            for (var i=0; i<lines.length; i++) {
-                var line = lines[i];
-                if (!line.match(/^\s/)) { // no indent
-                    if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; dd = ""; }
-                    dl += "<dt>"+line+"</dt>";
-                } else { // indented...
-                    dd += line.trim()+'\n';
-                }
-            }
-            return dl + "<dd>" + markit("myword",dd) + "</dd>";
-            }
-
+    &   = = terms <dl>
 
 The `[:math] label is defined here using the `[ascii2mml] function to translate AsciiMath notation into HTML Math ML elements:
 
@@ -360,23 +308,6 @@ The `[~greet] markup label can be defined with a `[hello] transform function:
 
 The `[hello] function is defined to simply add a "Hello " prefix to the content text.
 
-Here is the link example we saw earlier, this time showing how the translator functions are defined. These functions generate HTML elements with attribute values that contain the content text:
-
-.demo
-    I saw @id[Tom] and @id[Harry] last night.
-
-    #id[Tom]: Thomas Bigfoot.
-
-    #id[Harry]: Harold Higgins
-
-    &
-        @id = idLink
-        #id = idTarget
-
-        idLink :: (ref) => "<a href='#"+ref+"'>"+ref+"</a>"
-        idTarget :: (ref) => "<b id='"+ref+"'>"+ref+"</b>"
-
-
 The next example defines a `[tempF] translator functions to translate Celsius to Fahrenheit:
 
 .demo
@@ -391,7 +322,7 @@ The next example defines a `[tempF] translator functions to translate Celsius to
 
 The `[.temp] label is defined with a `[tempF] transform function. The `[tempF] transform is defined using the `[:~] symbol which introduces a regular expression rule to match the content text. The `[::] symbol introduces a semantic action that translates the matched text for the HTML presentation. The details do not matter, this example is just to illustrate how new custom markup translators can be defined. The details are explained in a separate document.
 
-The next example defines the `[mdy] transform function for date translation:
+The next example defines the `[mdy] transform function for a month/day/year date translation:
 
 .demo
 	The date was .date[2/3/2013].
