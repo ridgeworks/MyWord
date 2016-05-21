@@ -12,7 +12,7 @@ In a nutshell:
 
 -   The first word in a block may be a markup label, the remainder is the content text.
 
--   Lines that do not start with a markup label form normal paragraphs of prose.
+-   Blocks without a markup label are normal paragraphs of prose.
 
 -	Authors can define a vocabulary of labels for their own markup language lingo.
 
@@ -25,7 +25,7 @@ In a nutshell:
 
 ##	Blocks
 
-A block that starts with a markup label is called a verse, otherwise the block of text is a paragraph of prose. A markup label starts with a sigil character (a magic symbol) so that it can be easily distinguished from a normal word of prose.
+A block that starts with a markup label is called a verse, otherwise the block of text is a paragraph of prose. A markup label is the first word of the block and starts with a sigil character (a magic symbol) so that it is easily distinguished from a normal word of prose.
 
 The sigil characters have no inherent significance other than to designate a markup label. Here is an example of a MyWord document using the tilde ~ sigil character, the source text is on the left, and the HTML presentation is on the right:
 
@@ -55,7 +55,7 @@ A block of verse must start at the left margin, and can contain any number of in
 
 When the markup label is undefined the label and its content text will be shown verbatim in the HTML translation.
 
-A paragraph of ~[prose] is any line of text that does ~[not] start with a markup label. A paragraph may contain any number of lines, provided the lines do not start with a label, and are not blank or empty.
+If the first word is not a block label then the block is a paragraph of ~[prose]. A paragraph may contain any number of lines, provided the lines do not start with a block label, and are not blank or empty.
 
 By default the lines of text inside a paragraph of prose flow together in the HTML translation. This is the standard way that HTML presents text in paragraph elements. The prose may contain inline markup labels, but there are none in this first example.
 
@@ -305,7 +305,7 @@ Other content may have a custom format, a table for example:
 
 ##  Prose Paragraphs
 
-Lines of prose (i.e. lines that do not begin with a label) are collected together into paragraphs which are separated by blank lines. This is a very natural way to write plain text paragraphs.
+Lines of prose (i.e. lines that do not begin with a block label) are collected together into paragraphs which are separated by blank lines. This is a very natural way to write plain text paragraphs.
 
 The translation into HTML ignores line-breaks so that the lines flow into a line length that fits the width of the presentation. The HTML standard translates any number of white-space characters (space, tab, line-end) into a single space between words.
 
@@ -512,7 +512,16 @@ A sigil word probably has some semantic meaning, so an even better solution is t
 
     ~hash[#hashtag] in a line of prose.
 
-    & ~hash = <var class='hash'>
+    &  ~hash = <var class='hash'>
+
+A generic text element can always be used to escape any markup content:
+
+.demo
+    #hashtag is seen as a label.
+
+    ~[#hashtag] in a line of prose.
+
+    &  ~ = text
 
 
 
@@ -575,21 +584,23 @@ For example:
 
             Some ~bag[text in a ~em[bag]].
 
+        ~style
+            .box { border:thin solid gray; padding-left:10pt; }
+            .bag { border:thin solid gray; padding:2pt; }
+
         &
             ~box = <div class=box>
             ~cap = prose <h2>
             ~bag = text <span class=bag>
             ~em  = <em>
+            ~style = text <style scoped>
 
-    :style
-        .box { border:thin solid gray; padding-left:10pt; }
-        .bag { border:thin solid gray; padding:2pt; }
 
 The defintion for a block label uses the "myword" transform by default (e.g. the ~box label).
 
 The defintion of an inline label uses the "prose" transform by default (e.g. the ~em label).
 
-The standard transform function "text" translates the content text verbatim (e.g. the ~bag label).
+The standard "text" transform translates the content verbatim (e.g. the ~bag and ~style labels).
 
 If the transform function generates HTML content that does not require an outer HTML wapper then the label definition may omit the HTML <tag> wrapper.
 

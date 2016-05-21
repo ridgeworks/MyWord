@@ -370,13 +370,13 @@ Tables can be written using standard HTML table elements. This provides full fle
 :style
     th, td { padding-left: 10pt; }
 
-Simple tables like this one can use the source text layout as an array format. A line of text represents a table row, and column fields are simply separated by one or more tab characters, or two or more space characters:
+A simple array format can be used to directly represent a small table. In an array format each line represents a row, and cells are separated by one or more tab characters, or two or more space characters:
 
 .demo
     .array
-        1    One      Line
-        2    Two      Area
-        3    Three    Volume
+        1    line     length
+        2    plane    area
+        3    space    volume
 
     & .array = array <table class=array>
 
