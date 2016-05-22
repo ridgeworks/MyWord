@@ -56,21 +56,23 @@ First, labels may be defined to directly represent the corresponding HTML elemen
     :h3  Header 3
 
     &
-        :h2 = <h2>
-        :h3 = <h3>
+        :h2 = prose <h2>
+        :h3 = prose <h3>
 
 The HTML headers :h1 to :h6 can all be befined the same way.
+
+A header has `[prose] content, without nested blocks.
 
 Labels can also be defined to mimic the Markdown notations:
 
 .demo
     ##  Header 2
 
-    ### Header 3
+    ###  Header 3
 
     &
-        ##  = <h2>
-        ### = <h3>
+        ##  = prose <h2>
+        ### = prose <h3>
 
 The header text is usually a single short line, but a block label can have multiple indented lines of content:
 
@@ -87,16 +89,17 @@ A more elaborate header may include the header text as an ID to enable HTML link
     &
         ###  = header3
         header3 :: (content) =>
-            "<h3 id='"+content+"'>"+content+"</h3>"
+            "<h3 id='"+markit('text',content)+"'>"+
+                markit('prose',content)+"</h3>"
 
 Style rules can present headers in different ways, and they may use a border line as a horizonal rule to divide sections.
 
 A simple horizontal rule may also be used.
 
 .demo
-    ---
+    ---   ..
 
-    &  --- = <hr>
+    &  --- = <hr/>
 
 
 ###   Prose Elements
@@ -163,7 +166,7 @@ Other prose elements:
 
         ?[mark this]
 
-        // and more...
+        //  and more...
 
     &
         > = <blockquote>
@@ -191,8 +194,10 @@ A URL can be translated into an HTML link, which is one of the few HTML elements
     &
         @ = linkURL
 
-        linkURL :: (content) =>
-          "<a href='"+content+"'>"+content+"</a>"
+        linkURL :: (content) => {
+            var url = markit('text', content);
+            return "<a href='"+url+"'>"+url+"</a>";
+            }
 
 In general custom defined links need to be defined directly:
 
@@ -216,9 +221,9 @@ An image URL label ! can be defined similarly:
 Images can also be defined directly:
 
 .demo
-    !go The Go language gopher.
+    !go[]
 
-    &   !go = <img src='gopher.png' title='GO gopher'>
+    &   !go = <img src='gopher.png' title='GO gopher'/>
 
 
 ###   Plain Text
@@ -257,12 +262,12 @@ The shorthand symbols / can be used for a :pre element, and ` for a :code elemen
 The // label can be used for comments:
 
 .demo
-    // This is a comment ...
+    //  This is a comment ...
 
     &  // = <div hidden>
 
 
-### Syntax Highlighting
+###  Syntax Highlighting
 
 
 
@@ -272,16 +277,16 @@ There are three HTML list tags:
 
 .demo
     :ul
-        :li An unordered list item.
-        :li Another list item.
+        :li  An unordered list item.
+        :li  Another list item.
 
     :ol
-        :li An ordered list item.
-        :li Another list item.
+        :li  An ordered list item.
+        :li  Another list item.
 
     :dl
-        :dt A term
-        :dd Definition of term.
+        :dt  A term
+        :dd  Definition of term.
 
 &
     :ul = <ul>
@@ -324,13 +329,13 @@ The `[terms] transform also defines an ID attribute for the term line. This allo
 .demo
     See @=[Flim] or @=[Flam].
 
-    #### Notes:
+    ####  Notes:
 
-    = Flim
-        A note about flim...
+    =  Flim
+         A note about flim...
 
-    = Flam
-        A note about flam...
+    =  Flam
+         A note about flam...
 
     &
         @= = linkID
@@ -344,22 +349,22 @@ Tables can be written using standard HTML table elements. This provides full fle
 
 .demo
     :table
-      :tr
-        :th Unit
-        :th Shape
-        :th Dimension
-      :tr
-        :td 1
-        :td line
-        :td length
-      :tr
-        :td 2
-        :td plane
-        :td area
-      :tr
-        :td 3
-        :td space
-        :td volume
+        :tr
+            :th  Unit
+            :th  Shape
+            :th  Dimension
+        :tr
+            :td  1
+            :td  line
+            :td  length
+        :tr
+            :td  2
+            :td  plane
+            :td  area
+        :tr
+            :td  3
+            :td  space
+            :td  volume
 
 &
     :table = <table>
@@ -378,7 +383,7 @@ A simple array format can be used to directly represent a small table. In an arr
         2    plane    area
         3    space    volume
 
-    & .array = array <table class=array>
+    &  .array = array <table class=array>
 
 :style
     table.array {border-collapse:collapse;}
@@ -398,10 +403,10 @@ The `[array] transform is defined in the core lingo, so authors may define custo
 .demo
 
   .lunch
-    Name    Lunch order   Spicy     Owes
-    Joan    saag paneer   medium    $11
-    Sally   vindaloo      .g(mild)  $14
-    Erin    lamb madras   .r(hot)   $5
+        Name    Lunch order   Spicy     Owes
+        Joan    saag paneer   medium    $11
+        Sally   vindaloo      .g(mild)  $14
+        Erin    lamb madras   .r(hot)   $5
 
   &
     .lunch = array <table class=lunch>
@@ -416,7 +421,7 @@ The `[array] transform is defined in the core lingo, so authors may define custo
 
 
 
-### Custom HTML
+###  Custom HTML
 
 MyWord will escape any HTML syntax characters so that the source text is presented verbatim. However, the author may choose to define an `[:html] label to represent a feature that can present HTML. This `[:html] label will not translate its content text so that any standard HTML annotations will be presented as HTML elements.
 
@@ -424,37 +429,20 @@ MyWord will escape any HTML syntax characters so that the source text is present
     :html
         <h3>Header <i>three</i></h3>
 
-    & :html = rawText
+    &   :html = rawText
         rawText :: (txt) => txt
 
 
 ##  Rich Documents
 
 /
-    cross references
-
-    References
-
-    footnotes
-
-
-    tables
-
     Maths
 
     TOC
 
     Index
 
-    Book or website features
-
-
-##  Component Modules
-
-/
-    &   .demo = myw/demo
-
-    @import myw/demo
+    Book or website features, forms, ...
 
 
 
