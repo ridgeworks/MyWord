@@ -96,9 +96,9 @@ Markup labels can be defined to represent any HTML elements, for example:
 
 The content text is the remainder of the block after the markup label. The block ends at the next line that is not indented under the markup label. This allows the content text to contain any characters without restriction, there are no special syntax characters to be escaped.
 
-This is different from most other markup languages, data languages, and programming languges. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This necessarily restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required). These languages can not quote themselves.
+This is different from most other markup languages, data languages, and programming languges. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required). These languages can not quote themselves.
 
-A length count is a perfect way to denote the end of a block of text that can contain any characters without restriction (and can therefore quote itself). Unfortunately a length count is impractical in documents that can be manually edited in any plain text editor.
+A length count is a perfect way to denote the end of a block of text that can contain any characters without restriction (and can therefore quote itself). Unfortunately a length count is impractical in documents that can be manually edited in a plain text editor.
 
 ###  Indented Content
 
@@ -116,17 +116,17 @@ MyWord uses a very simple indentation scheme:
 
 -   A label must start at the left margin, and content lines are indented.
 
--   An inset of one tab, or 4 or less spaces, is deleted from each line of content.
+-   An inset of one tab, or 2 to 4 spaces, is deleted from each line of content.
 
 -   The inset deleted from a line is never more than the inset deleted from an earlier line.
 
-This allows an author to indent content using a tab, or 1, 2, 3, or 4 space characters. The inset deleted from the first line should determine the inset deleted from all subsequent lines.
+This allows an author to indent content using a tab, or 2, 3, or 4 space characters. The inset deleted from the first line should determine the inset deleted from all subsequent lines.
 
 The white-space following the label and the inset of indented lines is all part of a skeleton format that delimits the block, it is not part of the content text.
 
-Deleting the inset shifts the content text left, so the content text now starts at the left margin. Each level of indentation requires either one tab, or 4 or less space characters. The same inset should be used for every line in a block.
+Deleting the inset shifts the content text left, so the content text now starts at the left margin. Each level of indentation requires either one tab, or 2, 3, or 4 space characters. The same inset should be used for every line in a block.
 
-Each indentation level can only contain nested indentation to its right. The indentation of each level should be the same. It is considered bad practice for later lines in the same block of content to have a smaller inset than earlier lines. If that happens then the smaller inset will be deleted from subsequent lines.
+Each indentation level can only contain nested indentation to its right. It is considered bad practice for later lines in the same block of content to have a smaller inset than earlier lines. If that happens then the smaller inset will be deleted from subsequent lines.
 
 The block structure is parsed breadth first, the content of a nested block is only parsed after the outer levels have been parsed. This is important since the myword block grammar is not necessarily the grammar that will be used for the content of a block. The content grammar is determined by the markup label definition.
 
@@ -135,7 +135,7 @@ This breadth before depth parsing process enables the composite grammar to be co
 
 ###  Content Syntax
 
-The myword block grammar is applied to the content of a block of verse by default.
+The myword block grammar is applied to the content of a label block by default.
 
 This allows myword documents to be nested:
 
@@ -239,7 +239,7 @@ The .box label uses the default myword grammar, but the .box label can be replac
         .foot { border-top: thin solid gray; font-size: small; }
         .box { border:thin solid gray; }
 
-Other blocks may have content with a custom format. For example, the .array label uses a grammar that allows the layout of its content text to represent a table:
+Other blocks may have content with other formats. For example, the .array label uses a grammar that allows the layout of its content text to represent a table:
 
 :div
     .demo
@@ -296,7 +296,7 @@ Paragraph content uses a standard prose grammar by default. The prose grammar de
 .eg
     label[content text...]
 
-The label must start with one or more punctuation characters, optionally followed by alphanumeric characters, for example:
+The label must start with one or more symbols that are not alphanumeric word characters, it may have an optional alphanumeric word suffix, and there can be no white space before the opening bracket, for example:
 
 :div
     .demo
@@ -322,11 +322,11 @@ The details of label definitions are covered later, the point here is that the p
 
 An inline element is a markup structure that starts with a label immediately followed by content text in brackets. The brackets are part of the markup skeleton, they are not part of the content text.
 
-The inline markup element format has some useful properties:
+The inline markup format has some useful properties:
 
 -   An unlimted number of labels are available.
 
--   Labels begin with a punctuation symbol so they stand out well.
+-   Labels begin with a symbol that is not alphanumeric so they stand out well.
 
 -   Any text can be concatenated before or after a markup element.
 
@@ -763,7 +763,7 @@ The MyWord document block structure is defined by this grammar:
 	verse	:= label content
 	content := line (blank sp line)*
 	prose	:= line (nl !sigil sp* !nl line)*
-	label	:= word gap
+	label	:= word offset
 	word    :~ \S+
 	offset  :~ [\n\r]* ([\t]|[ ][ \t]) [ \t]*
 	sp      :~ [ \t]
@@ -781,124 +781,38 @@ The prose grammar follows the same scheme as the block grammar, it delimits the 
     content := paren / square
     paren   := [(] (paren / notp)* [)]
     square  := [\[] (square / nots)* [\]]
-    text    := char (!sigil char)*
-	label	:= sigil word
-	sigil   :~ [^a-zA-Z0-9 \t]+
-	word    :~ [a-zA-Z0-9-]*
+	label	:~ [^\sa-zA-Z0-9]+ [a-zA-Z0-9]*
 	notp    :~ [^()]+
 	nots    :~ [^\[\]]+
-    char    :~ [\s\S]
+    text    :~ [\s\S] [a-zA-Z0-9\s]*
 
 This is a basic default prose grammar. Authors may substitute a different grammar for the content of their prose paragraphs.
 
-For example, an author may prefer to use Markdown notations rather than the default prose grammar, although that is rather limiting.
 
-A better option is to extend the default prose grammar with other shorthand notations. For example, a quote notation like `[*for emphasis*] may be defined if desired. Even without extending the prose grammar an inline element could be defined as: `[*[for emphasis]], which is just as easy to read, and almost as easy to write.
+###  Meta Markup Grammar
 
----  ...
-#terms
+The metaword grammar is for the defintion of labels and transforms.
 
-    myword
+.eg
+   metaword   := (blank / labeldef / typedef / uses / comment / undefined)*
+   labeldef   := word eq labelspec     :: label
+   typedef    := word gritrule         :: type
+   uses       := "@import"  block      :: uses
+   comment    := "//" line             :: nil
+   undefined  := line                  :: undefined
+   blank      := sp nl                 :: nil
+   block      := line insetline*       :: string
+   gritrule   := colon block           :: string
+   labelspec  := tag / word sp* tag?
+   insetline  := nl / sp+ line
+   colon      :~ [ \t]+ :
+   eq         :~ [ \t]+ = \s*
+   tag        :~ [<][^>]*[>]
+   line       :~ [^\\n\\r]*
+   word       :~ \S+
+   sp         :~ [ \t]
+   nl         :~ \r \n? | \n
 
-        The top level document block grammar, prose or verse.
+The `[@import] instruction imports the content of file(s) given a list of their URL(s), and translates the content as `[metaword].
 
-    prose
-
-        The grammar for inline markup in prose.
-
-    text
-
-        The grammar for verbatim text, this will escape any HTML syntax characters.
-
-    metamark
-
-        The grammar used for label defintions, applies to the content text in an & label.
-
-&   #terms = terms <dl class=terms>
-
-    terms :: (content) => {
-            var dl = "";
-            var dd = "";
-            var lines = content.split('\n');
-            for (var i=0; i<lines.length; i++) {
-                var line = lines[i];
-                if (!line.match(/^\s/)) { // no indent
-                    if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; dd = ""; }
-                    dl += "<dt><code>"+line+"</code></dt>";
-                } else { // indented...
-                    dd += line.trim()+'\n';
-                }
-            }
-            return dl + "<dd>" + markit("myword",dd) + "</dd>";
-            }
-
----  ...
-
-Another example. A local link requires a pair of transform functions, one for the reference and another for the target id. The label pair may use a common sigil with different key words, or different sigils with the same key word. For example:
-
-.demo
-    See ~ref[1] for example.
-
-    ###  References
-
-    ~def[1] The first reference ...
-
-    &
-        ~ref = ref_def
-        ~def = def_ref
-
-        ref_def :: (content) => {
-            var key = markit('text', content);
-            return "<a class=ref href='#def-"+key+"'>"+key+"</a>";
-            }
-        def_ref :: (content) => {
-            var key = markit('text', content);
-            return "<b class=def id='def-"+key+"'>"+key+"</b>";
-            }
-
----   ...
-
-There is a small library of built-in transform functions that can be extended with new custom transforms.
-
-The built-in transform functions are defined by corresponding grammar rules.
-
-=   myword
-
-        The top level document block grammar, prose or verse.
-
-=   prose
-
-        The grammar for inline markup in prose.
-
-=   text
-
-        The grammar for verbatim text, this will escape any HTML syntax characters.
-
-=   metamark
-
-        The grammar used for label defintions, applies to the content text in an & label.
-
-&   = = terms <dl>
-
-
----  ...
-###  Notes
-
-+   `   undefined labels, even if they are defined?? e.g. ~title
-+   `   default &entity; -- & &amp; translation? prose option?
-+   `   `[*for emphasis* and *[for emphasi], needs *[]] or some such def.
-
-+   `   should sigils include §¶• etc..?
-+   `   should brackets include {...}, « ... », ... ?
-+   `   Grit rules [(] or '(' issue...
-+   `   should labels be able to end with : or = ?
-
-+   `   block sigil should NOT be $ \ ' "
-+   `   label word starts with a letter, eliminates .5 #8 etc..
-+   `   inline labels COULD allow $ \ ' "
-
-+   `   metamark grammar
-+   `   nested content left nesting (a(b(c))) not (((a)b)c)
-
-+   `   feature compnents? How to pkg style rules with labels...
 

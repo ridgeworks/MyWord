@@ -92,14 +92,16 @@ A more elaborate header may include the header text as an ID to enable HTML link
             "<h3 id='"+markit('text',content)+"'>"+
                 markit('prose',content)+"</h3>"
 
-Style rules can present headers in different ways, and they may use a border line as a horizonal rule to divide sections.
+Style rules can present headers in different ways, for example with a border line to divide sections.
 
-A simple horizontal rule may also be used.
+A simple horizontal rule may also be used:
 
 .demo
-    ---   ..
+    ___  ___
 
-    &  --- = <hr/>
+    &  ___ = <hr/>
+
+An empty element has no content, but a markup label with an empty content block is not seen as an offset label, so some content is needed. The content of an empty label is not presented, it can be used for comments.
 
 
 ###   Prose Elements
@@ -197,7 +199,13 @@ A URL can be translated into an HTML link, which is one of the few HTML elements
         linkURL :: (content) => {
             var url = markit('text', content);
             return "<a href='"+url+"'>"+url+"</a>";
-            }
+          }
+
+&
+    linkURL :: (content) => {
+        var url = markit('text', content);
+        return "<a href='"+url+"'>"+url+"</a>";
+      }
 
 In general custom defined links need to be defined directly:
 
@@ -205,6 +213,38 @@ In general custom defined links need to be defined directly:
     @zen[CSS Zen Garden]
 
     &   @zen = <a href='http://csszengarden.com'>
+
+Internal links can be used for cross references:
+
+.demo
+    See @id[foo] ...
+
+    #id[foo]: All about foo ...
+
+    &
+        @id = linkID
+        #id = isID <b>
+
+        linkID :: (content) => {
+            var id = markit('text', content);
+            return "<a href='#"+id+"'>"+id+"</a>";
+          }
+
+        isID :: (content) => {
+            var id = markit('text', content);
+            return "<span id='"+id+"'>"+id+"</span>";
+          }
+
+&
+    linkID :: (content) => {
+        var id = markit('text', content);
+        return "<a href='#"+id+"'>"+id+"</a>";
+      }
+
+    isID :: (content) => {
+        var id = markit('text', content);
+        return "<span id='"+id+"'>"+id+"</span>";
+      }
 
 
 ###   Images
@@ -259,6 +299,20 @@ The shorthand symbols / can be used for a :pre element, and ` for a :code elemen
         / = text <pre>
         ` = text <code>
 
+Syntax highlighting can be added:
+
+.demo
+    A snippet of Python code:
+
+	.py
+		# this a blob of Python code
+		if x > 42:
+			print 'end of </script>.'
+
+    &   .py = highlight <pre class=py>
+
+The `[.py] label applies the `[highlight] translator to its content, and wraps the result into an HTML `[<pre>] element. The `[highlight] function translates the content text into HTML element for the Python syntax which enables style sheet rules to present the syntax highlighting.
+
 The // label can be used for comments:
 
 .demo
@@ -267,13 +321,9 @@ The // label can be used for comments:
     &  // = <div hidden>
 
 
-###  Syntax Highlighting
-
-
-
 ###   Lists
 
-There are three HTML list tags:
+HTML list tags can be used directly:
 
 .demo
     :ul
@@ -284,19 +334,13 @@ There are three HTML list tags:
         :li  An ordered list item.
         :li  Another list item.
 
-    :dl
-        :dt  A term
-        :dd  Definition of term.
-
 &
     :ul = <ul>
     :li = <li>
     :ol = <ol>
-    :dl = <dl>
-    :dt = <dt>
-    :dd = <dd>
 
-A quick and easy way to write generic lists can be defined with list transform functions:
+A quick and easy way to write lists is provided by defining labels that use a list transform function:
+
 
 .demo
     -   Unordered list item.
@@ -305,40 +349,73 @@ A quick and easy way to write generic lists can be defined with list transform f
     +   Ordered list item.
     +   Another list item.
 
-    =   Term
-        Definition of the term.
-    =   Another Term
-        Definition of another term.
-
     &
         - = list <ul>
         + = list <ol>
-        = = terms <dl>
-
-&
-    - = list <ul>
-    + = list <ol>
-    = = terms <dl>
 
 The `[list] transform groups elements with the same label together as list item elements inside the given HTML list wrapper.
 
-The `[terms] transform is similar, but the first line of each item is wrapped into a term element with the remainder in a definition element.
+
+####  Defintion Lists
+
+The third form of HTML lists is for defintions:
+
+.demo
+    :dl
+        :dt  A Term
+        :dd  The defintion of a term ...
+
+        :dt  Another Term
+        :dd  Another defintion ...
+
+&
+    :dl = <dl>
+    :dt = <dt>
+    :dd = <dd>
+
+A simpler way to write a list of defintions is to use the `[terms] transform that enables the layout of the content text to directly represent terms and their defintions. The defintions are simply indented further than the term.
 
 The `[terms] transform also defines an ID attribute for the term line. This allows links to reference terms:
 
 .demo
-    See @=[Flim] or @=[Flam].
+    See @notes[Flim] or @notes[Flam].
 
     ####  Notes:
 
-    =  Flim
-         A note about flim...
+    .notes
 
-    =  Flam
-         A note about flam...
+        Flim
+
+            A note about flim...
+
+        Flam
+
+            A note about flam...
 
     &
-        @= = linkID
+        @notes = linkID
+        .notes = terms <dl class=notes>
+
+&
+    terms :: (content) => { 
+        var dl = "";
+        var dd = "";
+        var lines = content.split('\n'); 
+        for (var i=0; i<lines.length; i++) { 
+            var line = lines[i];
+            if (!line) continue; 
+            if (!line.match(/^\s/)) { // no indent 
+                if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
+                dd = "";
+                dl += "<dt>" + markit("text",line) + "</dt>";
+            } else { // indented..
+              dd += line.trim()+'\n';
+            } 
+        } 
+        if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
+        return dl; 
+        } 
+
 
 Definition lists can be used like this for a glossary of terms, or a bibliography, or end notes, and so on.
 
