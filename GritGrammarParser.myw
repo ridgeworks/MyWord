@@ -170,7 +170,7 @@ In summary:
 	(x y)* => [[x, y], ...]
 
 
-## PEG And RegExp Rules
+##  PEG And RegExp Rules
 
 To see why we need PEG rules in addition to RegExp rules let's try to match an iterative expression with a RegExp rule. For example, to parse a list of numbers that are added together, such as: "1+2-3+4". We could try this:
 
@@ -616,7 +616,7 @@ The parse trace is turned on by the "true" argument in the parse call. The trace
 An alternative is to trigger a trace report for individual rule(s) by inserting a "$" after the "::" and before the semantic action (without using the trace argument in the parse call). Using a $ before a semantic action is particularly useful for debugging an individual rule and its semantic action.
 
 
-## Appendix: Grit In Grit
+##  Appendix: Grit In Grit
 
 The grammar for the Grit grammar rules can be defined in Grit. The interpretation of the regular expression syntax and the semantic action syntax depends on the host programming language.
 
