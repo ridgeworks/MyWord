@@ -261,19 +261,6 @@ A label for a list item can be defined by a translator that will compose a group
 
 The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
 
-The `[terms] transform generates an HTML definition list. This transform wraps the first line of the content into an HTML `[<dt>] and the remainder into a `[<dd>] element. The `[=] label then wraps the resulting content for a group of term defintions into an outer HTML `[<dl>] defintion list element:
-
-.demo
-    =  Tom
-
-        Thomas ~[the Tank Engine].
-
-    =  Dick
-
-        Richard ~[the Lion Heart].
-
-    &   = = terms <dl>
-
 The `[:math] label is defined here using the `[ascii2mml] function to translate AsciiMath notation into HTML Math ML elements:
 
 .demo
