@@ -24,7 +24,7 @@ The next example uses the standard HTML `[h2] tag for a header, and the HTML `[c
 
 The MyWord markup labels start with a symbol prefix called a sigil (a magic symbol). The sigil enables readers to easily distinguish a first word that is a markup label from a first word that is a normal prose word. The content of a first word markup label is the remainder of the line, plus any lines that are indented under the label line.
 
-In a paragraph of prose the sigil alerts the reader to the start of an inline markkup label, even if it is embedded in a longer word. The brackets clearly delimit the content.
+In a paragraph of prose the sigil alerts the reader to the start of an inline markup label, even if it is embedded in a longer word. The brackets clearly delimit the content.
 
 MyWord does not pre-define the markup labels, authors define their own vocabulary of markup labels. The sigil prefix can be used to indicate the general nature of the label, such as using the colon for HTML tag names. The sigil also enables undefined labels to be detected and flagged in a draft document.
 
@@ -129,7 +129,7 @@ The label for an HTML link element is defined here with a `[@] prefix to indicat
 An image uses the HTML `[<img>] element, and the label has been given a `[!] prefix:
 
 .demo
-	The GO gopher !go[gopher]
+	!go
 
 	&   !go = <img src='Xtras/gopher.png' title='gopher'/>
 
@@ -181,14 +181,44 @@ The `[text] and `[higlight] translators preserve the content text and present it
 
 ##  Content Translation
 
-The ability to define a label that can translate its content enabels an author to use custom notations and  formats.
+A label can be defined to translate its content text. This enabels an author to use custom notations and formats.
 
-For example:
+For example, the source text layout format can be used to directly represent an array of elements in an HTML table. In an array format each line is a table row, and column fields are simply separated by white-space, either tabs or multiple space characters:
 
 .demo
-	It starts on .date[2/3/2013].
+	.array
+        1    One      Line
+        2    Two      Area
+        3    Three    Volume
 
-	&   .date = mdy <b class=date>
+    &  .array = array <table class=array>
+
+:style
+    table.array {border-collapse:collapse;}
+    .array td { border:thin solid gray; padding:2pt 10pt; }
+
+&
+    array := row*                 :: (rows) => this.flatten(rows).join('')
+        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+        item  := (!delim char)+
+        delim :~ %tsep | %nl
+        tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
+        nl    :~ [\n\f]|([\r][\n]?)
+        char  :~ [\s\S]
+
+The label definition specifies that the array transform function is to be applied to the content text. This function translates the array of source text fields into cells in an HTML table element.
+
+The definition of transform functions is discussed in the next section. For the moment let's just assume that transform functions like this are available.
+
+A label can use a transform function to parse any source text syntax.
+
+Here is another example, for a month/day/year date format:
+
+.demo
+	It starts on .mdy[2/3/2013].
+
+	&   .mdy = mdy <b class=date>
 
 &
     mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
@@ -200,30 +230,7 @@ For example:
             'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
             ' ' + d + ', ' + y + '</time>'; }
 
-The content of the .date label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element. How the mdy transform function is defined will be discussed in the next section. For the moment lets just assume that transform functions like this are available.
-
-The content of a label can use any format that has an appropriate transform function. For example, the label for a table can specify that the format of its content text is tab-separated data fields, which are to be translated into cells in an HTML table element, like this:
-
-.demo
-	.tsv
-	    A    B    C
-	    1    2    3
-
-	&  .tsv = tsv <table class=tsv>
-
-The label definition specifies that the tsv transform is to be applied to the content text. The tsv function will translate the tab separated fields into cells in an HTML table element.
-
-If you prefer to write your tables using a format more like some of the extensions to Markdown, then you can define the bar `[|] as a label that will use a `[bartab] translator:
-
-.demo
-	|  Name   | Lunch order  | Spicy  | Owes :
-	   Joan   | saag paneer  | medium | $11
-	   Sally  | vindaloo     | mild   | $14
-	   Erin   | lamb madras  | HOT    | $5
-
-	&   | = bartab <table class=bartab>
-
-The `[bartab] function is very similar to the `[tsv] function but it uses the bar character | as a field separator, and it knows how to translate header line notations that can allign columns.
+The content of the .mdy label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element.
 
 An HTML link element requires a URL as an `[href] attribute value, so defining a label to represent an HTML link requires a transform function:
 
@@ -233,24 +240,6 @@ An HTML link element requires a URL as an `[href] attribute value, so defining a
     &   @ = linkURL
 
 The `[linkURL] transform function generates the required HTML wrapper: `[<a href='http://csszengarden.com'>].
-
-HTML link elements and target id elements can be created by transform functions:
-
-.demo
-    I saw @id[Tom] and @id[Harry] last night.
-
-    #id[Tom]: Thomas Bigfoot.
-
-    #id[Harry]: Harold Higgins
-
-    &
-        @id = idLink
-        #id = idTarget
-
-&
-    idLink :: (ref) => "<a href='#"+ref+"'>"+ref+"</a>"
-    idTarget :: (ref) => "<b id='"+ref+"'>"+ref+"</b>"
-
 
 A label for a list item can be defined by a translator that will compose a group of items into an HTML list:
 
@@ -272,37 +261,6 @@ A label for a list item can be defined by a translator that will compose a group
 
 The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
 
-A list of terms can be translated into an HTML defintion list using the `[terms] transform function. This transform wraps the content into either an HTML `[<dt>] or a `[<dd>] element, according to the indentation. The `[:] label then wraps the resulting content into an outer HTML `[<dl>] defintion list element:
-
-.demo
-    :
-      Tom
-
-        Thomas ~[the Tank Engine].
-
-      Dick
-
-        Richard ~[the Lion Heart].
-
-    &   : = terms <dl>
-
-& terms :: (content) => {
-            var dl = "";
-            var dd = "";
-            var lines = content.split('\n');
-            for (var i=0; i<lines.length; i++) {
-                var line = lines[i];
-                if (!line.match(/^\s/)) { // no indent
-                    if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; dd = ""; }
-                    dl += "<dt>"+line+"</dt>";
-                } else { // indented...
-                    dd += line.trim()+'\n';
-                }
-            }
-            return dl + "<dd>" + markit("myword",dd) + "</dd>";
-            }
-
-
 The `[:math] label is defined here using the `[ascii2mml] function to translate AsciiMath notation into HTML Math ML elements:
 
 .demo
@@ -311,12 +269,15 @@ The `[:math] label is defined here using the `[ascii2mml] function to translate 
 
 	&   :math = ascii2mml <math display=block>
 
-An author may wish to break a document up into parts to be edited as separate files. Separte parts can then be included into the main document body with an `[@include] label:
+An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[@include] label:
 
 .demo
-	@include MyWord.part.txt
+	!include  MyWord.part.txt
 
-    & @include = import <div class='include' style='border:solid thin grey'>
+    &  !include = import <div class='include'>
+
+    :style
+        .include { border:solid thin grey; }
 
 The `[@include] label is defined in the same way as any other label, it uses a transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.txt] file is translated as text using MyWord markup by default.
 
@@ -337,23 +298,6 @@ The `[~greet] markup label can be defined with a `[hello] transform function:
 
 The `[hello] function is defined to simply add a "Hello " prefix to the content text.
 
-Here is the link example we saw earlier, this time showing how the translator functions are defined. These functions generate HTML elements with attribute values that contain the content text:
-
-.demo
-    I saw @id[Tom] and @id[Harry] last night.
-
-    #id[Tom]: Thomas Bigfoot.
-
-    #id[Harry]: Harold Higgins
-
-    &
-        @id = idLink
-        #id = idTarget
-
-        idLink :: (ref) => "<a href='#"+ref+"'>"+ref+"</a>"
-        idTarget :: (ref) => "<b id='"+ref+"'>"+ref+"</b>"
-
-
 The next example defines a `[tempF] translator functions to translate Celsius to Fahrenheit:
 
 .demo
@@ -368,7 +312,7 @@ The next example defines a `[tempF] translator functions to translate Celsius to
 
 The `[.temp] label is defined with a `[tempF] transform function. The `[tempF] transform is defined using the `[:~] symbol which introduces a regular expression rule to match the content text. The `[::] symbol introduces a semantic action that translates the matched text for the HTML presentation. The details do not matter, this example is just to illustrate how new custom markup translators can be defined. The details are explained in a separate document.
 
-The next example defines the `[mdy] transform function for date translation:
+The next example defines the `[mdy] transform function for a month/day/year date translation:
 
 .demo
 	The date was .date[2/3/2013].
