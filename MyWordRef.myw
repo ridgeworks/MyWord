@@ -646,6 +646,8 @@ Here is the same file being read as plain text:
       !include = import <div class=include>
       .txt = text <pre>
 
+&   * = <em>
+
 The `[.myw] label is defined so that files with a `[.myw] suffix are translated as MyWord documents:
 
 .eg
