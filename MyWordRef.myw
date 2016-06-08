@@ -758,17 +758,16 @@ The indentation of lines in the block is not part of the content text, it is par
 The MyWord document block structure is defined by this grammar:
 
 .eg
-	myword	:= (blank / verse / prose)*
-	blank	:= (sp* nl)+
-	verse	:= label content
-	content := line (blank sp line)*
-	prose	:= line (nl !sigil sp* !nl line)*
-	label	:= word offset
-	word    :~ \S+
-	offset  :~ [\n\r]* ([\t]|[ ][ \t]) [ \t]*
-	sp      :~ [ \t]
-	line	:~ [^\n\r]*
-	nl      :~ \n | \r\n?
+	myword	:= (blank / block/ line)*          :: elems
+	block   := label (blank* offset line)+     :: block
+	blank   :~ [ \\t]* (?: \\n | \\r\\n?)      :: blank
+	line    :~ [^\\n\\r]* (?: \\n | \\r\\n?)?  :: line
+	label   :~ (\\S+)                          :: string
+	offset  :~ (\\t | [ ]{2,4})                :: string
+
+The parser identifies block labels that are defined with the `[metamark] transform and evaluates their content first, before it renders the parse tree.
+
+The parser also groups lines into paragraphs.
 
 
 ###  Prose Grammar
