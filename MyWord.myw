@@ -2,14 +2,17 @@
 
 The essence of any markup language is to enables an author to ~[label] pieces of text to explain the intended meaning. In MyWord the authors can define their own markup labels, and embed any kind of markup language or notation. The markup labels can be defined by the author to be easy to understand with minimum distraction for the reader.
 
-MyWord enables the first word in a line to be used as a markup label for a block of text. Inside different blocks of text different notations and markup languages can be used. Blocks of text without a markup label are paragraphs of prose by default. In prose pragraphs markup labels can be applied to text in brackets.
+MyWord enables the first word in a line to be used as a markup label for a block of text. Blocks of text without a markup label are paragraphs of prose by default. In prose pragraphs markup labels can be applied to text in brackets.
 
-Here is an example with a couple of MyWord markup labels. The `[##] symbol is used here to label a header, and the `[~] symbol is used for italics:
+Here is an example with a couple of MyWord markup labels. The `[##] symbol is used here to label a header, and the `[*] symbol is used for emphasis:
 
 .demo
-	##  A Header Line
+  ##  A Header Line
 
-	The ~[Alice In Wonderland] story.
+  The *[Alice In Wonderland] story.
+
+&
+  * = <em>
 
 On the left is the plain text source using MyWord markup, and on the right is an HTML presentation generated from the MyWord markup.
 
@@ -22,11 +25,11 @@ The next example uses the standard HTML `[h2] tag for a header, and the HTML `[c
 
 	The :cite[Alice In Wonderland] story.
 
-The MyWord markup labels start with a symbol prefix called a sigil (a magic symbol). The sigil enables readers to easily distinguish a first word that is a markup label from a first word that is a normal prose word. The content of a first word markup label is the remainder of the line, plus any lines that are indented under the label line.
+In MyWord a block markup label is any first word that is offset by a tab or two spaces from the following text. The content of a block label is the remainder of the line plus any lines that are indented under the label line.
 
-In a paragraph of prose the sigil alerts the reader to the start of an inline markup label, even if it is embedded in a longer word. The brackets clearly delimit the content.
+In a paragraph of prose the brackets delimit the content of an inline label.
 
-MyWord does not pre-define the markup labels, authors define their own vocabulary of markup labels. The sigil prefix can be used to indicate the general nature of the label, such as using the colon for HTML tag names. The sigil also enables undefined labels to be detected and flagged in a draft document.
+MyWord does not pre-define any markup labels, but the MyWord translator is normally packaged with a vocabulary of common labels, known as a lingo. Authors can also define their own markup labels, and any undefined labels will be flagged in the HTML presentation.
 
 
 ##	Label Vocabulary
@@ -51,12 +54,17 @@ Shorthand symbols such can be used for common labels:
 	###  Level 3 Header
 	####    Level 4 Header
 
-	Shorthand symbols: ~(italic), !(bold words), and `(plain text).
+	Shorthand symbols: *(emphasis), **(bold words), and `(plain text).
 
 	Superscript^(above) and subscript_(below).
 
 	>   An HTML blockquote tag presents text that
         is indented from the margin.
+
+&
+    * = <em>
+    ** = <strong>
+    ` = <code>
 
 Shorthand symbols can also be used for HTML lists and links:
 
@@ -87,9 +95,9 @@ Here is a sample of a few of the definitions for labels seen in previous example
         :b = <b>
         :cite = <cite>
 
-        ~ = <i>
-        ! = <b>
-        ` = <code>
+        *  = <em>
+        ** = <strong>
+        `  = <code>
 
 The special & label introduces a block of defintions. Each label is defined with the HTML element that it represent.
 
@@ -100,6 +108,8 @@ Rather than write a block of definitons like this into every document an author 
 
 The `[@import] takes a URL for a file containing definitions of the vocabulary of labels that the author wants to use.
 
+The MyWord translator is normally pre-packaged with a default vocabulary of label definitions (known as a lingo). The author can add custom labels to extend or over-ride this vocabulary.
+
 
 ##	Custom Label Definitions
 
@@ -108,7 +118,7 @@ A shared file of defintions can provide a rich vocabulary of labels, but a docum
 For example the `[.box] label could represent an HTML `[<div class='box'>] element. It is a common convention to use a dot prefix to indicate an HTML class attribute:
 
 .demo
-	.box    A box of ~[prose]...
+	.box    A box of *[prose]...
 
     &   .box = <div class='box'>
 
@@ -126,10 +136,10 @@ The label for an HTML link element is defined here with a `[@] prefix to indicat
 
 	&   @zen = <a href='http://www.csszengarden.com'>
 
-An image uses the HTML `[<img>] element, and the label has been given a `[!] prefix:
+An image uses the HTML `[<img>] element which has no content, the label has been given a `[!] prefix to indicate an image:
 
 .demo
-	!go
+	!go[]
 
 	&   !go = <img src='Xtras/gopher.png' title='gopher'/>
 
@@ -318,9 +328,9 @@ The next example defines the `[mdy] transform function for a month/day/year date
 	The date was .date[2/3/2013].
 
 	&
-	   .date = mdy <span class=date>
+	  .date = mdy <span class=date>
 
-       mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
+      mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
                 var dd = (d.length < 2)? '0'+d : d;
                 var mm = (m.length < 2)? '0'+m : m;
                 var ymd = y+'-'+mm+'-'+dd;
@@ -367,7 +377,7 @@ The `[x-markup.js] script is packaged in a directory with other resources. This 
 
 ##	Conclusion
 
-MyWord has no predefined markup labels (other than the special label used to define a new label). Authors can define a set of labels to suit their language preferences and the needs of their documents. Any MyWord label can be defined to represent any HTML element the author requires.
+MyWord has no predefined markup labels, authors can define a vocabulary of labels to suit their language preferences and the needs of their documents. Any MyWord label can be defined to represent any HTML element the author requires.
 
 MyWord makes it very easy to define new markup labels that may contain any desired data formats or domain specific languages.
 
