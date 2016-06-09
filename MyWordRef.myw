@@ -116,17 +116,17 @@ MyWord uses a very simple indentation scheme:
 
 -   A label must start at the left margin, and content lines are indented.
 
--   An inset of one tab, or 2 to 4 spaces, is deleted from each line of content.
+-   An inset of one tab character, or 2 to 4 space characters, is deleted from each line of content.
 
--   The inset deleted from a line is never more than the inset deleted from an earlier line.
+-   The line with the smallest inset determines the inset that is deleted from every line.
 
-This allows an author to indent content using a tab, or 2, 3, or 4 space characters. The inset deleted from the first line should determine the inset deleted from all subsequent lines.
+This allows an author to indent content using a tab character, or 2, 3, or 4 space characters (for each level of indentation).
+
+The line with the minimum inset will determine the inset that represents one level of indentation, and that inset will be removed for all lines. Each level of indentation should use the same inset (tab or spaces), but only one tab character will be removed regardless of the number of space characters that are removed from space indented lines.
 
 The white-space following the label and the inset of indented lines is all part of a skeleton format that delimits the block, it is not part of the content text.
 
-Deleting the inset shifts the content text left, so the content text now starts at the left margin. Each level of indentation requires either one tab, or 2, 3, or 4 space characters. The same inset should be used for every line in a block.
-
-Each indentation level can only contain nested indentation to its right. It is considered bad practice for later lines in the same block of content to have a smaller inset than earlier lines. If that happens then the smaller inset will be deleted from subsequent lines.
+Deleting the inset shifts the content text left, so the content text now starts at the left margin.
 
 The block structure is parsed breadth first, the content of a nested block is only parsed after the outer levels have been parsed. This is important since the myword block grammar is not necessarily the grammar that will be used for the content of a block. The content grammar is determined by the markup label definition.
 
@@ -629,31 +629,31 @@ Larger MyWord documents can include content from separate files by using an `[im
 For example:
 
 .demo
-    !include  MyWord.part.txt
+    !include  MyWord.part.myw
 
     &  !include = import <div class=include>
 
-The document with URL `[MyWord.part.txt] is translated as a MyWord file by default, and it inherets the lingo of the host document.
+The document with URL `[MyWord.part.myw] is translated as a MyWord file by default, and it inherets the lingo of the host document.
 
-In general a file read by the `[import] transform will be translated according to it's file suffix. The file suffix (including the dot as a prefix sigil) will be treated as a markup label, just as if it was a block label on the content of the file. If the suffix is not defined as a label then the file will be translated as a myword file by default (as in the previous example).
+In general a file read by the `[import] transform will be translated according to it's file suffix. The file suffix (including the dot as a prefix sigil) will be treated as a markup label, just as if it was a block label on the content of the file. If the suffix is not defined as a label then the file will be translated as a myword file by default.
 
 Here is the same file being read as plain text:
 
 .demo
-    !include  MyWord.part.txt
+    !include  MyWord.part.myw
 
     &
       !include = import <div class=include>
-      .txt = text <pre>
+      .myw = text <pre>
 
-&   * = <em>
-
-The `[.myw] label is defined so that files with a `[.myw] suffix are translated as MyWord documents:
+Of course the `[.myw] label is normally defined so that files with a `[.myw] suffix are translated as MyWord documents, and files with a `[.txt] suffix will be read as plain text files:
 
 .eg
-    &   .myw = myword
+    &
+        .myw = myword
+        .txt = text <pre>
 
-The definitions of labels and transform fuunctions can be shared by imported documents, or definitions can be loaded from a separte file using the `[@import] instruction. As we saw in a previous example for AsciiMaths translation.
+Definitions of labels and transform functions can be shared by imported documents, or definitions can be loaded from a separte file using the `[@import] instruction. As we saw in a previous example for AsciiMaths translation.
 
 Third party translators that are available as a JavaScript function can be used too. For example, a document containing Markdown markup can be translated with the `[marked.js] translator. This script defines a `[marked] function:
 

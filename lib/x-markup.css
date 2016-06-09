@@ -18,8 +18,3 @@ table.demo td.A1 {
     padding-left:10pt; padding-right:30pt;
     white-space:pre; font-family:monospace; background:whitesmoke;
 }
-table.demo td.A3 {
-    width:50%; overflow:hidden; vertical-align:top;
-    padding-left:10pt; padding-right:30pt;
-    white-space:pre; font-family:monospace; background:whitesmoke;
-}
