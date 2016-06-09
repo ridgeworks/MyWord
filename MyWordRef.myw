@@ -782,10 +782,10 @@ The prose grammar follows the same scheme as the block grammar, it delimits the 
     content := paren / square
     paren   := [(] (paren / notp)* [)]
     square  := [\[] (square / nots)* [\]]
-	label	:~ [^\sa-zA-Z0-9]+ [a-zA-Z0-9]*
+	label	:~ [^\sa-zA-Z0-9()\[\]]+ [a-zA-Z0-9_-]*
 	notp    :~ [^()]+
 	nots    :~ [^\[\]]+
-    text    :~ [\s\S] [a-zA-Z0-9\s]*
+    text    :~ [\s\S]([^ \(\[]*\s+)* [\sa-zA-Z0-9()\[\]]*
 
 This is a basic default prose grammar. Authors may substitute a different grammar for the content of their prose paragraphs.
 
@@ -805,7 +805,7 @@ The metaword grammar is for the defintion of labels and transforms.
    block      := line insetline*       :: string
    gritrule   := colon block           :: string
    labelspec  := tag / word sp* tag?
-   insetline  := nl / sp+ line
+   insetline  := sp* nl / sp+ line
    colon      :~ [ \t]+ :
    eq         :~ [ \t]+ = \s*
    tag        :~ [<][^>]*[>]
