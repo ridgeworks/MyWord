@@ -188,7 +188,6 @@ The `[.py] label applies the `[highlight] translator to its content, and wraps t
 
 The `[text] and `[higlight] translators preserve the content text and present it verbatim, but other translator functions can transform the content in different ways.
 
-
 ##  Content Translation
 
 A label can be defined to translate its content text. This enabels an author to use custom notations and formats.
@@ -254,20 +253,18 @@ The `[linkURL] transform function generates the required HTML wrapper: `[<a href
 A label for a list item can be defined by a translator that will compose a group of items into an HTML list:
 
 .demo
-	*  First bullet point...
+	-  First bullet point...
 
-	*  Second point...
+	-  Second point...
 
 	  +  First step in the second point.
 	  +  Second step..
 	  +  Third step.
 
-	*  Third point.
+	-  Third point.
 
-	&   * = list <ul>
+	&   - = list <ul>
 	&   + = list <ol>
-
-&   // list :: (content) => markit('_group',content)
 
 The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
 
@@ -374,7 +371,6 @@ In this example the `[MyWord.into.txt] file contains the source text, and that i
 
 The `[x-markup.js] script is packaged in a directory with other resources. This script will automatically load any other resources that it needs from this directory. See the ReadMe document for more specific release information.
 
-
 ##	Conclusion
 
 MyWord has no predefined markup labels, authors can define a vocabulary of labels to suit their language preferences and the needs of their documents. Any MyWord label can be defined to represent any HTML element the author requires.
@@ -386,4 +382,3 @@ MyWord makes it very easy to define new markup labels that may contain any desir
 
     div.nb { font-size: small; border-top: solid thin grey; }
     a.nb { vertical-align:super; font-size: x-small;}
-
