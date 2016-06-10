@@ -268,13 +268,13 @@ A label for a list item can be defined by a translator that will compose a group
 
 The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
 
-The `[:math] label is defined here using the `[ascii2mml] function to translate AsciiMath notation into HTML Math ML elements:
+The `[math:] label can be defined with an `[asciimath] transform function that will translate AsciiMath notation into HTML Math ML elements. This label and transform are defined in a separate file that can be imported and used like this:
 
 .demo
-	:math
+	math:
 		sum_(i=1)^n i^3=((n(n+1))/2)^2
 
-	&   :math = asciimath <math display=block>
+	&   @import pkgs/asciimath.mmk
 
 An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[@include] label:
 

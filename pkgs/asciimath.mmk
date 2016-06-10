@@ -1,5 +1,7 @@
-:math	= asciimath <math display=block>
 
+math:	= asciimath <math display=block>
+
+:math	= asciimath <math display=inline>
 
 asciimath	    := E*							:: (Es) => this.flatten(Es).join('')
 
