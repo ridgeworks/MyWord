@@ -59,11 +59,6 @@
 :var            = <var> 
 :wbr            = <wbr/>  
 
-// maths...
-
-:math	        = asciimath <math display=inline>
-math:	        = asciimath <math display=block>
-
 // imbedding .....
 
 @imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>

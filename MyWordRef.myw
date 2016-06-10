@@ -610,14 +610,13 @@ The `[array] transform translates the contents of each table cell using the `[pr
 
 The array transform can be used with different style rules to present tables to suite the application. Transforms like this can be included as utility functions in the vocabulary of a core lingo that can be bundled together with the MyWord translator.
 
-More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[asciimath] function that translates AsciiMath notation into HTML Math ML elements. The grammar for this transform function is defined in a separate file `[pkgs/asciimath.mmk], which can be used like this:
+More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[asciimath] function that translates AsciiMath notation into HTML Math ML elements. The `[math:] label and the grammar for the `[asciimath] transform function is defined in a separate file `[pkgs/asciimath.mmk], which can be used like this:
 
 .demo
 	:math
 		sum_(i=1)^n i^3=((n(n+1))/2)^2
 
-	&   :math = asciimath <math display=block>
-        @import pkgs/asciimath.mmk
+	&   @import pkgs/asciimath.mmk
 
 
 
