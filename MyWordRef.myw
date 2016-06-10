@@ -57,7 +57,7 @@ A markup label must start at the left margin, and the block may contain any numb
 
 When the markup label is undefined the label and its content text will be shown verbatim in the HTML translation.
 
-If the first word is not an offset label then the block is a paragraph of ~[prose]. A paragraph may contain any number of lines, provided the lines do not start with a offset label, and are not blank or empty.
+If the first word is not an offset label then the block is a paragraph of *[prose]. A paragraph may contain any number of lines, provided the lines do not start with a offset label, and are not blank or empty.
 
 By default the lines of text inside a paragraph of prose flow together in the HTML translation. This is the standard way that HTML presents text in paragraph elements. The prose may contain inline markup labels, but there are none in this first example.
 
@@ -110,7 +110,7 @@ One reason is that traditional grammar specifications for computer languages are
 
 This has lead to a tradition that avoids the use of "significant white-space". That has been compounded by confusion and misuse of tab characters. There has also been passionate discussions on the merits of different styles and pactices for indentation. Some programmers have concluded that the use of significant white-space is bad practice and should be avoided.
 
-This is unfortunate because the use of indentation is a practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. It allows a block of verse to contain any data format, markup, data language, script, or programming language.
+This is unfortunate because the use of indentation is a practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. It allows a block of text to contain any data format, markup, data language, script, or programming language.
 
 MyWord uses a very simple indentation scheme:
 
@@ -280,13 +280,13 @@ The line format can be preserved by using individual line blocks:
 
 :div
     .demo
-        ~  This is the first line,
-        ~  the second line
-        ~  and the third line.
+        .  This is the first line,
+        .  the second line
+        .  and the third line.
 
-    &   ~ = prose <div class=line>
+    &   . = prose <div>
 
-The `[~] label has been defined to represent a line of prose.
+The `[.] label has been defined to represent a line of prose.
 
 
 ###  Inline Elements
@@ -346,14 +346,14 @@ Unlike the content of an indented block the content of brackets is not completel
 
 ##  Label Definitions
 
-The special label & is used to define new labels.
+By convention the label & is used to define new labels.
 
 Simple label defintions only need to specify the HTML tag that a label represents.
 
 .eg
     &   label = <tag atts...>
 
-The translation of the label markup into HTML will wrap the content text into a <tag atts...> wrapper. This is all that is required to define a custom label in terms of any desired HTML.
+The translation of the label markup into HTML will wrap the content text into a `[<tag atts...>] wrapper. This is all that is required to define a custom label in terms of any desired HTML.
 
 A standard lingo can pre-define labels with the same names as standard HTML tag names. Many common HTML tag names are useful without the need for any attribute values.
 
@@ -395,12 +395,13 @@ For example:
 
         &  :mark = <mark style="color:red">
 
-    ~sandbox
+    ~xbox
         Some :mark[other second level] text.
 
     &
         :mark = <mark>
         ~sandbox = <div>
+        ~xbox = <div>
 
 ###  CSS Style
 
@@ -609,14 +610,14 @@ The `[array] transform translates the contents of each table cell using the `[pr
 
 The array transform can be used with different style rules to present tables to suite the application. Transforms like this can be included as utility functions in the vocabulary of a core lingo that can be bundled together with the MyWord translator.
 
-More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[ascii2mml] function that translates AsciiMath notation into HTML Math ML elements. The grammar for this transform function is defined in a separate file `[pkgs/math.mmk], which can be used like this:
+More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[asciimath] function that translates AsciiMath notation into HTML Math ML elements. The grammar for this transform function is defined in a separate file `[pkgs/asciimath.mmk], which can be used like this:
 
 .demo
 	:math
 		sum_(i=1)^n i^3=((n(n+1))/2)^2
 
-	&   :math = ascii2mml <math display=block>
-        @import pkgs/math.mmk
+	&   :math = asciimath <math display=block>
+        @import pkgs/asciimath.mmk
 
 
 
@@ -631,11 +632,11 @@ For example:
 .demo
     !include  MyWord.part.myw
 
-    &  !include = import <div class=include>
+    &  !include = include <div class=include>
 
-The document with URL `[MyWord.part.myw] is translated as a MyWord file by default, and it inherets the lingo of the host document.
+The document with URL `[MyWord.part.myw] is translated as a MyWord file, and it inherets the lingo of the host document.
 
-In general a file read by the `[import] transform will be translated according to it's file suffix. The file suffix (including the dot as a prefix sigil) will be treated as a markup label, just as if it was a block label on the content of the file. If the suffix is not defined as a label then the file will be translated as a myword file by default.
+In general a file read by the `[include] transform will be translated according to it's file suffix. The file suffix (including the dot as a prefix sigil) will be treated as a markup label, just as if it was a block label on the content of the file. If the suffix is not defined as a label then the file will be translated as a myword file by default.
 
 Here is the same file being read as plain text:
 
@@ -643,7 +644,7 @@ Here is the same file being read as plain text:
     !include  MyWord.part.myw
 
     &
-      !include = import <div class=include>
+      !include = include <div class=include>
       .myw = text <pre>
 
 Of course the `[.myw] label is normally defined so that files with a `[.myw] suffix are translated as MyWord documents, and files with a `[.txt] suffix will be read as plain text files:
@@ -653,7 +654,7 @@ Of course the `[.myw] label is normally defined so that files with a `[.myw] suf
         .myw = myword
         .txt = text <pre>
 
-Definitions of labels and transform functions can be shared by imported documents, or definitions can be loaded from a separte file using the `[@import] instruction. As we saw in a previous example for AsciiMaths translation.
+Definitions of labels and transform functions are availbel inside included documents. Other definitions can be loaded from a separte file using the `[@import] instruction. As we saw in a previous example for AsciiMaths translation.
 
 Third party translators that are available as a JavaScript function can be used too. For example, a document containing Markdown markup can be translated with the `[marked.js] translator. This script defines a `[marked] function:
 
@@ -661,7 +662,7 @@ Third party translators that are available as a JavaScript function can be used 
     !include  example.md
 
     &
-      !include = import <div class=example>
+      !include = include <div class=example>
       @import 3rdparty/marked.js
       .md = marked <div class=md>
 
@@ -749,7 +750,10 @@ Longevity is not something that can be said for even the most sucessful and popu
 
 ##  Appendix
 
-The MyWord grammars are specified using Grit grammar rules, the details for this can be found in @grit[The Grit Grammar Language].
+The MyWord grammars are specified using Grit grammar language, the details for this can be found in @grit[The Grit Grammar Parser].
+
+&   @grit = <a href='GritGrammarParser.html'>
+
 
 ###  Block Grammar
 
@@ -799,9 +803,9 @@ The metaword grammar is for the defintion of labels and transforms.
    labeldef   := word eq labelspec     :: label
    typedef    := word gritrule         :: type
    uses       := "@import"  block      :: uses
-   comment    := "//" line             :: nil
-   undefined  := line                  :: undefined
-   blank      := sp nl                 :: nil
+   comment    := "//" line nl?         :: nil
+   undefined  := sp* word line         :: undefined
+   blank      := sp* nl                :: nil
    block      := line insetline*       :: string
    gritrule   := colon block           :: string
    labelspec  := tag / word sp* tag?

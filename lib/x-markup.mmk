@@ -4,7 +4,7 @@
 // definitions...
 
 &           = metamark
-@include    = import  
+@include    = include
 
 // file type transforms..
 
@@ -30,14 +30,14 @@
 :div            = <div>
 :em             = <em> 
 :footer         = <footer>
-:h1             = <h1>
-:h2             = <h2> 
-:h3             = <h3> 
-:h4             = <h4> 
-:h5             = <h5> 
-:h6             = <h6> 
+:h1             = prose <h1>
+:h2             = prose <h2> 
+:h3             = prose <h3> 
+:h4             = prose <h4> 
+:h5             = prose <h5> 
+:h6             = prose <h6> 
 :header         = <header>
-:hr             = <hr> 
+:hr             = <hr/> 
 :i              = <i> 
 :ins            = <ins>
 :kbd            = text <kbd>
@@ -59,18 +59,23 @@
 :var            = <var> 
 :wbr            = <wbr/>  
 
+// maths...
+
+:math	        = asciimath <math display=inline>
+math:	        = asciimath <math display=block>
+
 // imbedding .....
 
 @imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
 
 // common light-weight markup.....
 
-#       = <h1>
-##      = <h2> 
-###     = <h3> 
-####    = <h4> 
-#####   = <h5>
-######  = <h6>
+#       = prose <h1>
+##      = prose <h2> 
+###     = prose <h3> 
+####    = prose <h4> 
+#####   = prose <h5>
+######  = prose <h6>
 *       = <em>
 **      = <strong>  
 >       = <blockquote>
