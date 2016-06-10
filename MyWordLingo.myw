@@ -139,7 +139,7 @@ Symbols similar to Markdown can be defined as labels too:
         * = <em>
         ** = <strong>
 
-Of course there is no reason why these labels could not be defined to be italics and bold instead.
+Of course there is no reason why these labels could not be defined to be italics and bold instead. The * is also a good choice for a bullet point, but to avoid ambiguity it will not be used for that purpose here, a dash - will be used for bullet point lists.
 
 The bracket notation avoids many of the complications that occur in the Markdown quote style notations.
 
