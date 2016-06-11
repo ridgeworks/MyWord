@@ -4,7 +4,7 @@
 // definitions...
 
 &           = metamark
-!include    = include
+@include    = include
 
 // file type transforms..
 
@@ -72,7 +72,7 @@
 
 // imbedding .....
 
-!imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
+@imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
 
 // common light-weight markup.....
 
@@ -125,9 +125,8 @@ isID :: (content) => {
  
 
 // dl terms definition lists...
-.
 
-terms = terms <dl class=terms>
+.terms = terms <dl class=terms>
 
 terms :: (content) => {
     var dl = "";
