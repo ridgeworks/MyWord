@@ -25,6 +25,9 @@
 :button         = <button> 
 :cite           = <cite>
 :code           = text <code> 
+:dl             = myword <dl>
+:dd             = myword <dd>
+:dt             = text <dt>
 :del            = <del>
 :dfn            = <dfn>
 :div            = myword <div>
@@ -64,7 +67,8 @@
 :u              = <u>
 :ul             = myword <ul>
 :var            = <var> 
-:wbr            = <wbr/>  
+:wbr            = <wbr/>
+
 
 // imbedding .....
 
@@ -79,7 +83,7 @@
 #####   = <h5>
 ######  = <h6>
 *       = <em>
-**      = <strong>  
+**      = <strong>
 >       = myword <blockquote>
 ---     = <hr/>
 -       = list <ul>
@@ -90,7 +94,7 @@
 ~~      = <s>
 ^       = <sup>
 _       = <sub>
-/       = text <pre>  
+/       = text <pre>
 //      = <span hidden>
 ?       = <mark>
 
@@ -107,7 +111,7 @@ imgURL :: (content) =>   "<img src='"+content+"'/>"
 // id links...
 
 @id = linkID 
-#id = isID <b>  
+#id = isID <b>
 
 linkID :: (content) => {
     var id = markit('text', content);
@@ -117,9 +121,11 @@ linkID :: (content) => {
 isID :: (content) => {
     var id = markit('text', content); 
     return "<span id='"+id+"'>"+id+"</span>";
-    }   
+    }
+ 
 
-// dl terms definition lists...  .
+// dl terms definition lists...
+.
 
 terms = terms <dl class=terms>
 
@@ -127,10 +133,10 @@ terms :: (content) => {
     var dl = "";
     var dd = "";
     var lines = content.split('\n');
-    for (var i=0; i<lines.length; i++) {  
+    for (var i=0; i<lines.length; i++) {
         var line = lines[i];
         if (!line) continue;
-            if (!line.match(/^\s/)) { // no indent  
+            if (!line.match(/^\s/)) { // no indent
             if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
             dd = "";
             dl += "<dt>" + markit("text",line) + "</dt>";
@@ -142,20 +148,20 @@ terms :: (content) => {
     return dl;
     }
 
-// table array...  .
+// table array...
 
-array = array <table class=array>
+.array = array <table class=array>
 
-  array := row*                 :: (rows) => this.flatten(rows).join('')
+array := row*                 :: (rows) => this.flatten(rows).join('')
     row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"] 
     cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"] 
     item  := (!delim char)+
     delim :~ %tsep | %nl 
     tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]* 
     nl    :~ [\n\f]|([\r][\n]?)
-    char  :~ [\s\S]   
+    char  :~ [\s\S] 
 
-// useful document elements ......  .
+// useful document elements ......
 
 .eg     = text <div class='eg'>
 
