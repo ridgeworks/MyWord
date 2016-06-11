@@ -1,6 +1,6 @@
 #    MyWord Markup
 
-The essence of any markup language is to enables an author to ~[label] pieces of text to explain the intended meaning. In MyWord the authors can define their own markup labels, and embed any kind of markup language or notation. The markup labels can be defined by the author to be easy to understand with minimum distraction for the reader.
+The essence of any markup language is to enables an author to *[label] pieces of text to explain the intended meaning. In MyWord the authors can define their own markup labels, and embed any kind of markup language or notation. The markup labels can be defined by the author to be easy to understand with minimum distraction for the reader.
 
 MyWord enables the first word in a line to be used as a markup label for a block of text. Blocks of text without a markup label are paragraphs of prose by default. In prose pragraphs markup labels can be applied to text in brackets.
 
@@ -10,9 +10,6 @@ Here is an example with a couple of MyWord markup labels. The `[##] symbol is us
   ##  A Header Line
 
   The *[Alice In Wonderland] story.
-
-&
-  * = <em>
 
 On the left is the plain text source using MyWord markup, and on the right is an HTML presentation generated from the MyWord markup.
 
@@ -89,7 +86,7 @@ Here is a sample of a few of the definitions for labels seen in previous example
         :h2 = <h2>
         :h3 = <h3>
 
-        > = <blockquote>
+        > = myword <blockquote>
 
         :i = <i>
         :b = <b>
@@ -166,7 +163,7 @@ The previous examples defined MyWord labels to represent different HTML elements
 Sometimes an author may want to quote the content text verbatim, without any translation. An author can do this by defining a label that uses a plain text translation, so that the content can be presented verbatim:
 
 .demo
-	Here is: `kbd[keyboard ~[literal] text].
+	Here is: `kbd[keyboard *[literal] text].
 
 	&   `kbd = text <kbd>
 
@@ -248,7 +245,7 @@ An HTML link element requires a URL as an `[href] attribute value, so defining a
 
     &   @ = linkURL
 
-The `[linkURL] transform function generates the required HTML wrapper: `[<a href='http://csszengarden.com'>].
+The `[linkURL] transform function generates the required HTML wrapper: `[<a href='http://csszengarden.com'>] .
 
 A label for a list item can be defined by a translator that will compose a group of items into an HTML list:
 
@@ -276,7 +273,7 @@ The `[math:] label can be defined with an `[asciimath] transform function that w
 
 	&   @import pkgs/asciimath.mmk
 
-An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[@include] label:
+An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[!include] label:
 
 .demo
 	!include  MyWord.part.myw
@@ -286,7 +283,7 @@ An author may wish to break a document up into parts to be edited as separate fi
     :style
         .include { border:solid thin grey; }
 
-The `[@include] label is defined in the same way as any other label, it uses a transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.myw] file is translated as text with MyWord markup.
+The `[!include] label is defined in the same way as any other label, it uses the `[include] transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.myw] file is translated as text with MyWord markup.
 
 
 ##  Translator Functions
