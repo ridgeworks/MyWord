@@ -630,9 +630,9 @@ Larger MyWord documents can include content from separate files by using an `[in
 For example:
 
 .demo
-    !include  MyWord.part.myw
+    @include  MyWord.part.myw
 
-    &  !include = include <div class=include>
+    &  @include = include <div class=include>
 
 The document with URL `[MyWord.part.myw] is translated as a MyWord file, and it inherets the lingo of the host document.
 
@@ -641,10 +641,10 @@ In general a file read by the `[include] transform will be translated according 
 Here is the same file being read as plain text:
 
 .demo
-    !include  MyWord.part.myw
+    @include  MyWord.part.myw
 
     &
-      !include = include <div class=include>
+      @include = include <div class=include>
       .myw = text <pre>
 
 Of course the `[.myw] label is normally defined so that files with a `[.myw] suffix are translated as MyWord documents, and files with a `[.txt] suffix will be read as plain text files:
@@ -659,10 +659,10 @@ Definitions of labels and transform functions are availbel inside included docum
 Third party translators that are available as a JavaScript function can be used too. For example, a document containing Markdown markup can be translated with the `[marked.js] translator. This script defines a `[marked] function:
 
 .demo
-    !include  example.md
+    @include  example.md
 
     &
-      !include = include <div class=example>
+      @include = include <div class=example>
       @import 3rdparty/marked.js
       .md = marked <div class=md>
 

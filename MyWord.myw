@@ -273,17 +273,17 @@ The `[math:] label can be defined with an `[asciimath] transform function that w
 
 	&   @import pkgs/asciimath.mmk
 
-An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[!include] label:
+An author may wish to break a document up into parts to be edited as separate files. Separate parts can then be included into the main document body with an `[@include] label:
 
 .demo
-	!include  MyWord.part.myw
+	@include  MyWord.part.myw
 
-    &  !include = include <div class='include'>
+    &  @include = include <div class='include'>
 
     :style
         .include { border:solid thin grey; }
 
-The `[!include] label is defined in the same way as any other label, it uses the `[include] transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.myw] file is translated as text with MyWord markup.
+The `[@include] label is defined in the same way as any other label, it uses the `[include] transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.myw] file is translated as text with MyWord markup.
 
 
 ##  Translator Functions

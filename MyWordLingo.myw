@@ -512,7 +512,7 @@ MyWord will escape any HTML syntax characters so that the source text is present
 
 ##  Rich Documents
 
-/
+The lingo for simple documents can be extended by importing packages for Math/
     Maths
 
     TOC
