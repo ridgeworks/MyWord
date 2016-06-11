@@ -139,7 +139,7 @@ Symbols similar to Markdown can be defined as labels too:
         * = <em>
         ** = <strong>
 
-Of course there is no reason why these labels could not be defined to be italics and bold instead.
+Of course there is no reason why these labels could not be defined to be italics and bold instead. The * is also a good choice for a bullet point, but to avoid ambiguity it will not be used for that purpose here, a dash - will be used for bullet point list items.
 
 The bracket notation avoids many of the complications that occur in the Markdown quote style notations.
 
@@ -171,7 +171,7 @@ Other prose elements:
         //  and more...
 
     &
-        > = <blockquote>
+        > = myword <blockquote>
         ~ = <u>
         ^ = <sup>
         _ = <sub>
@@ -335,9 +335,9 @@ HTML list tags can be used directly:
         :li  Another list item.
 
 &
-    :ul = <ul>
-    :li = <li>
-    :ol = <ol>
+    :ul = myword <ul>
+    :li = myword <li>
+    :ol = myword <ol>
 
 A quick and easy way to write lists is provided by defining labels that use a list transform function:
 
@@ -369,9 +369,9 @@ The third form of HTML lists is for defintions:
         :dd  Another defintion ...
 
 &
-    :dl = <dl>
-    :dt = <dt>
-    :dd = <dd>
+    :dl = myword <dl>
+    :dt = text <dt>
+    :dd = myword <dd>
 
 A simpler way to write a list of defintions is to use the `[terms] transform that enables the layout of the content text to directly represent terms and their defintions. The defintions are simply indented further than the term.
 
@@ -444,10 +444,10 @@ Tables can be written using standard HTML table elements. This provides full fle
             :td  volume
 
 &
-    :table = <table>
-    :tr = <tr>
-    :th = <th>
-    :td = <td>
+    :table = myword <table>
+    :tr = myword <tr>
+    :th = myword <th>
+    :td = myword <td>
 
 :style
     th, td { padding-left: 10pt; }

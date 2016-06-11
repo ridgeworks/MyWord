@@ -1,7 +1,9 @@
-:math	= ascii2mml <math display=block>
 
+math:	= asciimath <math display=block>
 
-ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
+:math	= asciimath <math display=inline>
+
+asciimath	    := E*							:: (Es) => this.flatten(Es).join('')
 
     E 			:= ws (fraction / Sexp) ws		:: (ws1,exp,ws2) => [ws1,exp[0],ws2]
 
@@ -9,7 +11,7 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
 
     fraction 	:= Sbr slash 					:: (s,slashOp) => ["<",slashOp[0],">",s,slashOp[1],"</",slashOp[0],">"]
 
-    Sexp		:= S (slash / subsuper)			:: (s,ops) => 
+    Sexp		:= S (slash / subsuper)			:: (s,ops) =>
                                                     (ops[0].length==0) ? s :
                                                     ["<",ops[0][0],">",s,ops[0].slice(1),"</",ops[0][0],">"]
 
@@ -28,20 +30,20 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
     superscript	:= superOp Spr					:: (_,s) => ["msup",s]
     superOp 	:~ \^ (?! \^)
 
-    Spr 		:= ws (Sbr / S)?				:: (_,s) => s					
+    Spr 		:= ws (Sbr / S)?				:: (_,s) => s
 
     Sbr 		:= l Enoright* r				:: (_l,exp,_r) => ["<mrow>",exp,"</mrow>"]
 
     l			:= l_ang / l_hidd / l_other
     l_ang		:~ [(]: | <<					:: () => "<mo>&#x2329;</mo>"
     l_hidd		:~ {:							:: () => []
-    l_other		:~ [([{] | [|] (?! -- | == | __ | ~)	
+    l_other		:~ [([{] | [|] (?! -- | == | __ | ~)
                                                 :: (l) => ["<mo>",l,"</mo>"]
 
     r			:= r_ang / r_hidd / r_other
     r_ang		:~ :[)] | >>					:: (_) => "<mo>&#x232A;</mo>"
     r_hidd		:~ :}							:: (_) => []
-    r_other		:~ [)\]}] | [|] (?! -- | == | __ | ~)	
+    r_other		:~ [)\]}] | [|] (?! -- | == | __ | ~)
                                                 :: (r) => ["<mo>",r,"</mo>"]
 
 
@@ -50,7 +52,7 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
     linebreak	:~ [\r]? [\n]					:: () => "<mspace linebreak='newline'/>"
 
 
-    S 			:=	S_bracketed / 
+    S 			:=	S_bracketed /
                     S_quoted /
                     S_special /
                     S_constant
@@ -61,7 +63,7 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
     matrix		:= ws mxcontent ws				:: (_,content) => ["<mtable>",content,"</mtable>"]
 
     mxcontent 	:= (&'(' mxrowrnd (ws ',' mxrowrnd)+) /
-                   (&'[' mxrowsqr (ws ',' mxrowsqr)+) 
+                   (&'[' mxrowsqr (ws ',' mxrowsqr)+)
                                                 :: (rowitems) => {				// ([_,row,rows]) => {
                                                     var result=[rowitems[1]]	// [row]
                                                     //rows.forEach(([_ws,_sep,row]) => result.push(row))
@@ -90,22 +92,22 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
     S_quoted	:~ " ([^"]*) " 					:: (_,quoted) => ["<mtext>",quoted,"</mtext>"]
 
 
-    S_special	:= grdspecial (	
-                    S_fenced / 
-                    S_frac / 
-                    S_root / 
+    S_special	:= grdspecial (
+                    S_fenced /
+                    S_frac /
+                    S_root /
                     S_stackrel /
                     S_underset /
-                    S_sqrt / 
-                    S_text / 
-                    S_font / 
-                    S_accover / 
+                    S_sqrt /
+                    S_text /
+                    S_font /
+                    S_accover /
                     S_accunder /
-                    S_underover)				:: (_,sp) => sp 
+                    S_underover)				:: (_,sp) => sp
     grdspecial	:~ (?= [a-zL^])
 
 
-    S_fenced	:= abs / norm / floor / ceil	
+    S_fenced	:= abs / norm / floor / ceil
                                                 :: (fenced) => ["<mrow>",fenced,"</mrow>"]
     abs			:= 'abs' Spr					:: (_,s) => ["<mo>|</mo>",s,"<mo>|</mo>"]
     norm		:= 'norm' Spr					:: (_,s) => ["<mo>&#x2225;</mo>",s,"<mo>&#x2225;</mo>"]
@@ -137,7 +139,7 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
 
 
     S_font		:= font Spr						:: (font,s) => ["<mstyle mathvariant='",font,"'>",s,"</mstyle>"]
-    font		:~ b{2,3} | sf | cc | tt | fr	:: (style) => 
+    font		:~ b{2,3} | sf | cc | tt | fr	:: (style) =>
                                                     {return {"bbb":"double-struck",
                                                              "bb":"bold",
                                                              "sf":"sans-serif",
@@ -167,9 +169,9 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
                                                              "</mo>"]
 
 
-    S_underover := underover subscript? superscript? 
+    S_underover := underover subscript? superscript?
                                                 :: (op,sb,sp) =>
-                                                    ((sb.length>0) && (sp.length>0)) ? 
+                                                    ((sb.length>0) && (sp.length>0)) ?
                                                             ["<munderover>",op,sb[0][1],sp[0][1],"</munderover>"] :
                                                     ((sb.length>0) ? ["<munder>",op,sb[0][1],"</munder>"] :
                                                     ((sp.length>0) ? ["<mover>",op,sp[0][1],"</mover>"] :
@@ -344,8 +346,8 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
                                                     }
 
     greekSyms	:~ Delta | Gamma | Lambda | Omega | Phi | Pi | Sigma | Theta | Xi
-    binarySyms	:~ [*]{1,3} | / (?: /|[_][\\]?) | \\ [\\ ] | ! (?: =|in) | : (?: =|[.]) | lt=? | <=>? | gt=? | 
-                    > (?: -=?|=) | int? | su[bp]e? | ~[=~|] | prop | setminus | xx | divide | - (?: :|<=?|=|lt) | @ | 
+    binarySyms	:~ [*]{1,3} | / (?: /|[_][\\]?) | \\ [\\ ] | ! (?: =|in) | : (?: =|[.]) | lt=? | <=>? | gt=? |
+                    > (?: -=?|=) | int? | su[bp]e? | ~[=~|] | prop | setminus | xx | divide | - (?: :|<=?|=|lt) | @ |
                     o[+x.] | \^\^ | vv | nn | uu | and | or | not | if | =>? | AA | EE | TT | _[|]_ | [|] (?: --|==|__|~)
     miscSyms	:~ oint | del | grad | [+]- | O/ | oo | aleph | [.]{3} | ' | q?quad | [cvd]dots | diamond |
                     square | __[|] | CC | NN | QQ | RR | ZZ
@@ -356,7 +358,7 @@ ascii2mml	    := E*							:: (Es) => this.flatten(Es).join('')
 
     derivative	:~ dx | dy | dz | dt			:: (df) => ["<mrow><mi>d</mi><mi>",df.substring(1),"</mi></mrow>"]
 
-    letter 		:~ [A-Za-z]						:: (letter) => ["<mi>",letter,"</mi>"] 
+    letter 		:~ [A-Za-z]						:: (letter) => ["<mi>",letter,"</mi>"]
 
     escape 		:~ [\\]	  						:: () => []
 
