@@ -138,7 +138,7 @@ An image uses the HTML `[<img>] element which has no content, the label has been
 .demo
 	!go[]
 
-	&   !go = <img src='Xtras/gopher.png' title='gopher'/>
+	&   !go = <img src='images/gopher.png' title='gopher'/>
 
 A footnote or end-note can be created from HTML components like this:
 

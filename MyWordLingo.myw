@@ -252,7 +252,7 @@ Internal links can be used for cross references:
 An image URL label ! can be defined similarly:
 
 .demo
-    ![gopher.png]
+    ![images/gopher.png]
 
     &   ! = image
         image :: (content) =>
@@ -263,7 +263,7 @@ Images can also be defined directly:
 .demo
     !go[]
 
-    &   !go = <img src='gopher.png' title='GO gopher'/>
+    &   !go = <img src='images/gopher.png' title='GO gopher'/>
 
 
 ###   Plain Text
