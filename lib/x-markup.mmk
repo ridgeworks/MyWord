@@ -72,7 +72,7 @@
 
 // imbedding .....
 
-@imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
+!imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
 
 // common light-weight markup.....
 
