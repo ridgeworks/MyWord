@@ -4,7 +4,7 @@
 // definitions...
 
 &           = metamark
-@include    = include
+!include    = include
 
 // file type transforms..
 
