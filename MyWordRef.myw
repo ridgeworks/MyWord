@@ -85,7 +85,7 @@ Markup labels can be defined to represent any HTML elements, for example:
 
     &   title: = <h2>
         author: = <h3>
-        foot: = <div class=foot>
+        foot: = myword <div class=foot>
 
     :style
         h2, h3 { text-align: center; }
@@ -180,8 +180,8 @@ This allows myword documents to be nested:
 
     &   title: = <h2>
         author: = <h3>
-        foot: = <div class=foot>
-        .box = <div class=box>
+        foot: = myword <div class=foot>
+        .box = myword <div class=box>
 
     :style
         h2, h3 { text-align: center; }
@@ -231,7 +231,7 @@ The .box label uses the default myword grammar, but the .box label can be replac
 
     &   title: = <h2>
         author: = <h3>
-        foot: = <div class=foot>
+        foot: = myword <div class=foot>
         .viz = text <pre class=box>
 
     :style
@@ -395,13 +395,12 @@ For example:
 
         &  :mark = <mark style="color:red">
 
-    ~xbox
+    ~sandbox
         Some :mark[other second level] text.
 
     &
         :mark = <mark>
-        ~sandbox = <div>
-        ~xbox = <div>
+        ~sandbox = myword <div>
 
 ###  CSS Style
 
@@ -428,7 +427,7 @@ For example:
                 margin:10pt; padding-left:5pt; }
 
     &
-        .box = <div class=box>
+        .box = myword <div class=box>
         :style = text <style scoped>
 
 The `[:style] rule itself is defined in this example for completness. It would be more typical to use a label provided by a document wide lingo that pre-defined labels for all the standard HTML tag names.
@@ -476,7 +475,7 @@ The MyWord markup language has no pre-defined labels other than the special & la
 
 ##  Content Translators
 
-When a label is defined simply as an HTML element, then the content text will be translated with the same translation as the outer text that contains this label. In other words if the document is being processed using the myword grammar then the content of a block label will also be processed using the myword grammar. If the label is an inline element in prose, then the prose grammar will be the default grmmar for the content.
+When a label is defined simply as an HTML element, then the content text will be translated as prose by default.
 
 The full form of label defintion can specify an explicit transform function in addition to an HTML tag wrapper.
 
@@ -499,16 +498,18 @@ For example:
             .bag { border:thin solid red; padding:2pt; }
 
         &
-            .box = <div class=box>
+            .box = myword <div class=box>
             .cap = prose <h2>
             .bag = text <span class=bag>
             :em  = <em>
             :style = text <style scoped>
 
 
-The defintion for a block label uses the "myword" transform by default (e.g. the .box label).
+The definition for a block label with block content should use the "myword" transform (e.g. the .box label).
 
-The defintion of an inline label uses the "prose" transform by default (e.g. the :em label).
+If the block label only contains inline elements the the "prose" transform should be used (e.g. the .cap label).
+
+The defintion of a label as an HTML tag will use the "prose" transform by default (e.g. the :em label).
 
 The standard "text" transform translates the content verbatim (e.g. the .bag and :style labels).
 
@@ -517,7 +518,7 @@ If the transform function generates HTML content that does not require an outer 
 
 ##  Transform Functions
 
-Transform functions can be defined using the special & label.
+Transform function can also be defined in much the same way as label definitions.
 
 A basic transform function is simply a JavaScript function that takes the markup element's content text and returns the translated HTML (as a string, anything else is an error):
 
@@ -526,7 +527,7 @@ A basic transform function is simply a JavaScript function that takes the markup
 
 The transform is defined with the standard JavaScript ES6 () => ... arrow syntax for a function definition. This is translated into ES5 JavaScript to allow a little backward compatibility with browsers using ES5 that do not support the ES6 arrow functions syntax.
 
-For example, the transform function to generate an HTML link for a URL:
+For example, the @ label can be defined with a transform function to generate an HTML link for a URL:
 
 .demo
     See the @[http://csszengarden.com] web site.
@@ -539,7 +540,7 @@ For example, the transform function to generate an HTML link for a URL:
             return "<a href='"+url+"'>"+url+"</a>";
             }
 
-The `[@url] label is defined to use the `[linkURL] transform function. This function takes the content text as a URL web address and generates an HTML link to target that URL.
+The `[@] label is defined with the `[linkURL] transform function. This function takes the content text as a URL web address and generates an HTML link to target that URL.
 
 The special `[markit] function translates the content as `[text], which will escape any HTML syntax characters in the content text. The `[markit] function can apply any transform function to a text string.
 
@@ -610,10 +611,10 @@ The `[array] transform translates the contents of each table cell using the `[pr
 
 The array transform can be used with different style rules to present tables to suite the application. Transforms like this can be included as utility functions in the vocabulary of a core lingo that can be bundled together with the MyWord translator.
 
-More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[:math] label can be defined with the `[asciimath] function that translates AsciiMath notation into HTML Math ML elements. The `[math:] label and the grammar for the `[asciimath] transform function is defined in a separate file `[pkgs/asciimath.mmk], which can be used like this:
+More complicated transform functions, such as the translation of AsciiMath, can also defined with grammar rules. The `[math:] label can be defined with the `[asciimath] function that translates AsciiMath notation into HTML Math ML elements. The `[math:] label and the grammar for the `[asciimath] transform function is defined in a separate file `[pkgs/asciimath.mmk], which can be used like this:
 
 .demo
-	:math
+	math:
 		sum_(i=1)^n i^3=((n(n+1))/2)^2
 
 	&   @import pkgs/asciimath.mmk
@@ -624,7 +625,7 @@ More complicated transform functions, such as the translation of AsciiMath, can 
 
 A MyWord document can define all the labels and transform functions that it uses, in other words it can define its own markup lingo. But most authors will employ a standard pre-defined library to provide a core markup language, a common lingo. This lingo can be bundled together with the MyWord translator. Documents can extend this core lingo with their own label and transform definitions.
 
-Larger MyWord documents can include content from separate files by using an `[import] transform to read the content of a given URL. The lingo of the importing document is inhereted by the imported document (i.e. the defintions are shared). Included documents may also include further documents.
+Larger MyWord documents can include content from separate files by using an `[include] transform to read the content of a given URL. The lingo of the importing document is inhereted by the imported document (i.e. the defintions are shared). Included documents may also include further documents.
 
 For example:
 

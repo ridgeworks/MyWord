@@ -11,38 +11,40 @@
 .myw        = myword
 .txt        = text <pre>
 
-// simple standard HTML5 element names
+// simple standard HTML5 element names, inline prose is the default transform
 
 :abbr           = <abbr>
 :address        = <address>
-:article        = <article>
-:aside          = <aside>
+:article        = myword <article>
+:aside          = myword <aside>
 :b              = <b>
 :bdi            = <bdi>
 :bdo            = <b>
-:blockquote     = <blockquote> 
+:blockquote     = myword <blockquote> 
 :br             = <br/> 
 :button         = <button> 
 :cite           = <cite>
 :code           = text <code> 
 :del            = <del>
 :dfn            = <dfn>
-:div            = <div>
+:div            = myword <div>
 :em             = <em> 
-:footer         = <footer>
-:h1             = prose <h1>
-:h2             = prose <h2> 
-:h3             = prose <h3> 
-:h4             = prose <h4> 
-:h5             = prose <h5> 
-:h6             = prose <h6> 
-:header         = <header>
+:footer         = myword <footer>
+:h1             = <h1>
+:h2             = <h2> 
+:h3             = <h3> 
+:h4             = <h4> 
+:h5             = <h5> 
+:h6             = <h6> 
+:header         = myword <header>
 :hr             = <hr/> 
 :i              = <i> 
 :ins            = <ins>
 :kbd            = text <kbd>
+:li             = myword <li>
 :legend         = <legend>
 :mark           = <mark> 
+:ol             = myword <ol>
 :p              = <p> 
 :pre            = text <pre>
 :q              = <q> 
@@ -55,7 +57,12 @@
 :style          = text <style scoped> 
 :sub            = <sub>
 :sup            = <sup> 
+:table          = myword <table>
+:td             = myword <td>
+:th             = myword <th>
+:tr             = myword <tr>
 :u              = <u>
+:ul             = myword <ul>
 :var            = <var> 
 :wbr            = <wbr/>  
 
@@ -65,15 +72,15 @@
 
 // common light-weight markup.....
 
-#       = prose <h1>
-##      = prose <h2> 
-###     = prose <h3> 
-####    = prose <h4> 
-#####   = prose <h5>
-######  = prose <h6>
+#       = <h1>
+##      = <h2> 
+###     = <h3> 
+####    = <h4> 
+#####   = <h5>
+######  = <h6>
 *       = <em>
 **      = <strong>  
->       = <blockquote>
+>       = myword <blockquote>
 ---     = <hr/>
 -       = list <ul>
 +       = list <ol>
