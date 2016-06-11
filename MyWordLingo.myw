@@ -497,7 +497,6 @@ The `[array] transform is defined in the core lingo, so authors may define custo
     .lunch td:nth-child(4)  { text-align:right; }
 
 
-
 ###  Custom HTML
 
 MyWord will escape any HTML syntax characters so that the source text is presented verbatim. However, the author may choose to define an `[:html] label to represent a feature that can present HTML. This `[:html] label will not translate its content text so that any standard HTML annotations will be presented as HTML elements.
@@ -509,17 +508,11 @@ MyWord will escape any HTML syntax characters so that the source text is present
     &   :html = rawText
         rawText :: (txt) => txt
 
+##  Conclusion
 
-##  Rich Documents
+This document outlines features that will cover many simple documents. These features are defined with labels and transform functions that create a core lingo. Authors can change or extend this lingo as they need.
 
-The lingo for simple documents can be extended by importing packages for Math/
-    Maths
-
-    TOC
-
-    Index
-
-    Book or website features, forms, ...
+Other lingos can be defined for particular applications, such as maths notations, and these lingos can be loaded as separate feature packages on top of the core lingo.
 
 
 
