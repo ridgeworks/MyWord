@@ -158,7 +158,7 @@ The `[#nb] label is a block label that is defined with the target ID `[nb]. The 
 
 ##  Plain Text Content
 
-The previous examples defined MyWord labels to represent different HTML elements. By default the content text is translated in the same way, so MyWord markup labels may contain nested labels. Just as the content of an HTML can contain nested HTML.
+The previous examples defined MyWord labels to represent different HTML elements. The content text is usually translated as MyWord markup, so markup labels may contain nested labels. Just as the content of an HTML element can contain nested HTML elements.
 
 Sometimes an author may want to quote the content text verbatim, without any translation. An author can do this with a label that uses a plain text translation, so that the content can be presented verbatim:
 
