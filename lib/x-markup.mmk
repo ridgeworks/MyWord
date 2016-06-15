@@ -5,6 +5,7 @@
 
 &           = metamark
 @include    = include
+@imbed      = imbedURL
 
 // file type transforms..
 
@@ -53,7 +54,6 @@
 :q              = <q> 
 :s              = <s> 
 :samp           = <samp>
-:script         = text <script> 
 :small          = <small>
 :span           = <span>
 :strong         = <strong> 
@@ -68,11 +68,6 @@
 :ul             = myword <ul>
 :var            = <var> 
 :wbr            = <wbr/>
-
-
-// imbedding .....
-
-@imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
 
 // common light-weight markup.....
 
@@ -152,13 +147,20 @@ terms :: (content) => {
 .array = array <table class=array>
 
 array := row*                 :: (rows) => this.flatten(rows).join('')
-    row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"] 
+    row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
     cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"] 
     item  := (!delim char)+
     delim :~ %tsep | %nl 
     tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]* 
     nl    :~ [\n\f]|([\r][\n]?)
     char  :~ [\s\S] 
+
+// iframe for imbed...
+
+imbedURL :: (content) => {
+    var url = markit('text', content);
+    return "<iframe src='"+url+"' scrolling=no style='overflow:hidden; border:none; width:100%;'></iframe>";
+    }
 
 // useful document elements ......
 
@@ -167,7 +169,7 @@ array := row*                 :: (rows) => this.flatten(rows).join('')
 .demo   = demo <table class='demo'>
 
 demo    :: (content) => "<tr><td class='A1'>" + 
-                content.replace(/</g,'&lt;') + 
+                markit('text',content) + 
                 "</td><td class='B1'>" + 
                 markit('myword',content) + 
                 "</td></tr>"
