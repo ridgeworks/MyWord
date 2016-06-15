@@ -467,7 +467,7 @@ A simple array format can be used to directly represent a small table. In an arr
     .array td { border:thin solid gray; padding:2pt 10pt; }
 &
     array := row*                 :: (rows) => this.flatten(rows).join('')
-        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
         cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
         item  := (!delim char)+
         delim :~ %tsep | %nl
@@ -480,10 +480,10 @@ The `[array] transform is defined in the core lingo, so authors may define custo
 .demo
 
   .lunch
-        Name    Lunch order   Spicy     Owes
-        Joan    saag paneer   medium    $11
-        Sally   vindaloo      .g(mild)  $14
-        Erin    lamb madras   .r(hot)   $5
+    Name    Lunch order   Spicy     Owes
+    Joan    saag paneer   medium    $11
+    Sally   vindaloo      .g(mild)  $14
+    Erin    lamb madras   .r(hot)   $5
 
   &
     .lunch = array <table class=lunch>
@@ -496,7 +496,7 @@ The `[array] transform is defined in the core lingo, so authors may define custo
     .lunch tr:nth-child(1)  { font-weight:bold; background:whitesmoke; }
     .lunch td:nth-child(4)  { text-align:right; }
 
-
+font-weight:bold; background:whitesmoke;
 
 ###  Custom HTML
 

@@ -1,6 +1,6 @@
 #    MyWord Markup
 
-The essence of any markup language is to enables an author to *[label] pieces of text to explain the intended meaning. In MyWord the authors can define their own markup labels, and embed any kind of markup language or notation. The markup labels can be defined by the author to be easy to understand with minimum distraction for the reader.
+The essence of any markup language is to enable an author to *[label] pieces of text to explain the intended meaning. In MyWord the authors can define their own markup labels, and embed any kind of markup language or notation. The markup labels can be defined by the author to be easy to understand with minimum distraction for the reader.
 
 MyWord enables the first word in a line to be used as a markup label for a block of text. Blocks of text without a markup label are paragraphs of prose by default. In prose pragraphs markup labels can be applied to text in brackets.
 
@@ -13,7 +13,7 @@ Here is an example with a couple of MyWord markup labels. The `[##] symbol is us
 
 On the left is the plain text source using MyWord markup, and on the right is an HTML presentation generated from the MyWord markup.
 
-Symbolic labels are neat and simple, but they are only practical for a small vocabulary. For a larger vocabulary key words labels are a more effective way to express the intended meaning. An author may choose to use the tag words that are defined in the HTML standard as part of their vocabulary of labels
+Symbolic labels are neat and simple, but they are only practical for a small vocabulary. For a larger vocabulary key words labels are a more effective way to express the intended meaning. An author may choose to use tag words that are defined in the HTML standard as part of their vocabulary of labels.
 
 The next example uses the standard HTML `[h2] tag for a header, and the HTML `[cite] tag for a citation. A colon prefix is used by convention to indicate that these labels are HTML tag names:
 
@@ -75,7 +75,7 @@ Shorthand symbols can also be used for HTML lists and links:
 	A web address URL link: @[http://csszengarden.com].
 
 
-##  Label Defintitions
+##  Label Definitions
 
 Markup labels are not pre-defined by the MyWord translator, any label can be defined to represent any HTML element.
 
@@ -86,8 +86,6 @@ Here is a sample of a few of the definitions for labels seen in previous example
         :h2 = <h2>
         :h3 = <h3>
 
-        > = myword <blockquote>
-
         :i = <i>
         :b = <b>
         :cite = <cite>
@@ -96,9 +94,11 @@ Here is a sample of a few of the definitions for labels seen in previous example
         ** = <strong>
         `  = <code>
 
-The special & label introduces a block of defintions. Each label is defined with the HTML element that it represent.
+        > = myword <blockquote>
 
-Rather than write a block of definitons like this into every document an author can put them into a file that can be shared across many documents. A file of defintions can be used like this:
+The special & label introduces a block of definitions. Each label is defined with the HTML element that it represent.
+
+Rather than write a block of definitions like this into every document an author can put them into a file that can be shared across many documents. A file of definitions can be used like this:
 
 .eg
     &   @import  myWord.definitions.txt
@@ -110,7 +110,7 @@ The MyWord translator is normally pre-packaged with a default vocabulary of labe
 
 ##	Custom Label Definitions
 
-A shared file of defintions can provide a rich vocabulary of labels, but a document can also define its own custom labels.
+A shared file of definitions can provide a rich vocabulary of labels, but a document can also define its own custom labels.
 
 For example the `[.box] label could represent an HTML `[<div class='box'>] element. It is a common convention to use a dot prefix to indicate an HTML class attribute:
 
@@ -150,7 +150,7 @@ A footnote or end-note can be created from HTML components like this:
 	    Kelvin: Absolute zero is 0°K ....
 
 	&
-        #nb = <div class='nb' id='nb'>
+        #nb = myword <div class='nb' id='nb'>
 	    ^nb  = <a class='nb' href='#nb'>
 
 The `[#nb] label is a block label that is defined with the target ID `[nb]. The `[^nb] label is defined as an HTML link to the target. The style sheet has presented this example in the form of a footnote.
@@ -160,7 +160,7 @@ The `[#nb] label is a block label that is defined with the target ID `[nb]. The 
 
 The previous examples defined MyWord labels to represent different HTML elements. By default the content text is translated in the same way, so MyWord markup labels may contain nested labels. Just as the content of an HTML can contain nested HTML.
 
-Sometimes an author may want to quote the content text verbatim, without any translation. An author can do this by defining a label that uses a plain text translation, so that the content can be presented verbatim:
+Sometimes an author may want to quote the content text verbatim, without any translation. An author can do this with a label that uses a plain text translation, so that the content can be presented verbatim:
 
 .demo
 	Here is: `kbd[keyboard *[literal] text].
@@ -175,7 +175,7 @@ Plain text translated verbatim may be presented with syntax higlighting:
     A snippet of Python code:
 
 	.py
-		# this a blob of Python code
+		# this is a blob of Python code
 		if x > 42:
 			print 'end of </script>.'
 
@@ -183,11 +183,11 @@ Plain text translated verbatim may be presented with syntax higlighting:
 
 The `[.py] label applies the `[highlight] translator to its content, and wraps the result into an HTML `[<pre>] element. The `[highlight] function translates the content text into HTML element for the Python syntax which enables style sheet rules to present the syntax highlighting.
 
-The `[text] and `[higlight] translators preserve the content text and present it verbatim, but other translator functions can transform the content in different ways.
+The `[text] and `[highlight] translators preserve the content text and present it verbatim, but other translator functions can transform the content in different ways.
 
 ##  Content Translation
 
-A label can be defined to translate its content text. This enabels an author to use custom notations and formats.
+A label can be defined to translate its content text. This enables an author to use custom notations and formats.
 
 For example, the source text layout format can be used to directly represent an array of elements in an HTML table. In an array format each line is a table row, and column fields are simply separated by white-space, either tabs or multiple space characters:
 
@@ -288,7 +288,7 @@ The `[@include] label is defined in the same way as any other label, it uses the
 
 ##  Translator Functions
 
-The previous examples showed how labels can be defined to use traslator functions. The translator functions may be JavaScript code, or they may be defined in MyWord with grammar rules.
+The previous examples showed how labels can be defined to use translator functions. The translator functions may use JavaScript code, or they may be defined in MyWord with grammar rules.
 
 The `[~greet] markup label can be defined with a `[hello] transform function:
 
@@ -347,7 +347,7 @@ A MyWord document can be translated into HTML on a server, or in a browser.
 
 One interesting way to deliver MyWord source text is inside an HTML script element. The `[x-markup.js] script in an HTML page will translate the contents of a `[<script type=text/x-markup.myword>] element into HTML.
 
-The MyWord source text in a `[<script>] element could be a complete MyWord document that defines its own labels. But any MyWord source file can import other MyWord source files and label defintitions. The source text and the label definitons can therefore be divided into separate files in any way the author wants.
+The MyWord source text in a `[<script>] element could be a complete MyWord document that defines its own labels. But any MyWord source file can import other MyWord source files and label definitions. The source text and the label definitions can therefore be divided into separate files in any way the author wants.
 
 In this example the `[MyWord.into.txt] file contains the source text, and that imports the definition files that it needs:
 
