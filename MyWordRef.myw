@@ -14,7 +14,7 @@ In a nutshell:
 
 -   Blocks without a markup label are normal paragraphs of prose.
 
--	Authors can define a vocabulary of labels for their own markup language lingo.
+-	Authors can define a vocabulary of labels for their own markup language.
 
 -	There are no special syntax characters, the text content can be used in any way the author desires.
 
@@ -108,7 +108,7 @@ So why is the use of indentation not common practice?
 
 One reason is that traditional grammar specifications for computer languages are based on the use of context free grammar specifcations. There are good practical reasons for this, but a context free grammar can not properly specify an indentation syntax.
 
-This has lead to a tradition that avoids the use of "significant white-space". That has been compounded by confusion and misuse of tab characters. There has also been passionate discussions on the merits of different styles and pactices for indentation. Some programmers have concluded that the use of significant white-space is bad practice and should be avoided.
+This has lead to a tradition that avoids the use of "significant white-space". That has been compounded by confusion and misuse of tab characters. There has also been passionate discussions on the merits of different styles and practices for indentation. Some programmers have concluded that the use of significant white-space is bad practice and should be avoided.
 
 This is unfortunate because the use of indentation is a practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. It allows a block of text to contain any data format, markup, data language, script, or programming language.
 
