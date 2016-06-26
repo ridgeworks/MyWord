@@ -21,60 +21,60 @@
 :b              = <b>
 :bdi            = <bdi>
 :bdo            = <b>
-:blockquote     = myword <blockquote> 
-:br             = <br/> 
-:button         = <button> 
+:blockquote     = myword <blockquote>
+:br             = <br/>
+:button         = <button>
 :cite           = <cite>
-:code           = text <code> 
+:code           = text <code>
 :dl             = myword <dl>
 :dd             = myword <dd>
 :dt             = text <dt>
 :del            = <del>
 :dfn            = <dfn>
 :div            = myword <div>
-:em             = <em> 
+:em             = <em>
 :footer         = myword <footer>
 :h1             = <h1>
-:h2             = <h2> 
-:h3             = <h3> 
-:h4             = <h4> 
-:h5             = <h5> 
-:h6             = <h6> 
+:h2             = <h2>
+:h3             = <h3>
+:h4             = <h4>
+:h5             = <h5>
+:h6             = <h6>
 :header         = myword <header>
-:hr             = <hr/> 
-:i              = <i> 
+:hr             = <hr/>
+:i              = <i>
 :ins            = <ins>
 :kbd            = text <kbd>
 :li             = myword <li>
 :legend         = <legend>
-:mark           = <mark> 
+:mark           = <mark>
 :ol             = myword <ol>
-:p              = <p> 
+:p              = <p>
 :pre            = text <pre>
-:q              = <q> 
-:s              = <s> 
-:samp           = <samp>
+:q              = <q>
+:s              = <s>
+:samp           = text <samp>
 :small          = <small>
 :span           = <span>
-:strong         = <strong> 
-:style          = text <style scoped> 
+:strong         = <strong>
+:style          = text <style scoped>
 :sub            = <sub>
-:sup            = <sup> 
+:sup            = <sup>
 :table          = myword <table>
 :td             = myword <td>
 :th             = myword <th>
 :tr             = myword <tr>
 :u              = <u>
 :ul             = myword <ul>
-:var            = <var> 
+:var            = <var>
 :wbr            = <wbr/>
 
 // common light-weight markup.....
 
 #       = <h1>
-##      = <h2> 
-###     = <h3> 
-####    = <h4> 
+##      = <h2>
+###     = <h3>
+####    = <h4>
 #####   = <h5>
 ######  = <h6>
 *       = <em>
@@ -85,7 +85,7 @@
 +       = list <ol>
 `       = text <code>
 =       = text <kbd>
- ~       = <u>
+~       = <u>
 ~~      = <s>
 ^       = <sup>
 _       = <sub>
@@ -96,16 +96,16 @@ _       = <sub>
 @       = linkURL
 !       = imgURL
 
-linkURL :: (content) => { 
-    var url = markit('text', content); 
+linkURL :: (content) => {
+    var url = markit('text', content);
     return "<a href='"+url+"'>"+url+"</a>";
     }
 
-imgURL :: (content) =>   "<img src='"+content+"'/>"
+imgURL :: (content) =>  "<img src='"+content+"'/>"
 
 // id links...
 
-@id = linkID 
+@id = linkID
 #id = isID <b>
 
 linkID :: (content) => {
@@ -114,10 +114,10 @@ linkID :: (content) => {
     }
 
 isID :: (content) => {
-    var id = markit('text', content); 
+    var id = markit('text', content);
     return "<span id='"+id+"'>"+id+"</span>";
     }
- 
+
 
 // dl terms definition lists...
 
@@ -148,12 +148,12 @@ terms :: (content) => {
 
 array := row*                 :: (rows) => this.flatten(rows).join('')
     row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
-    cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"] 
+    cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
     item  := (!delim char)+
-    delim :~ %tsep | %nl 
-    tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]* 
+    delim :~ %tsep | %nl
+    tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
     nl    :~ [\n\f]|([\r][\n]?)
-    char  :~ [\s\S] 
+    char  :~ [\s\S]
 
 // iframe for imbed...
 
@@ -168,8 +168,23 @@ imbedURL :: (content) => {
 
 .demo   = demo <table class='demo'>
 
-demo    :: (content) => "<tr><td class='A1'>" + 
-                markit('text',content) + 
-                "</td><td class='B1'>" + 
-                markit('myword',content) + 
+xdemo    :: (content) => "<tr><td class='A1'>" +
+                markit('text',content) +
+                "</td><td class='B1'>" +
+                markit('myword',content) +
                 "</td></tr>"
+
+.demo   = demo <table class='demo'>
+
+demo    :: (content) => {
+            var html = markit('myword',content);
+            return "<tr><td class='A1' contenteditable=true onkeyup='demoEdit(event)' >" +
+                markit('text',content) +
+                "</td><td class='B1'>" +
+                html +
+                "</td></tr><tr><td class='A2'>" +
+                "<button onclick='demoHTML(event)'>HTML..</button>" +
+                "</td></tr><tr><td class='A3' colspan=2 hidden>" +
+                markit('text',html) +
+                "</td></tr>"
+            }
