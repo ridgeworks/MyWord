@@ -56,8 +56,8 @@ First, labels may be defined to directly represent the corresponding HTML elemen
     :h3  Header 3
 
     &
-        :h2 = prose <h2>
-        :h3 = prose <h3>
+        :h2 = <h2>
+        :h3 = <h3>
 
 The HTML headers :h1 to :h6 can all be befined the same way.
 
@@ -71,8 +71,8 @@ Labels can also be defined to mimic the Markdown notations:
     ###  Header 3
 
     &
-        ##  = prose <h2>
-        ### = prose <h3>
+        ##  = <h2>
+        ### = <h3>
 
 The header text is usually a single short line, but a block label can have multiple indented lines of content:
 
@@ -81,7 +81,7 @@ The header text is usually a single short line, but a block label can have multi
         A Silly Long Header
         That Keeps On Going
 
-A more elaborate header may include the header text as an ID to enable HTML links to refer to it:
+A more elaborate header defintion could include the header text as an ID to enable HTML links to refer to it:
 
 .demo
     ###  Some Topic
@@ -97,9 +97,9 @@ Style rules can present headers in different ways, for example with a border lin
 A simple horizontal rule may also be used:
 
 .demo
-    ___  ___
+    ---  ...
 
-    &  ___ = <hr/>
+    &    --- = <hr/>
 
 An empty element has no content, but a markup label with an empty content block is not seen as an offset label, so some content is needed. The content of an empty label is not presented, it can be used for comments.
 
@@ -496,7 +496,7 @@ The `[array] transform is defined in the core lingo, so authors may define custo
     .lunch tr:nth-child(1)  { font-weight:bold; background:whitesmoke; }
     .lunch td:nth-child(4)  { text-align:right; }
 
-font-weight:bold; background:whitesmoke;
+
 
 ###  Custom HTML
 
