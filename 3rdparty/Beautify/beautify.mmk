@@ -1,6 +1,6 @@
 @import
     beautify.fw.js beautify-css.fw.js beautify-html.fw.js
-    highlight.fw.js styles/xcode.min.css
+    highlight.pack.js styles/xcode.min.css
 
 .javascript     = beautifyjs <pre>
 beautifyjs      :: (content) => hljs.highlightAuto(js_beautify(content)).value
