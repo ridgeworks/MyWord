@@ -447,7 +447,7 @@ A document can import a lingo file by using a `[@import file-url] instruction:
 .eg
     &  @import my-lingo.mmk
 
-The ~[.mmk] suffix indicates a meta-markup file type. This file type contains label definitions just as if they are inside a & block:
+The `[.mmk] suffix indicates a meta-markup file type. This file type contains label definitions just as if they are inside a `[&] block:
 
 .file  file: my-lingo.mmk
 .body
@@ -587,7 +587,7 @@ Here is the grammar that defines the `[array] transform:
 .eg
     &
         array := row*                 :: (rows) => this.flatten(rows).join('')
-            row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+            row   := tsep* cell* nl?  :: (_,cells) => ["<tr>",cells,"</tr>"]
             cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
             item  := (!delim char)+
             delim :~ %tsep | %nl
@@ -597,7 +597,7 @@ Here is the grammar that defines the `[array] transform:
 
 &
     array := row*                 :: (rows) => this.flatten(rows).join('')
-        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+        row   := tsep* cell* nl?  :: (_,cells) => ["<tr>",cells,"</tr>"]
         cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
         item  := (!delim char)+
         delim :~ %tsep | %nl
@@ -669,8 +669,6 @@ Third party translators that are available as a JavaScript function can be used 
       .md = marked <div class=md>
 
 The `[@import] loads the Markdown translator as JavaScript from the file `[marked.js]. The `[.md] label is defined to use this translator. The `[import] transform sees the `[.md] label that matches the file suffix and translates the file as Markdown by using the `[marked] transform function. The `[@import] instruction can also be used to import a CSS style sheet from a file with a `[.css] suffix.
-
-The
 
 
 ##  Translating MyWord Documents
