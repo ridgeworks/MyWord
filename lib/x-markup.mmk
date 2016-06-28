@@ -5,6 +5,7 @@
 
 &           = metamark
 @include    = include
+@imbed      = imbedURL
 
 // file type transforms..
 
@@ -20,94 +21,92 @@
 :b              = <b>
 :bdi            = <bdi>
 :bdo            = <b>
-:blockquote     = myword <blockquote> 
-:br             = <br/> 
-:button         = <button> 
+:blockquote     = myword <blockquote>
+:br             = <br/>
+:button         = <button>
 :cite           = <cite>
-:code           = text <code> 
+:code           = text <code>
+:dl             = myword <dl>
+:dd             = myword <dd>
+:dt             = text <dt>
 :del            = <del>
 :dfn            = <dfn>
 :div            = myword <div>
-:em             = <em> 
+:em             = <em>
 :footer         = myword <footer>
 :h1             = <h1>
-:h2             = <h2> 
-:h3             = <h3> 
-:h4             = <h4> 
-:h5             = <h5> 
-:h6             = <h6> 
+:h2             = <h2>
+:h3             = <h3>
+:h4             = <h4>
+:h5             = <h5>
+:h6             = <h6>
 :header         = myword <header>
-:hr             = <hr/> 
-:i              = <i> 
+:hr             = <hr/>
+:i              = <i>
 :ins            = <ins>
 :kbd            = text <kbd>
 :li             = myword <li>
 :legend         = <legend>
-:mark           = <mark> 
+:mark           = <mark>
 :ol             = myword <ol>
-:p              = <p> 
+:p              = <p>
 :pre            = text <pre>
-:q              = <q> 
-:s              = <s> 
-:samp           = <samp>
-:script         = text <script> 
+:q              = <q>
+:s              = <s>
+:samp           = text <samp>
 :small          = <small>
 :span           = <span>
-:strong         = <strong> 
-:style          = text <style scoped> 
+:strong         = <strong>
+:style          = text <style scoped>
 :sub            = <sub>
-:sup            = <sup> 
+:sup            = <sup>
 :table          = myword <table>
 :td             = myword <td>
 :th             = myword <th>
 :tr             = myword <tr>
 :u              = <u>
 :ul             = myword <ul>
-:var            = <var> 
-:wbr            = <wbr/>  
-
-// imbedding .....
-
-@imbed  = <iframe scrolling=no style='overflow:hidden; border:none; width:100%;'>
+:var            = <var>
+:wbr            = <wbr/>
 
 // common light-weight markup.....
 
 #       = <h1>
-##      = <h2> 
-###     = <h3> 
-####    = <h4> 
+##      = <h2>
+###     = <h3>
+####    = <h4>
 #####   = <h5>
 ######  = <h6>
 *       = <em>
-**      = <strong>  
+**      = <strong>
 >       = myword <blockquote>
 ---     = <hr/>
 -       = list <ul>
 +       = list <ol>
 `       = text <code>
 =       = text <kbd>
- ~       = <u>
+~       = <u>
 ~~      = <s>
 ^       = <sup>
 _       = <sub>
-/       = text <pre>  
+/       = text <pre>
 //      = <span hidden>
 ?       = <mark>
 
 @       = linkURL
 !       = imgURL
 
-linkURL :: (content) => { 
-    var url = markit('text', content); 
+linkURL :: (content) => {
+    var url = markit('text', content);
     return "<a href='"+url+"'>"+url+"</a>";
     }
 
-imgURL :: (content) =>   "<img src='"+content+"'/>"
+imgURL :: (content) =>  "<img src='"+content+"'/>"
 
 // id links...
 
-@id = linkID 
-#id = isID <b>  
+@id = linkID
+#id = isID <b>
 
 linkID :: (content) => {
     var id = markit('text', content);
@@ -115,22 +114,23 @@ linkID :: (content) => {
     }
 
 isID :: (content) => {
-    var id = markit('text', content); 
+    var id = markit('text', content);
     return "<span id='"+id+"'>"+id+"</span>";
-    }   
+    }
 
-// dl terms definition lists...  .
 
-terms = terms <dl class=terms>
+// dl terms definition lists...
+
+.terms = terms <dl class=terms>
 
 terms :: (content) => {
     var dl = "";
     var dd = "";
     var lines = content.split('\n');
-    for (var i=0; i<lines.length; i++) {  
+    for (var i=0; i<lines.length; i++) {
         var line = lines[i];
         if (!line) continue;
-            if (!line.match(/^\s/)) { // no indent  
+            if (!line.match(/^\s/)) { // no indent
             if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
             dd = "";
             dl += "<dt>" + markit("text",line) + "</dt>";
@@ -142,27 +142,34 @@ terms :: (content) => {
     return dl;
     }
 
-// table array...  .
+// table array...
 
-array = array <table class=array>
+.array = array <table class=array>
 
-  array := row*                 :: (rows) => this.flatten(rows).join('')
-    row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"] 
-    cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"] 
+array := row*                 :: (rows) => this.flatten(rows).join('')
+    row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
+    cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
     item  := (!delim char)+
-    delim :~ %tsep | %nl 
-    tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]* 
+    delim :~ %tsep | %nl
+    tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
     nl    :~ [\n\f]|([\r][\n]?)
-    char  :~ [\s\S]   
+    char  :~ [\s\S]
 
-// useful document elements ......  .
+// iframe for imbed...
+
+imbedURL :: (content) => {
+    var url = markit('text', content);
+    return "<iframe src='"+url+"' scrolling=no style='overflow:hidden; border:none; width:100%;'></iframe>";
+    }
+
+// useful document elements ......
 
 .eg     = text <div class='eg'>
 
 .demo   = demo <table class='demo'>
 
-demo    :: (content) => "<tr><td class='A1'>" + 
-                content.replace(/</g,'&lt;') + 
-                "</td><td class='B1'>" + 
-                markit('myword',content) + 
+demo    :: (content) => "<tr><td class='A1'>" +
+                markit('text',content) +
+                "</td><td class='B1'>" +
+                markit('myword',content) +
                 "</td></tr>"
