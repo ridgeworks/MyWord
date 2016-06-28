@@ -168,23 +168,8 @@ imbedURL :: (content) => {
 
 .demo   = demo <table class='demo'>
 
-xdemo    :: (content) => "<tr><td class='A1'>" +
+demo    :: (content) => "<tr><td class='A1'>" +
                 markit('text',content) +
                 "</td><td class='B1'>" +
                 markit('myword',content) +
                 "</td></tr>"
-
-.demo   = demo <table class='demo'>
-
-demo    :: (content) => {
-            var html = markit('myword',content);
-            return "<tr><td class='A1' contenteditable=true onkeyup='demoEdit(event)' >" +
-                markit('text',content) +
-                "</td><td class='B1'>" +
-                html +
-                "</td></tr><tr><td class='A2'>" +
-                "<button onclick='demoHTML(event)'>HTML..</button>" +
-                "</td></tr><tr><td class='A3' colspan=2 hidden>" +
-                markit('text',html) +
-                "</td></tr>"
-            }
