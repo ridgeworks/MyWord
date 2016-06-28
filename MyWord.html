@@ -12,25 +12,5 @@
     @import 3rdparty/Beautify/beautify.mmk
 @include  MyWord.myw
     </script>
-<script>
-    demoHTML = function(e) { // button --> td.A2 --> td.A3
-        var tdA2 = e.target.parentNode;
-        var tdA3 = tdA2.parentNode.nextSibling.firstChild;
-        if (tdA3.hidden) { // closed, update before showing...
-            var tdB1 = tdA2.parentNode.previousSibling.firstChild.nextSibling;
-            tdA3.textContent = tdB1.innerHTML;
-        }
-        tdA3.hidden = !tdA3.hidden;
-    }
-    demoEdit = function(e) {
-        var tdA1 = e.target;
-        var tdB1 = tdA1.nextSibling;
-        var tdA3 = tdA1.parentNode.nextSibling.nextSibling.firstChild;
-        tdB1.textContent = tdA1.textContent;
-        markme('myword',tdB1);
-        tdA3.hidden = true; // hide HTML, demoHTML can show new HTML later..
-    }
-</script>
-
 </body>
 </html>
