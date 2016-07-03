@@ -90,7 +90,7 @@
 ^       = <sup>
 _       = <sub>
 /       = text <pre>
-//      = <span hidden>
+//      = text <span hidden>
 ?       = <mark>
 
 @       = linkURL
@@ -168,8 +168,16 @@ imbedURL :: (content) => {
 
 .demo   = demo <table class='demo'>
 
-demo    :: (content) => "<tr><td class='A1'>" +
+demo    :: (content) => {
+            var html = markit('myword', content);
+            var ctx = markit.getContext()
+            return "<tr><td class='A1' contenteditable=true onkeyup='demoEdit(event)'>" +
                 markit('text',content) +
-                "</td><td class='B1'>" +
-                markit('myword',content) +
+                "</td><td class='B1' data-context='" + ctx + "'>" +
+                html +
+                "</td></tr><tr><td class='A2'>" +
+                "<button onclick='demoHTML(event)'>HTML..</button>" +
+                "</td></tr><tr><td class='A3' colspan=2 hidden>" +
+                markit('text',html) +
                 "</td></tr>"
+            }

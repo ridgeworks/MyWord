@@ -351,19 +351,19 @@ The MyWord source text in a `[<script>] element could be a complete MyWord docum
 
 The result is a small HTML "host" file that enables a standard browser to read and translate MyWord files. This allows the MyWord source text to be edited without the need to translate it into an HTML file, since the browser can read and translate the source text directly.
 
-In this example the `[MyWord.into.txt] file contains the source text, and that imports the definition files that it needs:
+This HTML host file will import the `[MyWord.example.txt] file that contains the MyWord source text, and that can import any definition files that it needs:
 
 .eg
     <!DOCTYPE HTML>
     <html>
     <head>
         <meta lang=en charset="UTF-8">
-        <title>Introduction to MyWord</title>
+        <title>Example MyWord</title>
         <script src='x-markup.js'></script>
     </head>
     <body>
     <script type=text/x-markup.myword>
-    @include  MyWord.intro.txt
+    @include  MyWord.example.txt
     </script>
     </body>
     </html>
