@@ -170,10 +170,9 @@ imbedURL :: (content) => {
 
 demo    :: (content) => {
             var html = markit('myword', content);
-            var ctx = markit.getContext()
             return "<tr><td class='A1' contenteditable=true onkeyup='demoEdit(event)'>" +
                 markit('text',content) +
-                "</td><td class='B1' data-context='" + ctx + "'>" +
+                "</td><td class='B1'>" +
                 html +
                 "</td></tr><tr><td class='A2'>" +
                 "<button onclick='demoHTML(event)'>HTML..</button>" +
