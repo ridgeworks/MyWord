@@ -4,6 +4,7 @@
 // definitions...
 
 &           = metamark
+()          = myword <div class='inset'>
 @include    = include
 @imbed      = imbedURL
 

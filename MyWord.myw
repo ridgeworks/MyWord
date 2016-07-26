@@ -56,20 +56,20 @@ Shorthand symbols such can be used for common labels:
 	Superscript^(above) and subscript_(below).
 
 	>   An HTML blockquote tag presents text that
-        is indented from the margin.
+		is indented from the margin.
 
 &
-    * = <em>
-    ** = <strong>
-    ` = <code>
+	* = <em>
+	** = <strong>
+	` = <code>
 
 Shorthand symbols can also be used for HTML lists and links:
 
 .demo
 	-   Bullet point list.
 	-   Second bullet point.
-	    +   First numbered point.
-	    +   Second numbered point.
+		+   First numbered point.
+		+   Second numbered point.
 	-   Third bullet point.
 
 	A web address URL link: @[http://csszengarden.com].
@@ -82,26 +82,26 @@ Markup labels are not pre-defined by the MyWord translator, any label can be def
 Here is a sample of a few of the definitions for labels seen in previous examples:
 
 .eg
-    &
-        :h2 = <h2>
-        :h3 = <h3>
+	&
+		:h2 = <h2>
+		:h3 = <h3>
 
-        :i = <i>
-        :b = <b>
-        :cite = <cite>
+		:i = <i>
+		:b = <b>
+		:cite = <cite>
 
-        *  = <em>
-        ** = <strong>
-        `  = <code>
+		*  = <em>
+		** = <strong>
+		`  = <code>
 
-        > = myword <blockquote>
+		> = myword <blockquote>
 
 The special & label introduces a block of definitions. Each label is defined with the HTML element that it represent.
 
 Rather than write a block of definitions like this into every document an author can put them into a file that can be shared across many documents. A file of definitions can be used like this:
 
 .eg
-    &   @import  myWord.definitions.txt
+	&   @import  myWord.definitions.txt
 
 The `[@import] takes a URL for a file containing definitions of the vocabulary of labels that the author wants to use.
 
@@ -117,7 +117,7 @@ For example the `[.box] label could represent an HTML `[<div class='box'>] eleme
 .demo
 	.box    A box of *[prose]...
 
-    &   .box = <div class='box'>
+	&   .box = <div class='box'>
 
 Inline markup labels can be defined in a similar way:
 
@@ -147,11 +147,11 @@ A footnote or end-note can be created from HTML components like this:
 
 	#nb  Notes
 
-	    Kelvin: Absolute zero is 0°K ....
+		Kelvin: Absolute zero is 0°K ....
 
 	&
-        #nb = myword <div class='nb' id='nb'>
-	    ^nb  = <a class='nb' href='#nb'>
+		#nb = myword <div class='nb' id='nb'>
+		^nb  = <a class='nb' href='#nb'>
 
 The `[#nb] label is a block label that is defined with the target ID `[nb]. The `[^nb] label is defined as an HTML link to the target. The style sheet has presented this example in the form of a footnote.
 
@@ -172,14 +172,14 @@ The `[`kbd] label specifies a `[text] translation for the content text that will
 Plain text translated verbatim may be presented with syntax higlighting:
 
 .demo
-    A snippet of Python code:
+	A snippet of Python code:
 
 	.py
 		# this is a blob of Python code
 		if x > 42:
 			print 'end of </script>.'
 
-    &   .py = highlight <pre class=py>
+	&   .py = highlight <pre class=py>
 
 The `[.py] label applies the `[highlight] translator to its content, and wraps the result into an HTML `[<pre>] element. The `[highlight] function translates the content text into HTML element for the Python syntax which enables style sheet rules to present the syntax highlighting.
 
@@ -193,25 +193,25 @@ For example, the source text layout format can be used to directly represent an 
 
 .demo
 	.array
-        1    One      Line
-        2    Two      Area
-        3    Three    Volume
+		1    One      Line
+		2    Two      Area
+		3    Three    Volume
 
-    &  .array = array <table class=array>
+	&  .array = array <table class=array>
 
 :style
-    table.array {border-collapse:collapse;}
-    .array td { border:thin solid gray; padding:2pt 10pt; }
+	table.array {border-collapse:collapse;}
+	.array td { border:thin solid gray; padding:2pt 10pt; }
 
 &
-    array := row*                 :: (rows) => this.flatten(rows).join('')
-        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
-        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
-        item  := (!delim char)+
-        delim :~ %tsep | %nl
-        tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
-        nl    :~ [\n\f]|([\r][\n]?)
-        char  :~ [\s\S]
+	array := row*                 :: (rows) => this.flatten(rows).join('')
+		row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+		cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+		item  := (!delim char)+
+		delim :~ %tsep | %nl
+		tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
+		nl    :~ [\n\f]|([\r][\n]?)
+		char  :~ [\s\S]
 
 The label definition specifies that the array transform function is to be applied to the content text. This function translates the array of source text fields into cells in an HTML table element.
 
@@ -227,23 +227,23 @@ Here is another example, for a month/day/year date format:
 	&   .mdy = mdy <b class=date>
 
 &
-    mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
-        var dd = (d.length < 2)? '0'+d : d;
-        var mm = (m.length < 2)? '0'+m : m;
-        var ymd = y+'-'+mm+'-'+dd;
-        return '<time datetime="'+ymd+'">' +
-            (['Jan','Feb','Mar','Apr','May','Jun',
-            'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
-            ' ' + d + ', ' + y + '</time>'; }
+	mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
+		var dd = (d.length < 2)? '0'+d : d;
+		var mm = (m.length < 2)? '0'+m : m;
+		var ymd = y+'-'+mm+'-'+dd;
+		return '<time datetime="'+ymd+'">' +
+			(['Jan','Feb','Mar','Apr','May','Jun',
+			'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
+			' ' + d + ', ' + y + '</time>'; }
 
 The content of the .mdy label is translated from a month/day/year format using the "mdy" transform function, and the result is wrapped into an HTML <b> element.
 
 An HTML link element requires a URL as an `[href] attribute value, so defining a label to represent an HTML link requires a transform function:
 
 .demo
-    @[http://csszengarden.com]
+	@[http://csszengarden.com]
 
-    &   @ = linkURL
+	&   @ = linkURL
 
 The `[linkURL] transform function generates the required HTML wrapper: `[<a href='http://csszengarden.com'>] .
 
@@ -269,7 +269,7 @@ The `[math:] label can be defined with an `[asciimath] transform function that w
 
 .demo
 	math:
-		sum_(i=1)^n i^3=((n(n+1))/2)^2
+        sum_(i=1)^n i^3=((n(n+1))/2)^2
 
 	&   @import pkgs/asciimath.mmk
 
@@ -278,10 +278,10 @@ An author may wish to break a document up into parts to be edited as separate fi
 .demo
 	@include  MyWord.part.myw
 
-    &  @include = include <div class='include'>
+	&	@include = include <div class='include'>
 
-    :style
-        .include { border:solid thin grey; }
+	:style
+		.include { border:solid thin grey; }
 
 The `[@include] label is defined in the same way as any other label, it uses the `[include] transform function to import the content text from a URL for a file. The content of that file is read and translated into HTML according to the file name suffix. A `[.myw] file is translated as text with MyWord markup.
 
@@ -293,12 +293,12 @@ The previous examples showed how labels can be defined with transfom functions. 
 For example, a `[~greet] markup label could be defined with a custom `[hello] transform function:
 
 .demo
-    The standard ~greet[World] example.
+	The standard ~greet[World] example.
 
-    &
-        ~greet = hello <b style='color:magenta'>
+	&
+		~greet = hello <b style='color:magenta'>
 
-        hello :: (content) => "Hello "+content
+		hello :: (content) => "Hello "+content
 
 The `[hello] function is defined to simply add a "Hello " prefix to the content text.
 
@@ -307,12 +307,11 @@ The next example defines a `[tempF] translator functions to translate Celsius to
 .demo
 	It was .temp[42C] today.
 
-	&
-	   .temp = tempF <span class=temp>
+	&   .temp = tempF <span class=temp>
 
-       tempF :~  ([+-]?\d+)\s*([CF]) :: (_,val,unit) =>
+		tempF :~  ([+-]?\d+)\s*([CF]) :: (_,val,unit) =>
 
-            ((unit == 'C') ? Math.round((val*9/5+32)*10)/10 : val)+"ºF"
+			((unit == 'C') ? Math.round((val*9/5+32)*10)/10 : val)+"ºF"
 
 The `[.temp] label is defined with a `[tempF] transform function. The `[tempF] transform is defined using the `[:~] symbol which introduces a regular expression rule to match the content text. The `[::] symbol introduces a semantic action that translates the matched text for the HTML presentation. The details do not matter, this example is just to illustrate how new custom markup translators can be defined. The details are explained in a separate document.
 
@@ -322,16 +321,17 @@ The next example defines the `[mdy] transform function for a month/day/year date
 	The date was .date[2/3/2013].
 
 	&
-	  .date = mdy <span class=date>
 
-      mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
-                var dd = (d.length < 2)? '0'+d : d;
-                var mm = (m.length < 2)? '0'+m : m;
-                var ymd = y+'-'+mm+'-'+dd;
-                return '<time datetime="'+ymd+'">' +
-                    (['Jan','Feb','Mar','Apr','May','Jun',
-                    'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
-	                ' ' + d + ', ' + y + '</time>'; }
+		.date = mdy <span class=date>
+
+		mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
+			var dd = (d.length < 2)? '0'+d : d;
+			var mm = (m.length < 2)? '0'+m : m;
+			var ymd = y+'-'+mm+'-'+dd;
+			return '<time datetime="'+ymd+'">' +
+			(['Jan','Feb','Mar','Apr','May','Jun',
+			'Jul','Aug','Sep','Oct','Nov','Dec'][m-1]) +
+			' ' + d + ', ' + y + '</time>'; }
 
 
 If labels and transform functions like this are defined in a separate file they can be shared across different documents, so that the author does not need to have these definitions in the source text.
@@ -354,19 +354,19 @@ The result is a small HTML "host" file that enables a standard browser to read a
 This HTML host file will import the `[MyWord.example.txt] file that contains the MyWord source text, and that can import any definition files that it needs:
 
 .eg
-    <!DOCTYPE HTML>
-    <html>
-    <head>
-        <meta lang=en charset="UTF-8">
-        <title>Example MyWord</title>
-        <script src='x-markup.js'></script>
-    </head>
-    <body>
-    <script type=text/x-markup.myword>
-    @include  MyWord.example.txt
-    </script>
-    </body>
-    </html>
+	<!DOCTYPE HTML>
+	<html>
+	<head>
+		<meta lang=en charset="UTF-8">
+		<title>Example MyWord</title>
+		<script src='x-markup.js'></script>
+	</head>
+	<body>
+	<script type=text/x-markup.myword>
+	@include  MyWord.example.txt
+	</script>
+	</body>
+	</html>
 
 The `[x-markup.js] script is packaged in a directory with other resources. This script will automatically load any other resources that it needs from this directory. See the ReadMe document for more specific release information.
 
@@ -377,7 +377,7 @@ MyWord has no predefined markup labels, authors can define a vocabulary of label
 MyWord makes it very easy to define new markup labels that may contain any desired data formats or domain specific languages.
 
 :style
-    *.box {border:thin solid gray; background:lavenderblush; margin:0pt 10pt; padding: 0pt 10pt;}
+	*.box {border:thin solid gray; background:lavenderblush; margin:0pt 10pt; padding: 0pt 10pt;}
 
-    div.nb { font-size: small; border-top: solid thin grey; }
-    a.nb { vertical-align:super; font-size: x-small;}
+	div.nb { font-size: small; border-top: solid thin grey; }
+	a.nb { vertical-align:super; font-size: x-small;}

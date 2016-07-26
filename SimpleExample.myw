@@ -1,3 +1,12 @@
 ###  Simple MyWord Document
 
+.demo
+    ![gopher.png]
+
+    &  ! = image
+        image :: content =>
+             "<img src='"+content+"'/>"
+
+
 :b(Hello World!) Replace this with your content.
+

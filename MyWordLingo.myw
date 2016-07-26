@@ -255,8 +255,9 @@ An image URL label ! can be defined similarly:
     ![gopher.png]
 
     &   ! = image
-        image :: (content) =>
-          "<img src='"+content+"'/>"
+        image :: (content) => {
+                return "<img src='"+content+"'/>";
+            }
 
 Images can also be defined directly:
 
@@ -304,10 +305,10 @@ Syntax highlighting can be added:
 .demo
     A snippet of Python code:
 
-	.py
-		# this a blob of Python code
-		if x > 42:
-			print 'end of </script>.'
+    .py
+        # this a blob of Python code
+        if x > 42:
+            print 'end of </script>.'
 
     &   .py = highlight <pre class=py>
 
