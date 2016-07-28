@@ -22,9 +22,9 @@ The next example uses the standard HTML `[h2] tag for a header, and the HTML `[c
 
 	The :cite[Alice In Wonderland] story.
 
-In MyWord a block markup label is any first word that is offset by a tab or two spaces from the following text. The content of a block label is the remainder of the line plus any lines that are indented under the label line.
+In MyWord a block markup label is any first word that is offset from the following text by a tab or two or more spaces. The content of a block label is the remainder of the line plus any lines that are indented under the label line (by a tab or two or more spaces).
 
-In a paragraph of prose the brackets delimit the content of an inline label.
+Lines of text that do not start with an offset label form paragraphs of prose which may contain inline markup. An inline label uses brackets to delimit the content text.
 
 MyWord does not pre-define any markup labels, but the MyWord translator is normally packaged with a vocabulary of common labels, known as a lingo. Authors can also define their own markup labels, and any undefined labels will be flagged in the HTML presentation.
 
