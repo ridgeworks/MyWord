@@ -96,37 +96,29 @@ Markup labels can be defined to represent any HTML elements, for example:
 
 The content text is the remainder of the block after the markup label. The block ends at the next line that is not indented under the markup label. This allows the content text to contain any characters without restriction, there are no special syntax characters to be escaped.
 
-This is different from most other markup languages, data languages, and programming languges. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required). These languages can not quote themselves.
+This is different from most other markup languages, data languages, and programming languges. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required).
 
-A length count is a perfect way to denote the end of a block of text that can contain any characters without restriction (and can therefore quote itself). Unfortunately a length count is impractical in documents that can be manually edited in a plain text editor.
+A length count is a perfect way to denote the end of a block of text that can contain any characters without restriction. Unfortunately a length count is impractical in documents that can be manually edited in a plain text editor.
 
-###  Indented Content
+The use of indentation to determine the end of a block of text is simple and intuitive, it is a good pragmatic alternative to a length count. MyWord uses a simple but flexible indentation scheme:
 
-The use of indentation to determine the end of a block of text is simple and intuitive, it is a good pragmatic alternative to a length count. This is a very valuable and unique property.
+-   A content line may be inset using one tab character for each level of indentation.
 
-So why is the use of indentation not common practice?
+-   A content line may be inset using 2 to 8 space characters for each level of indentation.
 
-One reason is that traditional grammar specifications for computer languages are based on the use of context free grammar specifcations. There are good practical reasons for this, but a context free grammar can not properly specify an indentation syntax.
+-   The minimum inset in a block determines the number of spaces for the first level of indentation.
 
-This has lead to a tradition that avoids the use of "significant white-space". That has been compounded by confusion and misuse of tab characters. There has also been passionate discussions on the merits of different styles and practices for indentation. Some programmers have concluded that the use of significant white-space is bad practice and should be avoided.
+-   The inset for one level of indentation is deleted from every line to extract the content text.
 
-This is unfortunate because the use of indentation is a practical alternative to a length count that can delimit an unrestricted blob of "syntax free" text. It allows a block of text to contain any data format, markup, data language, script, or programming language.
+An indented block may be inset with tabs or spaces, and the tab stop or spaces per inset may be anything from 2 to 8. A single space at the start of a line is not an inset indentation.
 
-MyWord uses a very simple indentation scheme:
+A mixture of tab insets and space insets in the same block is not recommended. If tab and space insets are mixed in the same block then 4 space characters will be taken as equivalent to a tab character, and an inset of up to 4 spaces will be deleted. Mixed indents can be visually confusing unless the editor tab stop is 4, and 4 spaces are used per indent level.
 
--   A label must start at the left margin, and content lines are indented.
+The white-space offset following the label, and the inset of indented lines, is all part of a skeleton format. The skeleton delimits the block content, but it is not part of the content text.
 
--   An inset of one tab character, or 2 to 4 space characters, is deleted from each line of content.
+Deleting the indentation shifts the content text left so that the content text starts at the left margin.
 
--   The line with the smallest inset determines the inset that is deleted from every line.
-
-This allows an author to indent content using a tab character, or 2, 3, or 4 space characters (for each level of indentation).
-
-The line with the minimum inset will determine the inset that represents one level of indentation, and that inset will be removed for all lines. Each level of indentation should use the same inset (tab or spaces), but only one tab character will be removed regardless of the number of space characters that are removed from space indented lines.
-
-The white-space following the label and the inset of indented lines is all part of a skeleton format that delimits the block, it is not part of the content text.
-
-Deleting the inset shifts the content text left, so the content text now starts at the left margin.
+An indented block of text without a label is treated as a block with an empty label. An empty label can be defined in the same way as any other label, it is represented as :kbd[()]. This allows the content of an indented block to be shifted left and treated as a block of myword content, thus removing the restriction that block labels must start at the left margin.
 
 The block structure is parsed breadth first, the content of a nested block is only parsed after the outer levels have been parsed. This is important since the myword block grammar is not necessarily the grammar that will be used for the content of a block. The content grammar is determined by the markup label definition.
 
@@ -770,8 +762,8 @@ The MyWord document block structure is defined by this grammar:
 	block   := label (blank* offset line)+     :: block
 	blank   :~ [ \\t]* (?: \\n | \\r\\n?)      :: blank
 	line    :~ [^\\n\\r]* (?: \\n | \\r\\n?)?  :: line
-	label   :~ (\\S+)                          :: string
-	offset  :~ (\\t | [ ]{2,4})                :: string
+	label   :~ (\\S*)                          :: string
+	offset  :~ (\\t | [ ]{2,8})                :: string
 
 The parser identifies block labels that are defined with the `[metamark] transform and evaluates their content first, before it renders the parse tree.
 

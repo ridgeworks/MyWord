@@ -4,6 +4,7 @@
 // definitions...
 
 &           = metamark
+()          = myword <div class='inset'>
 @include    = include
 @imbed      = imbedURL
 
@@ -90,7 +91,7 @@
 ^       = <sup>
 _       = <sub>
 /       = text <pre>
-//      = <span hidden>
+//      = text <span hidden>
 ?       = <mark>
 
 @       = linkURL
