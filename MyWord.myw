@@ -13,7 +13,7 @@ Here is an example with a couple of MyWord markup labels. The `[##] symbol is us
 
 On the left is the plain text source using MyWord markup, and on the right is an HTML presentation generated from the MyWord markup.
 
-Symbolic labels are neat and simple, but they are only practical for a small vocabulary. For a larger vocabulary key words labels are a more effective way to express the intended meaning. An author may choose to use tag words that are defined in the HTML standard as part of their vocabulary of labels.
+Symbolic labels are neat and simple, but they are only practical for a small vocabulary. For a larger vocabulary key-word labels are a more effective way to express the intended meaning. An author may choose to use tag words that are defined in the HTML standard as part of their vocabulary of labels.
 
 The next example uses the standard HTML `[h2] tag for a header, and the HTML `[cite] tag for a citation. A colon prefix is used by convention to indicate that these labels are HTML tag names:
 
