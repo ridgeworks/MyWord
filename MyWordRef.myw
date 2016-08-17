@@ -265,7 +265,7 @@ The translation into HTML ignores line-breaks so that the lines flow into a line
 
 .demo
     This is a paragraph with
-      lines that
+    lines that
     flow together.
 
 The line format can be preserved by using individual line blocks:
