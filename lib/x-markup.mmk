@@ -122,26 +122,21 @@ isID :: (content) => {
 
 // dl terms definition lists...
 
-.terms = terms <dl class=terms>
+deflink :: (content) => {
+    var key = markit('text',content)
+    var id = key.replace(' ','_')
+    return "<a href='#def-"+id+"'>"+key+"</a>";
+  }
 
-terms :: (content) => {
-    var dl = "";
-    var dd = "";
-    var lines = content.split('\n');
-    for (var i=0; i<lines.length; i++) {
-        var line = lines[i];
-        if (!line) continue;
-            if (!line.match(/^\s/)) { // no indent
-            if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
-            dd = "";
-            dl += "<dt>" + markit("text",line) + "</dt>";
-        } else { // indented..
-            dd += line.trim()+'\n';
-        }
+deflist := (blank / key / val)* :: (x) => this.flatten(x).join('')
+    key :~ (?: [ ]? [^ \t\n\r])+ :: (dt) =>  {
+        var key = markit('text',dt)
+        var id = key.replace(' ','_')
+        return "<dt id='def-"+id+"'>"+key+"</dt>"
     }
-    if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
-    return dl;
-    }
+    val :~ (?: (?: [\t]|[ ]{2,8}) [^\n\r]+ %blank*)+ :: (val) =>
+        "<dd>"+markit('myword',val)+"</dd>"
+    blank :~ [ \t]* (?: \n | \r\n?) :: () => ''
 
 // table array...
 

@@ -373,9 +373,9 @@ The third form of HTML lists is for defintions:
     :dt = text <dt>
     :dd = myword <dd>
 
-A simpler way to write a list of defintions is to use the `[terms] transform that enables the layout of the content text to directly represent terms and their defintions. The defintions are simply indented further than the term.
+A simpler way to write a list of defintions is to use the `[deflist] transform that enables the layout of the content text to directly represent terms and their defintions. The defintions are simply indented further than the term.
 
-The `[terms] transform also defines an ID attribute for the term line. This allows links to reference terms:
+The `[deflist] transform also defines an ID attribute for the term line. This allows links to reference terms via a `[deflink] transform:
 
 .demo
     See @notes[Flim] or @notes[Flam].
@@ -393,29 +393,25 @@ The `[terms] transform also defines an ID attribute for the term line. This allo
             A note about flam...
 
     &
-        @notes = linkID
-        .notes = terms <dl class=notes>
+        @notes = deflink
+        .notes = deflist <dl class=notes>
 
 &
-    terms :: (content) => { 
-        var dl = "";
-        var dd = "";
-        var lines = content.split('\n'); 
-        for (var i=0; i<lines.length; i++) { 
-            var line = lines[i];
-            if (!line) continue; 
-            if (!line.match(/^\s/)) { // no indent 
-                if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
-                dd = "";
-                dl += "<dt>" + markit("text",line) + "</dt>";
-            } else { // indented..
-              dd += line.trim()+'\n';
-            } 
-        } 
-        if (dd) { dl += "<dd>" + markit("myword",dd) + "</dd>"; }
-        return dl; 
-        } 
+    deflink :: (content) => {
+        var key = markit('text',content)
+        var id = key.replace(' ','_')
+        return "<a href='#def-"+id+"'>"+key+"</a>";
+      }
 
+    deflist := (blank / key / val)* :: (x) => this.flatten(x).join('')
+        key :~ (?: [ ]? [^ \t\n\r])+ :: (dt) =>  {
+            var key = markit('text',dt)
+            var id = key.replace(' ','_')
+            return "<dt id='def-"+id+"'>"+key+"</dt>"
+        }
+        val :~ (?: (?: [\t]|[ ]{2,8}) [^\n\r]+ %blank*)+ :: (val) =>
+            "<dd>"+markit('myword',val)+"</dd>"
+        blank :~ [ \t]* (?: \n | \r\n?) :: () => ''
 
 Definition lists can be used like this for a glossary of terms, or a bibliography, or end notes, and so on.
 
