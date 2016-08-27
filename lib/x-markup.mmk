@@ -1,10 +1,8 @@
 
-@import x-markup.css
-
 // definitions...
 
 &           = metamark
-()          = myword <div class='inset'>
+()          = <span class='inset'>
 @include    = include
 @imbed      = imbedURL
 
@@ -13,43 +11,43 @@
 .myw        = myword
 .txt        = text <pre>
 
-// simple standard HTML5 element names, inline prose is the default transform
+// simple standard HTML5 element names
 
 :abbr           = <abbr>
 :address        = <address>
-:article        = myword <article>
-:aside          = myword <aside>
+:article        = <article>
+:aside          = <aside>
 :b              = <b>
 :bdi            = <bdi>
 :bdo            = <b>
-:blockquote     = myword <blockquote>
+:blockquote     = <blockquote>
 :br             = <br/>
 :button         = <button>
 :cite           = <cite>
 :code           = text <code>
-:dl             = myword <dl>
-:dd             = myword <dd>
+:dl             = <dl>
+:dd             = <dd>
 :dt             = text <dt>
 :del            = <del>
 :dfn            = <dfn>
-:div            = myword <div>
+:div            = <div>
 :em             = <em>
-:footer         = myword <footer>
+:footer         = <footer>
 :h1             = <h1>
 :h2             = <h2>
 :h3             = <h3>
 :h4             = <h4>
 :h5             = <h5>
 :h6             = <h6>
-:header         = myword <header>
+:header         = <header>
 :hr             = <hr/>
 :i              = <i>
 :ins            = <ins>
 :kbd            = text <kbd>
-:li             = myword <li>
+:li             = <li>
 :legend         = <legend>
 :mark           = <mark>
-:ol             = myword <ol>
+:ol             = <ol>
 :p              = <p>
 :pre            = text <pre>
 :q              = <q>
@@ -61,12 +59,12 @@
 :style          = text <style scoped>
 :sub            = <sub>
 :sup            = <sup>
-:table          = myword <table>
-:td             = myword <td>
-:th             = myword <th>
-:tr             = myword <tr>
+:table          = <table>
+:td             = <td>
+:th             = <th>
+:tr             = <tr>
 :u              = <u>
-:ul             = myword <ul>
+:ul             = <ul>
 :var            = <var>
 :wbr            = <wbr/>
 
@@ -80,7 +78,7 @@
 ######  = <h6>
 *       = <em>
 **      = <strong>
->       = myword <blockquote>
+>       = <blockquote>
 ---     = <hr/>
 -       = list <ul>
 +       = list <ol>
@@ -144,12 +142,16 @@ deflist := (blank / key / val)* :: (x) => this.flatten(x).join('')
 
 array := row*                 :: (rows) => this.flatten(rows).join('')
     row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
-    cell  := item tsep?       :: (item) => ["<td>",markit('prose',this.flatten(item).join('')),"</td>"]
+    cell  := item tsep?       :: (item) => ["<td>",markit('myword',this.flatten(item).join('')),"</td>"]
     item  := (!delim char)+
     delim :~ %tsep | %nl
     tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
     nl    :~ [\n\f]|([\r][\n]?)
     char  :~ [\s\S]
+
+@css
+    table.array {border-collapse:collapse;}
+    .array td { border:thin solid gray; padding:2pt 10pt; }
 
 // iframe for imbed...
 
@@ -169,3 +171,19 @@ demo    :: (content) => "<tr><td class='A1'>" +
                 "</td><td class='B1'>" +
                 markit('myword',content) +
                 "</td></tr>"
+
+@css
+    .eg, table.demo td.A1 {
+        padding-left:10pt; padding-right:30pt;
+        white-space:pre; font-family:monospace; background:whitesmoke;
+    }
+
+    table.demo {
+        table-layout:fixed; width:100%;
+        border-spacing:5pt 0pt;
+    }
+    table.demo td.A1 {
+        width:50%; overflow:hidden; vertical-align:top;
+    }
+
+// TODO unused? @css  .pre { margin-left:20pt; }
