@@ -174,7 +174,7 @@ demo    :: (content) => "<tr><td class='A1'>" +
 
 @css
     .eg, table.demo td.A1 {
-        padding-left:10pt; padding-right:30pt;
+        padding-left:10pt; padding-right:10pt; padding-top:5pt; padding-bottom:5pt;
         white-space:pre; font-family:monospace; background:whitesmoke;
     }
 
@@ -182,8 +182,15 @@ demo    :: (content) => "<tr><td class='A1'>" +
         table-layout:fixed; width:100%;
         border-spacing:5pt 0pt;
     }
+
+    .eg, table.demo {
+        margin:5pt 0pt;
+    }
+
     table.demo td.A1 {
         width:50%; overflow:hidden; vertical-align:top;
     }
 
-// TODO unused? @css  .pre { margin-left:20pt; }
+    table.demo td.B1 {
+        overflow:hidden; vertical-align:top;
+    }
