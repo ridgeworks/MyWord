@@ -44,7 +44,7 @@ The `(asciimath) transform (which is implemented as a @grit[Grit] grammar) will 
 	simplify to get the two solutions:
 	:math[x_(1,2)=(-b+-sqrt(b^2 - 4a c))/(2a)]
 
-	&   :math = asciimath <math display=inline mathcolor=Maroon>
+	&   :math = <math display=inline mathcolor=Maroon> asciimath
 
 For more information on customizing the `(<math>) element, see @mathelement[The Top-Level `(math) Element].
 

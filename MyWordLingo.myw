@@ -171,7 +171,7 @@ Other prose elements:
         //  and more...
 
     &
-        > = myword <blockquote>
+        > = <blockquote> myword
         ~ = <u>
         ^ = <sup>
         _ = <sub>
@@ -223,7 +223,7 @@ Internal links can be used for cross references:
 
     &
         @id = linkID
-        #id = isID <b>
+        #id = <b> isID
 
         linkID :: (content) => {
             var id = markit('text', content);
@@ -281,9 +281,9 @@ There are various HTML tags for plain text:
     :kbd[keyboard text]
 
     &
-        :pre = text <pre>
-        :code = text <code>
-        :kbd = text <kbd>
+        :pre = <pre> text
+        :code = <code> text
+        :kbd = <kbd> text
 
 Plain text content for code or data should be presented verbatim, including any nested markup. The `[text] transform does this. In HTML itself there is no equivent way to quote text verbatim.
 
@@ -296,8 +296,8 @@ The shorthand symbols / can be used for a :pre element, and ` for a :code elemen
     `[some :code[code or data] text]
 
     &
-        / = text <pre>
-        ` = text <code>
+        / = <pre> text
+        ` = <code> text
 
 Syntax highlighting can be added:
 
@@ -309,7 +309,7 @@ Syntax highlighting can be added:
 		if x > 42:
 			print 'end of </script>.'
 
-    &   .py = highlight <pre class=py>
+    &   .py = <pre class=py> highlight
 
 The `[.py] label applies the `[highlight] translator to its content, and wraps the result into an HTML `[<pre>] element. The `[highlight] function translates the content text into HTML element for the Python syntax which enables style sheet rules to present the syntax highlighting.
 
@@ -335,9 +335,9 @@ HTML list tags can be used directly:
         :li  Another list item.
 
 &
-    :ul = myword <ul>
-    :li = myword <li>
-    :ol = myword <ol>
+    :ul = <ul> myword
+    :li = <li> myword
+    :ol = <ol> myword
 
 A quick and easy way to write lists is provided by defining labels that use a list transform function:
 
@@ -350,8 +350,8 @@ A quick and easy way to write lists is provided by defining labels that use a li
     +   Another list item.
 
     &
-        - = list <ul>
-        + = list <ol>
+        - = <ul> list
+        + = <ol> list
 
 The `[list] transform groups elements with the same label together as list item elements inside the given HTML list wrapper.
 
@@ -369,9 +369,9 @@ The third form of HTML lists is for defintions:
         :dd  Another defintion ...
 
 &
-    :dl = myword <dl>
-    :dt = text <dt>
-    :dd = myword <dd>
+    :dl = <dl> myword
+    :dt = <dt> text
+    :dd = <dd> myword
 
 A simpler way to write a list of defintions is to use the `[deflist] transform that enables the layout of the content text to directly represent terms and their defintions. The defintions are simply indented further than the term.
 
@@ -394,7 +394,7 @@ The `[deflist] transform also defines an ID attribute for the term line. This al
 
     &
         @notes = deflink
-        .notes = deflist <dl class=notes>
+        .notes = <dl class=notes> deflist
 
 &
     deflink :: (content) => {
@@ -440,10 +440,10 @@ Tables can be written using standard HTML table elements. This provides full fle
             :td  volume
 
 &
-    :table = myword <table>
-    :tr = myword <tr>
-    :th = myword <th>
-    :td = myword <td>
+    :table = <table> myword
+    :tr = <tr> myword
+    :th = <th> myword
+    :td = <td> myword
 
 :style
     th, td { padding-left: 10pt; }
@@ -456,7 +456,7 @@ A simple array format can be used to directly represent a small table. In an arr
         2    plane    area
         3    space    volume
 
-    &  .array = array <table class=array>
+    &  .array = <table class=array> array
 
 :style
     table.array {border-collapse:collapse;}
@@ -482,7 +482,7 @@ The `[array] transform is defined in the core lingo, so authors may define custo
     Erin    lamb madras   .r(hot)   $5
 
   &
-    .lunch = array <table class=lunch>
+    .lunch = <table class=lunch> array
     .g = <span style='color:green;'>
     .r = <span style='color:red;'>
 

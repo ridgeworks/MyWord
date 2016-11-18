@@ -94,7 +94,7 @@ Here is a sample of a few of the definitions for labels seen in previous example
 		** = <strong>
 		`  = <code>
 
-		> = myword <blockquote>
+		> = <blockquote> myword
 
 The special & label introduces a block of definitions. Each label is defined with the HTML element that it represent.
 
@@ -150,7 +150,7 @@ A footnote or end-note can be created from HTML components like this:
 		Kelvin: Absolute zero is 0°K ....
 
 	&
-		#nb = myword <div class='nb' id='nb'>
+		#nb = <div class='nb' id='nb'>
 		^nb  = <a class='nb' href='#nb'>
 
 The `[#nb] label is a block label that is defined with the target ID `[nb]. The `[^nb] label is defined as an HTML link to the target. The style sheet has presented this example in the form of a footnote.
@@ -165,11 +165,11 @@ Sometimes an author may want to quote the content text verbatim, without any tra
 .demo
 	Here is: `kbd[keyboard *[literal] text].
 
-	&   `kbd = text <kbd>
+	&   `kbd = <kbd> text
 
 The `[`kbd] label specifies a `[text] translation for the content text that will then be wrapped into a `[<kbd>] element. This means that any markup notations in the content text will not be translated, the source text will be quoted as literal text.
 
-Plain text translated verbatim may be presented with syntax higlighting:
+Plain text translated verbatim may be presented with syntax highlighting:
 
 .demo
 	A snippet of Python code:
@@ -179,7 +179,7 @@ Plain text translated verbatim may be presented with syntax higlighting:
 		if x > 42:
 			print 'end of </script>.'
 
-	&   .py = highlight <pre class=py>
+	&   .py = <pre class=py> highlight
 
 The `[.py] label applies the `[highlight] translator to its content, and wraps the result into an HTML `[<pre>] element. The `[highlight] function translates the content text into HTML element for the Python syntax which enables style sheet rules to present the syntax highlighting.
 
@@ -197,7 +197,7 @@ For example, the source text layout format can be used to directly represent an 
 		2    Two      Area
 		3    Three    Volume
 
-	&  .array = array <table class=array>
+	&  .array = <table class=array> array
 
 :style
 	table.array {border-collapse:collapse;}
@@ -224,7 +224,7 @@ Here is another example, for a month/day/year date format:
 .demo
 	It starts on .mdy[2/3/2013].
 
-	&   .mdy = mdy <b class=date>
+	&   .mdy = <b class=date> mdy
 
 &
 	mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
@@ -260,8 +260,8 @@ A label for a list item can be defined by a transform that will compose a group 
 
 	-  Third point.
 
-	&   - = list <ul>
-	&   + = list <ol>
+	&   - = <ul> list
+	&   + = <ol> list
 
 The `[list] transform wraps each item into an HTML `[<li>] list element, and then wraps a group of adjacent list items inside an HTML `[<ul>] or `[<ol>] list element.
 
@@ -278,7 +278,7 @@ An author may wish to break a document up into parts to be edited as separate fi
 .demo
 	@include  MyWord.part.myw
 
-	&	@include = include <div class='include'>
+	&	@include = <div class='include'> include
 
 	:style
 		.include { border:solid thin grey; }
@@ -296,7 +296,7 @@ For example, a `[~greet] markup label could be defined with a custom `[hello] tr
 	The standard ~greet[World] example.
 
 	&
-		~greet = hello <b style='color:magenta'>
+		~greet = <b style='color:magenta'> hello
 
 		hello :: (content) => "Hello "+content
 
@@ -307,7 +307,7 @@ The next example defines a `[tempF] translator functions to translate Celsius to
 .demo
 	It was .temp[42C] today.
 
-	&   .temp = tempF <span class=temp>
+	&   .temp = <span class=temp> tempF
 
 		tempF :~  ([+-]?\d+)\s*([CF]) :: (_,val,unit) =>
 
@@ -322,7 +322,7 @@ The next example defines the `[mdy] transform function for a month/day/year date
 
 	&
 
-		.date = mdy <span class=date>
+		.date = <span class=date> mdy
 
 		mdy  :~  (\d{1,2})\/(\d{1,2})\/(\d{4}) :: (_,m,d,y) => {
 			var dd = (d.length < 2)? '0'+d : d;

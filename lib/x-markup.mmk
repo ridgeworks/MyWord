@@ -2,14 +2,14 @@
 // definitions...
 
 &           = metamark
-()          = <span class='inset'>
+()          = <span class='inset'> myword
 @include    = include
 @imbed      = imbedURL
 
 // file type transforms..
 
 .myw        = myword
-.txt        = text <pre>
+.txt        = <pre> text
 
 // simple standard HTML5 element names
 
@@ -24,10 +24,10 @@
 :br             = <br/>
 :button         = <button>
 :cite           = <cite>
-:code           = text <code>
+:code           = <code> code
 :dl             = <dl>
 :dd             = <dd>
-:dt             = text <dt>
+:dt             = <dt> text
 :del            = <del>
 :dfn            = <dfn>
 :div            = <div>
@@ -43,20 +43,20 @@
 :hr             = <hr/>
 :i              = <i>
 :ins            = <ins>
-:kbd            = text <kbd>
+:kbd            = <kbd> text
 :li             = <li>
 :legend         = <legend>
 :mark           = <mark>
 :ol             = <ol>
 :p              = <p>
-:pre            = text <pre>
+:pre            = <pre> text
 :q              = <q>
 :s              = <s>
-:samp           = text <samp>
+:samp           = <samp> text
 :small          = <small>
 :span           = <span>
 :strong         = <strong>
-:style          = text <style scoped>
+:style          = <style scoped> text
 :sub            = <sub>
 :sup            = <sup>
 :table          = <table>
@@ -80,16 +80,16 @@
 **      = <strong>
 >       = <blockquote>
 ---     = <hr/>
--       = list <ul>
-+       = list <ol>
-`       = text <code>
-=       = text <kbd>
+-       = <ul> list
++       = <ol> list
+`       = <code> code
+=       = <kbd> text
 ~       = <u>
 ~~      = <s>
 ^       = <sup>
 _       = <sub>
-/       = text <pre>
-//      = text <span hidden>
+/       = <pre> text
+//      = <span hidden> text
 ?       = <mark>
 
 @       = linkURL
@@ -105,7 +105,7 @@ imgURL :: (content) =>  "<img src='"+content+"'/>"
 // id links...
 
 @id = linkID
-#id = isID <b>
+#id = <b> isID
 
 linkID :: (content) => {
     var id = markit('text', content);
@@ -138,7 +138,7 @@ deflist := (blank / key / val)* :: (x) => this.flatten(x).join('')
 
 // table array...
 
-.array = array <table class=array>
+.array = <table class=array> array
 
 array := row*                 :: (rows) => this.flatten(rows).join('')
     row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
@@ -162,12 +162,12 @@ imbedURL :: (content) => {
 
 // useful document elements ......
 
-.eg     = text <div class='eg'>
+.eg     = <div class='eg'> code
 
-.demo   = demo <table class='demo'>
+.demo   = <table class='demo'> demo
 
 demo    :: (content) => "<tr><td class='A1'>" +
-                markit('text',content) +
+                markit('code',content) +
                 "</td><td class='B1'>" +
                 markit('myword',content) +
                 "</td></tr>"

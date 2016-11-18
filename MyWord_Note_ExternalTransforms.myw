@@ -30,7 +30,7 @@ And now we can define labels which use this transform to syntax color blocks of 
 		if x > 42:
 			print 'end of </script>.'
 
-    &   .py = highlight <pre class=py>
+    &   .py = <pre class=py> highlight
 
 It's often convenient to package up the `(@import)'s and the auxiliary transforms (and maybe even label definitions) in their own package file, e.g., `(highlight.mmk) (again filepaths are dependant on file system configuration):
 
@@ -80,9 +80,9 @@ and just import the package:
     }
 
   &  @import highlight.mmk
-     .htm = highlight <pre class=htm>
-     .js  = highlight <pre class=js>
-     .css = highlight <pre class=css>
+     .htm = <pre class=htm> highlight
+     .js  = <pre class=js> highlight
+     .css = <pre class=css> highlight
 
 ###  Another Example, `(marked.js)
 
