@@ -3,7 +3,7 @@ MyWord provides a flexible translation system for converting annotated text to H
 
 One way of implementing such features is by using custom elements (introduced in HTML5; see @custom(Custom Elements)). MyWord labels can be easily defined to generate custom elements, and semantics can be added to those custom elements using JavaScript to access the full power of the environment. Both the label definitions and the associated JavaScript code can be collected into a single metamark package file which is then `(@import)ed by the source document. The remainder of this application note covers a number of examples of document level features that can be implemented in this way.
 
-The examples in this document use a few of the newer language features available in ECMAScript 2015 (6th Edition), namely arrow functions, template strings, and default parameters, but it shouldn't be difficult ot reqrite these for earlier versions of JavaScript is necessary.
+The examples in this document use a few of the newer language features available in ECMAScript 2015 (6th Edition), namely arrow functions, template strings, and default parameters, but it shouldn't be difficult to rewrite these for earlier versions of JavaScript if necessary.
 
 ###.  Example 1: Content Substitution
 Consider a boiler-plate style document that has a number of *(variable) references, e.g., a contract date or an author. Elsewhere in the document is a definitions list containing the *(values) to be substituted for the corresponding references.
