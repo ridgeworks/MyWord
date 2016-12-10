@@ -196,3 +196,5 @@ External global functions that meet the transform function signature requirement
     @marked = <a href='https://github.com/chjj/marked'>
     @import 3rdparty/Beautify/beautify.mmk
     @import 3rdparty/marked.js
+
+@include  myword_docStyle.myw

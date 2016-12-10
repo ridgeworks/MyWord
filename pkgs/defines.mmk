@@ -10,10 +10,7 @@
 
 // Generate a <myword-ref> custom element with default content equal to the reference name wrapped in <mark> element.
 //    Undefined references will be left as marked text.
-var_ref :: (content) => {
-            var ref = markit('text',content)
-            return ['<myword-ref name="', ref, '"><mark>%', ref, '</mark></myword-ref>'].join('')
-           }
+var_ref :: (content) => ((ref = markit('text',content)) => `<myword-ref name="${ref}"><mark>%${ref}</mark></myword-ref>`)()
 
 //
 // A definition list is a block of name-value pairs marked by label '%defines', .e.g.,
@@ -27,7 +24,7 @@ var_ref :: (content) => {
 %define = <myword-def> defineslist
 
 // transform 'deflist' is included with core lingo (see Myword Lingo)
-defineslist :: (content) => ['<dl class=var_define>', markit('deflist', content), '</dl>'].join('')
+defineslist :: (content) => `<dl class=var_define>${markit('deflist', content)}</dl>`
 
 // substitution is inline markup matching inline '%' refs
 @css    myword-ref * {display:inline}
@@ -35,7 +32,7 @@ defineslist :: (content) => ['<dl class=var_define>', markit('deflist', content)
 // javascript for <myword-def> custom element
 @javascript
   // <myword-def> define name value pairs and write value to named <myword-ref>'s
-  (function () {
+  ( () => {
       class MyWordDef extends HTMLElement {
           constructor() { super(); }
           connectedCallback() {
@@ -51,7 +48,7 @@ defineslist :: (content) => ['<dl class=var_define>', markit('deflist', content)
             } // for
           } // connectedCallback()
       } // MyWordDef
+
       if (!customElements.get('myword-def'))
         customElements.define('myword-def', MyWordDef)
-
   })()

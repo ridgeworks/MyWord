@@ -56,7 +56,7 @@
 :small          = <small>
 :span           = <span>
 :strong         = <strong>
-:style          = <style scoped> text
+:style          = <style> text
 :sub            = <sub>
 :sup            = <sup>
 :table          = <table>

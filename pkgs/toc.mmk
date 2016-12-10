@@ -30,7 +30,7 @@
 
 @javascript
   // <myword-toc> table of contents
-  (function () {
+  ( () => {
 	  
   class MyWordTOC extends HTMLElement {
       constructor() {

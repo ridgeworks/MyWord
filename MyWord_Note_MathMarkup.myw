@@ -27,6 +27,8 @@ Mathematical Markup Language, or MathML, is part of the HTML5 standard. From the
        math:  (a,b]={x in RR | a < x <= b}
 
 
+If you are not seeing properly rendered math on the right hand side, your browser may not support MathML; see the end of this document for possible ways around this limitation.
+
 The `(asciimath) transform (which is implemented as a @grit[Grit] grammar) will generate the content of the MathML `(<math>) element, but the `(<math>) element itself is defined by the label. This enables alternative or overriding label definitions to customize the appearance of math in the document:
 
 .demo
@@ -61,3 +63,5 @@ The `(asciimath) package provides a convenient way of incorporating math content
     @grit   = <a href='http://ridgeworks.github.io/MyWord/GritGrammarParser.html'>
     @mathelement = <a href='https://www.w3.org/TR/MathML2/chapter7.html#interf.toplevel'>
     @MJ     = <a href='https://www.mathjax.org/'>
+
+@include  myword_docStyle.myw
