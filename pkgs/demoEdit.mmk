@@ -42,7 +42,8 @@ demoEH   :: (content) => (
       this.contentEditable = true //; console.log('contentEditable=',this.contentEditable)
       this.addEventListener('keydown', (event) => { // replace tab functionality
         if (event.keyCode == 9 || event.which == 9) {
-          document.execCommand('insertText', false, '\t')
+          if (!event.defaultPrevented)		// Safari, Chrome issue: only insert on 'false'
+            document.execCommand('insertText', false, '\t')
           event.preventDefault()
         } else event.stopPropagation()
         return false    // don't lose focus

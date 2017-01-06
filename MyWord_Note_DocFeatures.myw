@@ -135,7 +135,8 @@ Editable content is commonly supported in modern browsers using the `(contentEdi
       this.contentEditable = true //; console.log('contentEditable=',this.contentEditable)
       this.addEventListener('keydown', function (event) { // replace tab functionality
         if (event.keyCode == 9 || event.which == 9) {
-          document.execCommand('insertText', false, '\t')
+          if (!event.defaultPrevented)		// Safari, Chrome issue: only insert on 'false'
+            document.execCommand('insertText', false, '\t')
           event.preventDefault()
         } else event.stopPropagation()
         return false    // don't lose focus
@@ -236,18 +237,22 @@ A package implementing the extended demo package is found in `(pkgs/demoEdit.mmk
 Custom elements are a part of the HTML5 Web Components standard and are supported to various degrees in current browsers. Until ubiquitous support is available, a polyfill for custom elements can be found at @cePolyfill(webcomponentsjs).
 ###.  Summary
 It is a fairly straight process to define MyWord labels which generate custom element tags, and then write JavaScript code in `(metamark) packages to provide semantics for those elements. In this way document level features can implemented that can't be easily done in a context insensitive translator like MyWord.
-&  .mmk = <pre> text
-   @import pkgs/toc.mmk pkgs/demoEdit.mmk
-   @intro = <a href='https://ridgeworks.github.io/MyWord/MyWord.html'>
-   @custom = <a href='https://www.w3.org/TR/custom-elements/'>
-   @lingo = <a href='https://ridgeworks.github.io/MyWord/MyWordLingo.html'>
-   @cePolyfill = <a href='https://github.com/webcomponents/custom-elements'>
 
-###.(Appendix A: `(defines.mmk)) 
+###.(Appendix A: `(defines.mmk))
 @include  pkgs/defines.mmk
 ###.(Appendix B: `(toc.mmk)) 
 @include  pkgs/toc.mmk
 ###.(Appendix C: `(demoEdit.mmk)) 
 @include  pkgs/demoEdit.mmk
 
-@include  myword_docStyle.myw
+&  .mmk = <pre> text
+   @import pkgs/toc.mmk pkgs/demoEdit.mmk
+   @intro = hyperlink https://ridgeworks.github.io/MyWord/MyWord.html
+   @custom = hyperlink https://www.w3.org/TR/custom-elements/
+   @lingo = hyperlink https://ridgeworks.github.io/MyWord/MyWordLingo.html
+   @cePolyfill = hyperlink https://github.com/webcomponents/custom-elements
+   @docstyle = stylelink stylesheets/myword_std.css
+   hyperlink :: (txt, url) => `<a href='${((url)?url:markit('text', txt)).trim()}'>${markit('myword', txt)}</a>`
+   stylelink :: (_, url) => `<link rel='stylesheet' type='text/css' href='${markit('text', url.trim())}'>`
+
+@docstyle()

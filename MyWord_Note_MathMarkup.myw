@@ -63,5 +63,7 @@ The `(asciimath) package provides a convenient way of incorporating math content
     @grit   = <a href='http://ridgeworks.github.io/MyWord/GritGrammarParser.html'>
     @mathelement = <a href='https://www.w3.org/TR/MathML2/chapter7.html#interf.toplevel'>
     @MJ     = <a href='https://www.mathjax.org/'>
+    @docstyle = stylelink stylesheets/myword_std.css
+    stylelink :: (_, url) => `<link rel='stylesheet' type='text/css' href='${markit('text', url.trim())}'>`
 
-@include  myword_docStyle.myw
+@docstyle()
