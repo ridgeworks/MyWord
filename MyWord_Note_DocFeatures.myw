@@ -49,7 +49,7 @@ The translation of MyWord content using these definitions will generate the nece
       for (var def=0; def < defs.length; def++) {  // defs.length is even number for <dt><dd> pairs
         var_name = defs[def].innerText      // name is innerText of <dt>
         var_value = defs[++def].innerHTML   // value is innerHTML of <dd>
-        refs = document.body.querySelectorAll('myword-ref[name="' + var_name + '"]')
+        refs = this.parentElement.querySelectorAll('myword-ref[name="' + var_name + '"]')
         for (var r = 0; r < refs.length; r++) {
           refs[r].innerHTML = var_value
         } // for
@@ -60,7 +60,7 @@ The translation of MyWord content using these definitions will generate the nece
   if (!customElements.get('myword-def'))
     customElements.define('myword-def', MyWordDef)
 
-The call to `(customElements.define) associates the `(MyWordDef) class with the custom tag `(myword-def). Whenever an instance of a `(myword-def) element is added to the DOM, the `(connectedCallback) method will be called. This method will scan the document for `(myword-ref)'s corresponding to its definitions, and substitute the associated value for the current content.
+The call to `(customElements.define) associates the `(MyWordDef) class with the custom tag `(myword-def). Whenever an instance of a `(myword-def) element is added to the DOM, the `(connectedCallback) method will be called. This method will scan the document for `(myword-ref)'s corresponding to its definitions, and substitute the associated value for the current content. Note that the scanning is restricted to the parent element of the `(MyWordDef) element, so only references in the same scope will be substitued
 
 The JavaScript and the label definitions can be combined in a single `(metamark) package file, as provided in the `(pkgs/defines.mmk) - see Appendix A for a source listing. 
 
@@ -147,7 +147,7 @@ Editable content is commonly supported in modern browsers using the `(contentEdi
   if (!customElements.get('myword-editable'))
     customElements.define('myword-editable', MyWordEditable)
 
-The second custom element named `(myword-sink) observes the content of another element, the source. When a change in the source content is detected, the new contents are transformed and the result replaces the current `(myword-sink) contents. A `(myword-sink) element has two defining attributes: the `(data-source), whose value is a CSS selector used to find the closest neighbour matching that selector, and the `(data-transform), whose value is the name of the transform to apply to the contents of the source. Here are the label and transform defintions for the current `(.demo) markup, and an extended version which allows editing source content will be reflected in the rendered HTML:
+The second custom element named `(myword-sink) observes the content of another element, the source. When a change in the source content is detected, the new contents are transformed and the result replaces the current `(myword-sink) contents. A `(myword-sink) element has two defining attributes: the `(data-source), whose value is a CSS selector used to find the closest neighbour matching that selector, and the `(data-type), whose value is the type of the source contents. Here are the label and type defintions for the current `(.demo) markup, and an extended version which allows editing source content will be reflected in the rendered HTML:
 .eg
 	.demo   = <table class='demo'> demo
 
@@ -162,7 +162,7 @@ The second custom element named `(myword-sink) observes the content of another e
     demoE   :: (content) =>
                 `<tr>
                     <td class='A1'><myword-editable>${markit('text', content)}</myword-editable></td>
-                    <td class='B1'><myword-sink data-source='.A1' data-transform=myword>${markit('myword', content)}</myword-sink></td>
+                    <td class='B1'><myword-sink data-source='.A1' data-type=myword>${markit('myword', content)}</myword-sink></td>
                 </tr>`
 
 The `(demoE) transform used for the live demo has an editable source element (`(td.A1)) and a sink element (`(td.B1)) which monitors it's closest neighbour (a direct descendant or ancestor's descendant) matching the selector `(.A1). When a change is observed the sink's contents are replaced by the result of applying the `(myword) transform to the modified source contents. Before looking at the code for the custom sink element, here's an example:
@@ -185,21 +185,21 @@ The MyWordSink custom element uses a MutationObserver to monitor changes in the 
 
         if (!this.id) this.id = 'sink' + Math.round(Math.random()*1000000)  // make sure element has an id
         var sourceSelector = this.getAttribute('data-source')
-        var transform = this.getAttribute('data-transform')
+        var type = this.getAttribute('data-type')
         if (sourceSelector) {
           var source = findClosest(this, sourceSelector.trim())
           if (source) {
             var sourceObserver = new MutationObserver((mutations, observer) => {
-              if (observer.transform) {
+              if (observer.type) {
                 observer.sink.textContent = observer.source.innerText || observer.source.textContent
-                window.postMessage({transform: observer.transform, selector: this.tagName.toLowerCase()+'#'+this.id}, '*')
+                window.postMessage({transform: observer.type, selector: this.tagName.toLowerCase()+'#'+this.id}, '*')
               } else {
-                observer.sink.textContent = observer.source.innerHTML // no transform, display raw HTML as text
+                observer.sink.textContent = observer.source.innerHTML // no type, display raw HTML as text
               }
             })
             sourceObserver.source = source
             sourceObserver.sink = this
-            sourceObserver.transform = transform ? transform.trim() : null
+            sourceObserver.type = type ? type.trim() : null
             sourceObserver.observe(source, {subtree: true, childList:true, characterData: true})
           } else {
             var errorInfo = "No source found in &lt;myword-sink> using selector " + sourceSelector
@@ -224,7 +224,7 @@ The `(metamark) definitions for this extended feature:
                 (source = content, html = markit('myword', content)) =>
                     `<tr>
                         <td class='A1'><myword-editable>${markit('text', source)}</myword-editable></td>
-                        <td class='B1'><myword-sink data-source='.A1' data-transform=myword>${html}</myword-sink></td>
+                        <td class='B1'><myword-sink data-source='.A1' data-type=myword>${html}</myword-sink></td>
                     </tr>
                     <tr>
                         <td style='vertical-align:top'><button onclick='((toHide) => toHide.hidden = !toHide.hidden) (this.parentElement.nextElementSibling)'>Toggle HTML Display</button></td>

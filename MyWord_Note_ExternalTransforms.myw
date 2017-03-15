@@ -44,45 +44,45 @@ and just import the package:
 .demo
   Some HTML:
   .htm
-    <!DOCTYPE HTML>
-    <html>
-    <head>
-    <meta lang=en charset="UTF-8">
-    <title>Grit Grammar Parser</title>
-    <script src='lib/x-markup.js'></script>
-    </head>
-    <body>
-        <script type=text/x-markup.myword>
-    @include  GritGrammarParser.myw
-        </script>
-    </body>
-    </html>
+      <!DOCTYPE HTML>
+      <html>
+      <head>
+      <meta lang=en charset="UTF-8">
+      <title>Grit Grammar Parser</title>
+      <script src='lib/x-markup.js'></script>
+      </head>
+      <body>
+          <script type=text/x-markup.myword>
+      @include  GritGrammarParser.myw
+          </script>
+      </body>
+      </html>
 
   and JavaScript:
   .js
-    function myFunction() {
+      function myFunction() {
         var str = "The rain in SPAIN stays mainly in the plain";
         var res = str.match(/ain/g);
         document.getElementById("demo").innerHTML = res;
-    }
+      }
 
   and CSS:
   .css
-    .pre { margin-left:20pt; }
+      .pre { margin-left:20pt; }
 
-    table.array {border-collapse:collapse;}
-    .array td { border:thin solid gray; padding:2pt 10pt; }
+      table.array {border-collapse:collapse;}
+      .array td { border:thin solid gray; padding:2pt 10pt; }
 
 
-    .eg {
+      .eg {
         padding-left:10pt; padding-right:30pt;
         white-space:pre; font-family:monospace; background:whitesmoke;
-    }
+      }
 
-  &  @import highlight.mmk
-     .htm = <pre class=htm> highlight
-     .js  = <pre class=js> highlight
-     .css = <pre class=css> highlight
+  &   @import highlight.mmk
+      .htm = <pre class=htm> highlight
+      .js  = <pre class=js> highlight
+      .css = <pre class=css> highlight
 
 ###  Another Example, `(marked.js)
 

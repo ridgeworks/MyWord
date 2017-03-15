@@ -87,9 +87,9 @@ Markup labels can be defined to represent any HTML elements, for example:
         author: = <h3>
         foot: = myword <div class=foot>
 
-    :style
-        h2, h3 { text-align: center; }
-        .foot { border-top: thin solid gray; font-size: small; }
+        @css
+          h2, h3 { text-align: center; }
+          .foot { border-top: thin solid gray; font-size: small; }
 
 
 ##	Block Content
@@ -175,10 +175,10 @@ This allows myword documents to be nested:
         foot: = myword <div class=foot>
         .box = myword <div class=box>
 
-    :style
-        h2, h3 { text-align: center; }
-        .foot { border-top: thin solid gray; font-size: small; }
-        .box { border:thin solid gray; }
+        @css
+          h2, h3 { text-align: center; }
+          .foot { border-top: thin solid gray; font-size: small; }
+          .box { border:thin solid gray; }
 
 The .box label uses the default myword grammar, but the .box label can be replaced by a .viz label that is defined to use a text grammar that simply quotes the source text verbatim:
 
@@ -226,10 +226,10 @@ The .box label uses the default myword grammar, but the .box label can be replac
         foot: = myword <div class=foot>
         .viz = text <pre class=box>
 
-    :style
-        h2, h3 { text-align: center; }
-        .foot { border-top: thin solid gray; font-size: small; }
-        .box { border:thin solid gray; }
+        @css
+          h2, h3 { text-align: center; }
+          .foot { border-top: thin solid gray; font-size: small; }
+          .box { border:thin solid gray; }
 
 Other blocks may have content with other formats. For example, the .array label uses a grammar that allows the layout of its content text to represent a table:
 
@@ -645,7 +645,7 @@ Of course the `[.myw] label is normally defined so that files with a `[.myw] suf
 
 .eg
     &
-        .myw = myword
+        .myw = <div> myword
         .txt = <pre> text
 
 Definitions of labels and transform functions are available inside included documents. Other definitions can be loaded from a separate file using the `[@import] instruction. As we saw in a previous example for AsciiMaths translation.

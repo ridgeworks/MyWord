@@ -41,7 +41,7 @@ defineslist :: (content) => `<dl class=var_define>${markit('deflist', content)}<
             for (var def=0; def < defs.length; def++) {   // defs.length is even number for <dt><dl> pairs
             var_name = defs[def].innerText      // name in <dt>
                 var_value = defs[++def].innerHTML   // use innerHTML   ; console.log(var_name,'=',var_value)
-                refs = document.body.querySelectorAll('myword-ref[name="' + var_name + '"]')
+                refs = this.parentElement.querySelectorAll('myword-ref[name="' + var_name + '"]')
                 for (var r = 0; r < refs.length; r++) {
                   refs[r].innerHTML = var_value
                 } // for

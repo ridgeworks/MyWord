@@ -3,7 +3,7 @@
 demoE   :: (content) =>
                 `<tr>
                     <td class='A1'><myword-editable>${markit('text', content)}</myword-editable></td>
-                    <td class='B1'><myword-sink data-source='.A1' data-transform=myword>${markit('myword', content)}</myword-sink></td>
+                    <td class='B1'><myword-sink data-source='.A1' data-type=myword>${markit('myword', content)}</myword-sink></td>
                 </tr>`
 
 
@@ -13,7 +13,7 @@ demoEH   :: (content) => (
                 (source = content, html = markit('myword', content)) =>
                     `<tr>
                         <td class='A1'><myword-editable>${markit('text', source)}</myword-editable></td>
-                        <td class='B1'><myword-sink data-source='.A1' data-transform=myword>${html}</myword-sink></td>
+                        <td class='B1'><myword-sink data-source='.A1' data-type=myword>${html}</myword-sink></td>
                     </tr>
                     <tr>
                         <td style='vertical-align:top'><button onclick='((toHide) => toHide.hidden = !toHide.hidden) (this.parentElement.nextElementSibling)'>Toggle HTML Display</button></td>
@@ -22,7 +22,7 @@ demoEH   :: (content) => (
              )()
 
 @css
-	myword-editable {display:block}
+	myword-editable {display:block; tab-size:4}
 	myword-editable:focus {outline:none; background:lightyellow}
 
 	table.demo td.A3 {
@@ -73,21 +73,21 @@ demoEH   :: (content) => (
 
         if (!this.id) this.id = 'sink' + Math.round(Math.random()*1000000)  // make sure element has an id
         var sourceSelector = this.getAttribute('data-source')
-        var transform = this.getAttribute('data-transform')
+        var type = this.getAttribute('data-type')
         if (sourceSelector) {
           var source = findClosest(this, sourceSelector.trim())
           if (source) {
             var sourceObserver = new MutationObserver((mutations, observer) => {
-              if (observer.transform) {
+              if (observer.type) {
                 observer.sink.textContent = observer.source.innerText || observer.source.textContent
-                window.postMessage({transform: observer.transform, selector: this.tagName.toLowerCase()+'#'+this.id}, '*')
+                window.postMessage({transform: observer.type, selector: this.tagName.toLowerCase()+'#'+this.id}, '*')
               } else {
-                observer.sink.textContent = observer.source.innerHTML // no transform, display raw HTML as text
+                observer.sink.textContent = observer.source.innerHTML // no type, display raw HTML as text
               }
             })
             sourceObserver.source = source
             sourceObserver.sink = this
-            sourceObserver.transform = transform ? transform.trim() : null
+            sourceObserver.type = type ? type.trim() : null
             sourceObserver.observe(source, {subtree: true, childList:true, characterData: true})
           } else {
             var errorInfo = "No source found in &lt;myword-sink> using selector " + sourceSelector

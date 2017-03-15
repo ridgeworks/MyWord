@@ -2,13 +2,13 @@
 // definitions...
 
 &           = metamark
-()          = <span class='inset'> myword
+// ()          = <span class='inset'> myword
 @include    = include
 @imbed      = imbedURL
 
 // file type transforms..
 
-.myw        = myword
+.myw        = <div> myword
 .txt        = <pre> text
 
 // simple standard HTML5 element names
