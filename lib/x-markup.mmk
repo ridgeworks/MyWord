@@ -1,7 +1,36 @@
+// Type definitions for basic HTML generation
 
-// definitions...
+errorString :: (content) =>	{
+                    if (console) console.error('markit: ' + content)
+                    return `<pre><mark style='color:blue'>\n*** Error *** ${markit('code', content)}\n</mark></pre>`
+                  }
+
+text        :: (content) => content.replace(/</g,'&lt;')
+code        :: (content) => content.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+
+blankline   :: (content) => '<div class=blank><br/></div>'
+
+insetblock  :: (content) => `<div class=insetblock>${markit('myword',content)}</div>`
+
+scope		:~ (\S*) \t ([\S\s]*)        :: (_, context, content) =>
+                    (context !== '') ?
+                        `<span class=myword data-context=${context}>${content}</span>` :
+                        (/<[^>]+>/.test(content) ?
+                            `<span class=myword>${content}</span>` :
+                            content)
+
+markedblock :~ (\S*) \t ([\S\s]*)        :: (_, label, content) =>
+                    `<dl><pre><dt><mark>${markit('text', label)}</mark></dt><dd>${markit('text', content)}</dd></pre></dl>`
+
+metajs      :: (javascript) => `<script type=application/javascript>${javascript}</script>`
+metacss     :: (css) => `<style scoped>${css}</style>`
+
+
+// Other default label definitions...
 
 &           = metamark
+({|)		= viz [
+(|})		= viz ]
 // ()          = <span class='inset'> myword
 @include    = include
 @imbed      = imbedURL
@@ -76,12 +105,10 @@
 ####    = <h4>
 #####   = <h5>
 ######  = <h6>
-*       = <em>
+*()     = <em>
 **      = <strong>
 >       = <blockquote>
 ---     = <hr/>
--       = <ul> list
-+       = <ol> list
 `       = <code> code
 =       = <kbd> text
 ~       = <u>
@@ -92,15 +119,40 @@ _       = <sub>
 //      = <span hidden> text
 ?       = <mark>
 
+// -       = <ul> list
+// +       = <ol> list
+// -	    = <li>
+// +	    = <li>
+// -..	    = <ul style="margin:0px">
+// +..     = <ol style="margin:0px">
+*       = <div class=mylistitem>
++       = <div class=mylistitem>
+-       = <div class=mylistitem>
+*..		= <ul style="margin:0px;list-style-type:disc">
+1..     = orderedlist decimal
+01..	= orderedlist decimal-leading-zero
+i..     = orderedlist lower-roman
+I..     = orderedlist upper-roman
+A..     = orderedlist upper-latin
+a..     = orderedlist lower-latin
+
+orderedlist :: (content, type) =>
+	`<ol style="margin:0px;list-style-type:${type}">${markit('myword',content)}</ol>`
+
+
 @       = linkURL
 !       = imgURL
 
-linkURL :: (content) => {
-    var url = markit('text', content);
-    return "<a href='"+url+"'>"+url+"</a>";
-    }
+link    :: (content, url) => `<a href="${url?url:content}">${markit('text',content)}</a>`
 
-imgURL :: (content) =>  "<img src='"+content+"'/>"
+image   :: (_,url) => `<img src=${url}>`
+
+linkURL :: (content, parms) => (
+    (url=parms.substring(0,parms.indexOf(' ')), desc=parms.substring(parms.indexOf(' ')).trim()) =>
+    `<a href="${markit('text', (url?url:(parms?parms:content)))}">${markit('myword', (content?content:desc))}</a>`
+    )()
+
+imgURL  :: (content) => `<img src='${markit('text', content)}'/>`
 
 // id links...
 
@@ -194,3 +246,12 @@ demo    :: (content) => "<tr><td class='A1'>" +
     table.demo td.B1 {
         overflow:hidden; vertical-align:top;
     }
+
+	div.mylistitem {
+		display:list-item; margin-left:40px
+	}
+
+	ol div.mylistitem, ul div.mylistitem {
+		margin-left:0px
+	}
+
