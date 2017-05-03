@@ -1,5 +1,6 @@
 // Type definitions for basic HTML generation
 
+
 errorString :: (content) =>	{
                     if (console) console.error('markit: ' + content)
                     return `<pre><mark style='color:blue'>\n*** Error *** ${markit('code', content)}\n</mark></pre>`
