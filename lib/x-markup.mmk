@@ -1,258 +1,206 @@
-// Type definitions for basic HTML generation
+@doc
+	***** Default Lingo *****
+	Type definitions required for basic HTML generation
 
+text        :: (content) => content.replace(/&/g,'&amp;').replace(/</g,'&lt;')
 
-errorString :: (content) =>	{
-                    if (console) console.error('markit: ' + content)
-                    return `<pre><mark style='color:blue'>\n*** Error *** ${markit('code', content)}\n</mark></pre>`
-                  }
+ctrl        :: (ctl) => {
+	             switch (ctl) {
+	               case '\n' : return '<span class=newline>\n</span>'
+	               case '\t' : return '<span class=tab>\t</span>'
+	               default   : return '<span class=my_ctl data-code=\''+ctl.charCodeAt(0).toString()+'\'>\ufffd</span>'
+	             }
+	           }
 
-text        :: (content) => content.replace(/</g,'&lt;')
-code        :: (content) => content.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+paragraph   :: (content) => `<p class=my_p>${markit('prose', content)}</p>`
 
-blankline   :: (content) => '<div class=blank><br/></div>'
+blankline   :: (_) => '<div class=my_blank>&nbsp;</div>'
 
-insetblock  :: (content) => `<div class=insetblock>${markit('myword',content)}</div>`
+insetblock  :: (content) => `<div class=my_insetblock>${markit('myword',content)}</div>`
 
-scope		:~ (\S*) \t ([\S\s]*)        :: (_, context, content) =>
-                    (context !== '') ?
-                        `<span class=myword data-context=${context}>${content}</span>` :
-                        (/<[^>]+>/.test(content) ?
-                            `<span class=myword>${content}</span>` :
-                            content)
+scope       :: (content, context) =>
+	             (context) ? `<span class=myword data-context=${context}>${content}</span>` : content
 
-markedblock :~ (\S*) \t ([\S\s]*)        :: (_, label, content) =>
-                    `<dl><pre><dt><mark>${markit('text', label)}</mark></dt><dd>${markit('text', content)}</dd></pre></dl>`
+markedblock :: (content, label) => ((blkcontent = content.replace(/\n/g, '\n\t')) =>
+	             `<pre class=Undefined>${markit('text', label)}\n\t${markit('text', blkcontent)}</pre>`
+	           ) ()
+
+errorString :: (content) => {
+	             if (console) console.error('markit: ' + content)
+	             return `<pre><mark style='color:blue'>*** Error *** ${markit('text', content)}</mark></pre>`
+	           }
 
 metajs      :: (javascript) => `<script type=application/javascript>${javascript}</script>`
 metacss     :: (css) => `<style scoped>${css}</style>`
 
 
-// Other default label definitions...
-
-&           = metamark
-({|)		= viz [
-(|})		= viz ]
-// ()          = <span class='inset'> myword
-@include    = include
-@imbed      = imbedURL
-
-// file type transforms..
-
-.myw        = <div> myword
-.txt        = <pre> text
-
-// simple standard HTML5 element names
-
-:abbr           = <abbr>
-:address        = <address>
-:article        = <article>
-:aside          = <aside>
-:b              = <b>
-:bdi            = <bdi>
-:bdo            = <b>
-:blockquote     = <blockquote>
-:br             = <br/>
-:button         = <button>
-:cite           = <cite>
-:code           = <code> code
-:dl             = <dl>
-:dd             = <dd>
-:dt             = <dt> text
-:del            = <del>
-:dfn            = <dfn>
-:div            = <div>
-:em             = <em>
-:footer         = <footer>
-:h1             = <h1>
-:h2             = <h2>
-:h3             = <h3>
-:h4             = <h4>
-:h5             = <h5>
-:h6             = <h6>
-:header         = <header>
-:hr             = <hr/>
-:i              = <i>
-:ins            = <ins>
-:kbd            = <kbd> text
-:li             = <li>
-:legend         = <legend>
-:mark           = <mark>
-:ol             = <ol>
-:p              = <p>
-:pre            = <pre> text
-:q              = <q>
-:s              = <s>
-:samp           = <samp> text
-:small          = <small>
-:span           = <span>
-:strong         = <strong>
-:style          = <style> text
-:sub            = <sub>
-:sup            = <sup>
-:table          = <table>
-:td             = <td>
-:th             = <th>
-:tr             = <tr>
-:u              = <u>
-:ul             = <ul>
-:var            = <var>
-:wbr            = <wbr/>
-
-// common light-weight markup.....
-
-#       = <h1>
-##      = <h2>
-###     = <h3>
-####    = <h4>
-#####   = <h5>
-######  = <h6>
-*()     = <em>
-**      = <strong>
->       = <blockquote>
----     = <hr/>
-`       = <code> code
-=       = <kbd> text
-~       = <u>
-~~      = <s>
-^       = <sup>
-_       = <sub>
-/       = <pre> text
-//      = <span hidden> text
-?       = <mark>
-
-// -       = <ul> list
-// +       = <ol> list
-// -	    = <li>
-// +	    = <li>
-// -..	    = <ul style="margin:0px">
-// +..     = <ol style="margin:0px">
-*       = <div class=mylistitem>
-+       = <div class=mylistitem>
--       = <div class=mylistitem>
-*..		= <ul style="margin:0px;list-style-type:disc">
-1..     = orderedlist decimal
-01..	= orderedlist decimal-leading-zero
-i..     = orderedlist lower-roman
-I..     = orderedlist upper-roman
-A..     = orderedlist upper-latin
-a..     = orderedlist lower-latin
-
-orderedlist :: (content, type) =>
-	`<ol style="margin:0px;list-style-type:${type}">${markit('myword',content)}</ol>`
-
-
-@       = linkURL
-!       = imgURL
-
-link    :: (content, url) => `<a href="${url?url:content}">${markit('text',content)}</a>`
-
-image   :: (_,url) => `<img src=${url}>`
-
-linkURL :: (content, parms) => (
-    (url=parms.substring(0,parms.indexOf(' ')), desc=parms.substring(parms.indexOf(' ')).trim()) =>
-    `<a href="${markit('text', (url?url:(parms?parms:content)))}">${markit('myword', (content?content:desc))}</a>`
-    )()
-
-imgURL  :: (content) => `<img src='${markit('text', content)}'/>`
-
-// id links...
-
-@id = linkID
-#id = <b> isID
-
-linkID :: (content) => {
-    var id = markit('text', content);
-    return "<a href='#"+id+"'>"+id+"</a>";
-    }
-
-isID :: (content) => {
-    var id = markit('text', content);
-    return "<span id='"+id+"'>"+id+"</span>";
-    }
-
-
-// dl terms definition lists...
-
-deflink :: (content) => {
-    var key = markit('text',content)
-    var id = key.replace(' ','_')
-    return "<a href='#def-"+id+"'>"+key+"</a>";
-  }
-
-deflist := (blank / key / val)* :: (x) => this.flatten(x).join('')
-    key :~ (?: [ ]? [^ \t\n\r])+ :: (dt) =>  {
-        var key = markit('text',dt)
-        var id = key.replace(' ','_')
-        return "<dt id='def-"+id+"'>"+key+"</dt>"
-    }
-    val :~ (?: (?: [\t]|[ ]{2,8}) [^\n\r]+ %blank*)+ :: (val) =>
-        "<dd>"+markit('myword',val)+"</dd>"
-    blank :~ [ \t]* (?: \n | \r\n?) :: () => ''
-
-// table array...
-
-.array = <table class=array> array
-
-array := row*                 :: (rows) => this.flatten(rows).join('')
-    row   := tsep* cell* nl?  :: (_,cells) => (cells.length>0)? ["<tr>",cells,"</tr>"] : ''
-    cell  := item tsep?       :: (item) => ["<td>",markit('myword',this.flatten(item).join('')),"</td>"]
-    item  := (!delim char)+
-    delim :~ %tsep | %nl
-    tsep  :~ ([ ]*[\t]|[ ]{2,}) [ \t]*
-    nl    :~ [\n\f]|([\r][\n]?)
-    char  :~ [\s\S]
+@doc
+	set default tab size to 4 spaces; inherited by all body content unless overridden
+	set newline to be significant, i.e., a line break.
+	set default paragraph margin to 0 (overrides user agent spacing).
 
 @css
-    table.array {border-collapse:collapse;}
-    .array td { border:thin solid gray; padding:2pt 10pt; }
+	body {tab-size:4; -moz-tab-size:4;}
+	span.newline {white-space:pre}
+	p.my_p {margin:0}
 
-// iframe for imbed...
 
-imbedURL :: (content) => {
-    var url = markit('text', content);
-    return "<iframe src='"+url+"' scrolling=no style='overflow:hidden; border:none; width:100%;'></iframe>";
-    }
+@doc
+	Types for treating parmstring in label defintions as the content for symbols
+	
+	`viz` treats parmstring as `myword`
+	`is` treats parmstring as raw text
 
-// useful document elements ......
+viz         :: (_, parmstring) => markit('myword', parmstring)
+is          :: (_, parmstring) => parmstring
 
-.eg     = <div class='eg'> code
 
-.demo   = <table class='demo'> demo
+@doc	`&` block notation for `metamark` content (type `metamark` defined in core translator)
 
-demo    :: (content) => "<tr><td class='A1'>" +
-                markit('code',content) +
-                "</td><td class='B1'>" +
-                markit('myword',content) +
-                "</td></tr>"
+& ..        <- metamark
+
+
+@doc
+	`@include` block notation for external content via URL (type `include` defined in core translator)
+	`.myw` and `.txt` block notations for file suffixes used with `@include`
+
+@include .. <- include
+.myw ..     <- <div class=mywInclude> myword
+.txt ..     <- <pre class=txtInclude> text
 
 @css
-    .eg, table.demo td.A1 {
-        padding-left:10pt; padding-right:10pt; padding-top:5pt; padding-bottom:5pt;
-        white-space:pre; font-family:monospace; background:whitesmoke;
-    }
+	pre.txtInclude {margin:0}
 
-    table.demo {
-        table-layout:fixed; width:100%;
-        border-spacing:5pt 0pt;
-    }
 
-    .eg, table.demo {
-        margin:5pt 0pt;
-    }
+@doc	`{ .. }` span notation (with alternative) for labeled inline content
 
-    table.demo td.A1 {
-        width:50%; overflow:hidden; vertical-align:top;
-    }
+{ .. }      <- inline { }
+{( .. )}    <- inline {( )}
 
-    table.demo td.B1 {
-        overflow:hidden; vertical-align:top;
-    }
+inline      :: (content, brackets) => {
+	              var parsed = /(\s*)(\S+)\s*([\S\s]*)/.exec(content)	// parsed=[all, leading, label, content]
+	              var br = brackets.split(' ')
+	              return (!parsed[1] && (markit.applyLabel(parsed[2]+' ..', null) !== null) && parsed[3])
+	                ? markit.applyLabel(parsed[2]+' ..', parsed[3])
+	                : [br[0], markit('myword', parsed[0]), br[1]].join('')
+	            }
 
-	div.mylistitem {
-		display:list-item; margin-left:40px
-	}
+@doc
+	inline      :~ (\s*)(\S+)\s*([\S\s]*)  :: (all, leading, label, content) =>
+					 (!leading && (markit.applyLabel(label+' ..', null) !== null) && content)
+					   ? markit.applyLabel(label+' ..', content)
+					   : markit('myword', all)
 
-	ol div.mylistitem, ul div.mylistitem {
-		margin-left:0px
-	}
 
+@doc	`[ .. ]` span notation for placeholders (references to label defintions)
+
+[ .. ]      <- asdefined
+asdefined   :: (contents) => ((defined = markit.applyLabel('['+contents.trim()+']', contents)) =>
+	             defined
+	               ? defined
+	               : `<span class=Undefined>[${markit('text', contents)}]</span>`
+	           ) ()
+
+
+@doc
+	`< .. >` span notation for hyperlinks, content is URL or notation can be literal `myword`
+	(Note: `link` type also used in placeholder defintions which supply the URL in the parmstring.)
+
+< .. >      <- link
+link        :: (contents, url) =>
+	             url
+	               ? `<a href='${url}'>${markit('myword',contents)}</a>`
+	               : ((/(?:(?:^[a-z](?:[-a-z0-9+.])*:\/\/)|(?:^[\/]?[^\s\/]+[\/.][^\s]+)|(?:#))\S+$/.test(contents.trim()))
+	                 ? `<a href='${contents.trim()}'>${contents}</a>`
+	                 : ['&lt;', markit('myword', contents), '>'].join('')
+	               )
+
+
+@doc
+	`#id ..` block notation for internal link targets, which are hidden by default.
+	`id` attribute value is the first word of the content, any remaining content is treated as `myword`.
+	
+
+#id ..       <- target
+target       :~ (\S+\s*)([\S\s]*) :: (_, id, content) =>
+	                   `<span class=target id='${id.trim()}'>${markit('text', id)}</span>${markit('myword', content)}`
+
+@css
+	span.target {visibility:hidden; height:1px; width:1px; position:absolute;}
+
+
+@doc	`image` type for use with placeholders, e.g., `[gopher] <- image images/gopher.png`
+
+image        :: (contents, url) => `<img src='${url?url:contents.trim()}' alt='${markit('text',contents)}'/>`
+
+
+@doc
+	Common Light-weight Markup:
+	-  block notations for headers (with id's) and block quote
+	-  span notation for escaping inline notations.
+	-  span notations for simple markup:`italics`, `bold` (with `alternatives), and `code`.
+	-  span notation for typograhical double quotes
+	-  symbols for horizontal rule and apostrophe
+
+# ..         <- header 1
+## ..        <- header 2
+### ..       <- header 3
+#### ..      <- header 4
+##### ..     <- header 5
+###### ..    <- header 6
+
+> ..         <- <blockquote class=my_blockquote>
+
+`` .. ``     <- <span class=my_text> text
+``( .. )``   <- <span class=my_text> text
+
+` .. `       <- <code class=my_text> text
+`( .. )`     <- <code class=my_text> text
+
+* .. *       <- <i>
+*( .. )*     <- <i>
+
+** .. **     <- <b>
+**( .. )**   <- <b>
+
+" .. "       <- <q class=my_dquo>
+"( .. )"     <- <q class=my_dquo>
+
+---          <- <hr class=my_hr />
+'            <- &rsquo;
+
+header       :: (c, level) =>
+	              `<h${level} class=my_h${level} id='toc${level}${c.trim().replace(/[^\w$-@.&!*(),]/g, '_')}'>${markit('myword', c)}</h${level}>`
+
+@css
+	h1.my_h1, h2.my_h2, h3.my_h3, h4.my_h4, h5.my_h5, h6.my_h6 {margin:0}
+	blockquote.my_blockquote {margin:0 40px}
+	q.my_dquo {quotes: "\201c" "\201d"}
+	.my_text {white-space:pre}
+	hr.my_hr + span.newline {display:none}
+
+
+@doc
+	Lists:
+	Alternative block notations for list items: `*` or `+` or `-`
+	`*..` block notation for unordered list
+	Several block notations for ordered list for numbers, letters, roman numerals etc.
+
+* ..         <- <div class=my_listitem>
++ ..         <- <div class=my_listitem>
+- ..         <- <div class=my_listitem>
+*.. ..       <- <ul class=mywordlist style="list-style-type:disc">
+1.. ..       <- orderedlist decimal
+01.. ..      <- orderedlist decimal-leading-zero
+i.. ..       <- orderedlist lower-roman
+I.. ..       <- orderedlist upper-roman
+A.. ..       <- orderedlist upper-latin
+a.. ..       <- orderedlist lower-latin
+
+orderedlist  :: (content, type) =>
+	              `<ol class=my_list style="list-style-type:${type}">${markit('myword',content)}</ol>`
+
+@css
+	.my_list {margin:0px}
+	.my_list div.my_listitem {margin-left:0px}
+	div.my_listitem {display:list-item; margin-left:40px}

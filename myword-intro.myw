@@ -1,0 +1,652 @@
+#    MyWord Markup Language
+
+A markup language enables authors to use annotations to *label* elements of text with their intended meaning. In MyWord documents the authors are free to choose their own *notations* to label text elements with their own meanings.
+
+MyWord documents do not depend on an external markup language specification to define the meaning of a notation. Instead the markup notations are self defined. Different authors with different topics can select and evolve their own markup notations.
+
+Here is an example of MyWord markup where the `##` symbol is used to label a header, and star `*` is used as a quote mark notation for italics:
+
+demo
+	##  A Header Line
+
+	The *Alice In Wonderland* story.
+
+On the left is the plain text source using MyWord markup, and on the right is an HTML presentation generated from the MyWord markup. The plain text markup can be edited with any text editor, and the translation into an HTML presentation can performed in any modern web-browser.
+
+This markup mimics the popular Markdown notations, but in MyWord the author can define any number of different notations. For example here is a different header label, and a bracket notation for the citation:
+
+sect
+	demo
+		==  A Header Line
+
+		The *<Alice In Wonderland>* story.
+	&
+		== ..    <-  <h2 style='margin:0; color:blue; font-style:italic; border-bottom:thin solid blue'>
+		*< .. >*  <-  <cite style='color:firebrick'>
+&	sect ..  <-  <div class=sect>
+
+Symbolic markup notations are neat and simple, but keyword labels are better for a larger vocabulary. In MyWord an author can choose any symbolic or keyword labels, including standard HTML tag names.
+
+The next example uses the HTML `h2` tag for a header, and the HTML `cite` tag for a citation:
+
+sect
+	demo
+		h2  A Header Line
+
+		The {cite Alice In Wonderland} story.
+	&
+		cite ..  <-  <cite>
+		h2 .. <- <h2 style='margin:0'>
+
+The label to `cite` the book title is a better semantic descriptor than the `*` which may be used to denote italics or emphasis. For simple notes the author may be satisfied with italics on the grounds that human readers will naturally deduce the semantic intent from the context. More complex commercial or technical documents may require a larger vocabulary with more specific semantic markup.
+
+In MyWord the author can choose a vocabulary of markup notations to suit any desired degree of semantic detail, and new labels can be defined as required.
+
+
+##	Label Vocabulary
+
+Simple documents only require a small set of markup labels for: headings, italics, bold, links, lists, and a few other things. These are the features provided in light-weight markup languages such as Markdown. They are also the basic features of a WYSIWYG (What You See Is What You Get) editor, as used for emails or blog notes and the like.
+
+For example, MyWord can mimic the popular Markdown notations:
+
+sect
+	demo
+		##  Level 2 Header
+		###  Level 3 Header
+		####    Level 4 Header
+
+		Inline elements: *italic*, **bold words**,
+		and `plain text`.
+
+		*  Bullet point list.
+		*  Second bullet point.
+		*  Third bullet point.
+
+		A link to the [Zen Garden] web-site.
+
+		&
+		   [Zen Garden]  <-  link http://www.csszengarden.com
+
+This example includes basic features similar to Markdown. The details will be explained shortly.
+
+In MyWord these features are not built-in, they are provided by a "lingo" of markup labels that the author can select and extend as desired.
+
+
+##	Markup Notations
+
+In MyWord the markup labels can be expressed using a variety of different notations, as seen in the previous examples. The notations themselves do not have any pre-defined meaning. The meaning assigned to each notation can be chosen to meet the authors requirements.
+
+###	Block Notations
+
+A block label is the first word at the start of a new line that is separated by an offset from the following content text that it labels. The offset is the syntax that distinguishes a label from a normal first word in a line of text. The offset can be a tab, or two or more spaces, or an indented line under the label. There can be any number of lines of content text inset under the label.
+
+Here are some examples:
+
+demo
+	###  A Header Line
+
+	### A line of text (no label offset).
+
+	box
+	  A box of text...
+
+	  box
+	    ###  Another Header
+
+	    box    A box in a box in a box...
+
+	  More content text...
+&
+	box ..  <- <div style='border:thin solid gray; margin:5pt 10pt'>
+The nice thing about an inset block is that the content can be absolutely any text at all. There is no special end symbol syntax, a inset block ends at the end of a line, where the indentation ends. The label will typically be a short tag with a few symbol characters, or a keyword.
+
+###	Paragraphs
+
+A paragraph is simply one or more lines of text that do not start with a label. A paragraph is terminated by a blank line, or a line with a label.
+
+By default the HTML presentation will wrap long lines to fit inside the available display width, and preserve any explicit line breaks inside a paragraph. This gives the HTML presentation the same general layout as the source text:
+
+demo
+	A line of prose with a
+	line break.
+
+If the author prefers to treat line breaks inside a paragraph as insignificant (the HTML default) then that can be done with a CSS style rule:
+
+sect
+	demo
+		A line of prose with a
+		line break.
+	&
+		@css
+			span.newline { white-space:normal; }
+
+###	Inline Notations
+
+Quote marks make a nice notation to markup common elements:
+
+sect
+	demo
+		Nice "quote marks" markup.
+
+		For code `if (x>y) p=q` it's back-tick quotes.
+
+		Some **bold and *italic* text** markup.
+
+	&
+		" .. "    <- <q>
+		* .. *    <- <i>
+		** .. **  <- <b>
+		` .. `    <- <code> text
+&
+	" .. "   <- <q>
+	@css
+		q {quotes: '\201C' '\201D'; }
+		q:before {content: open-quote; }
+		q:after  {content: close-quote; }
+
+For brackets, any sequence of symbol characters may be used in mirror image:
+
+sect
+	demo
+		The *<The Alice in Wonderland>* story.
+
+		A ~(fancy looking)~ note.
+
+		*<Alice through the ~(looking glass)~>*
+	&
+	  *< .. >*	 <- <i style='color:firebrick'>
+	  ~( .. )~	 <- <b style='color:blue; background:yellow'>
+
+Brackets can be defined as containers for other notations.
+
+For example, curly-bracket braces may be used as a container to enable keyword labels to be used inline:
+
+sect
+	demo
+		Some {em for emphasis} markup.
+
+		Hit the {button return} key.
+
+		Some {warn dangerous} markup.
+
+	&
+		em ..  <- <em>
+		button ..  <- <button>
+		warn ..  <- <span style='color:red'>
+A place-holder allows an author to represent any markup element with a simple square bracket notation that can be dropped into the prose narrative without interrupting the flow of their writing. The place-holder can be defined later.
+
+An HTML link or image requires a URL, but putting that information into the inline markup would disrupt the prose narrative. The place-holder definition is quite separate from the inline notation, it can be given later inside an `&` definition block (more on label definitions later):
+
+sect
+	demo
+		The [Zen Garden] web-site.
+
+		The GO Gopher: [gopher]
+
+	&
+	  [Zen Garden]  <- link http://www.csszengarden.com
+	  [gopher]      <- image images/gopher.png
+
+	  image :: (_, url) => `<img src='${url}' height=40 width=60 />`
+
+Most markup labels have content text, and they naturally correspond to HTML elements, but some labels stand for themselves as an entity, without any content text.
+
+Symbolic labels can be defined to directly represent HTML entities:
+
+sect
+	demo
+		It's Joe's <- nice apostrophes.
+		---
+		X\/Y <: Z
+	&
+		'	 <- &rsquo;
+		---	 <- <hr/>
+		\/	 <- &cup;
+		<:	 <- &isin;
+		<-	 <- &larr;
+
+Entity labels are not restricted to symbol characters, any word that starts with a symbol character can be used as an entity:
+
+sect
+	demo
+		\top-hat :smiley: ^1
+	&
+		\top-hat  <- &#127913;
+		:smiley:  <- &#x1f600;
+		^1        <- &#x1F44D;
+
+
+##  Markup Translation
+
+Any modern browser can load a MyWord translator as JavaScript in an HTML page, and this will enable the browser to directly read and translate plain text source files that contain MyWord markup notations.
+
+The translator requires a markup sheet to define the desired markup notations. A small markup sheet for Markdown-like notations may be all that is required:
+
+demo
+	&
+		# ..     <- <h1>
+		## ..    <- <h2>
+		### ..   <- <h3>
+		#### ..  <- <h4>
+
+		> ..  <- <blockquote>
+		* ..  <- <div class=list-point>
+
+		* .. *    <- <i>
+		** .. **  <- <b>
+		" .. "    <- <q>
+		` .. `    <- <code> text
+
+		[ .. ]  <- asdefined
+		{ .. }  <- inline
+
+A set of markup definitions like this can be included in the source text so that the document is self defined with its own "cheat sheet". This enables people to understand and edit the source text, and software can translate the markup into HTML for publication.
+
+In addition to markup that is defined inside a document, external markup sheets may be shared across documents. The MyWord translator can be packaged with a default markup sheet.
+
+A markup sheet is a bit like a CSS style sheet, but instead of defining the output presentation style the markup sheet defines the input markup notations.
+
+An author can use a lingo of pre-defined markup notations without needing to understand the details of how to define a notation. But as we will see it is quite easy to define new custom notations.
+
+
+##	Label Definitions
+
+A block label can be defined with any characters other than white-space, and the inset content text has no restrictions, the end is delimited by the indentation.
+
+###  Block Labels
+
+Labels are defined in a special definition block with an `&` label:
+
+sect
+	demo
+		###  A Header
+
+		box  A box of text..
+
+		&
+			### ..  <- <h3>
+			box ..  <- <div class=box>
+	&  @css .box { border: thin solid gray; }
+
+The text inside the `&` definition block uses a label definition language to assign markup labels their semantic meaning. The dots `..` after the label name indicates a block of content text. The `<-` operator defines these labels in terms of HTML elements.
+
+A MyWord block label can be defined to directly represent any  HTML block element.
+
+For examples, symbolic labels are defined here to represent HTML list elements and HTML list-item elements:
+demo
+	1..
+	    -	First numbered point
+	    -	Second point
+	    	i..
+	    	  -	First sub-point.
+	    	  -	Second point.
+	    -	Last numbered point.
+
+	&
+	  1.. ..  <- <ol>
+	  i.. ..  <- <ol style="list-style-type:lower-roman">
+	  - ..    <- <li>
+
+###	Inline Markup
+
+In a paragraph of prose an inline markup notation can use quote marks or brackets to delimit the content text.
+
+Quote marks are defined with the same symbols before and after dots `..` to indicate the content text:
+sect
+	demo
+		Some "quotes" for **bold words** and *italics*.
+
+		&
+		  * .. *     <- <i>
+		  ** .. **   <- <b>
+		  " .. "     <- <q>
+
+Brackets are defined using mirror image open and close symbols:
+sect
+	demo
+		Some *(star struck)* text.
+
+		The *<Alice In Wonderland>* book.
+
+		&
+		  *( .. )*  <- <em>
+		  *< .. >*  <- <cite class='book' style='color:firebrick'>
+
+By convention quote marks can be combined with parentheses to escape quote marks in the content:
+sect
+	demo
+		Tricky code `(`foo`)` to quote.
+
+		Some *(italic with nested **bold** text)*.
+
+		&
+		  `( .. )`  <- <code> text
+		  *( .. )*  <- <i>
+		  ** .. **  <- <b>
+
+The [Critic Markup] notations have been designed to help with document editing. They use bracket notations that can be defined like this:
+&
+	[Critic Markup] <- link http://criticmarkup.com
+sect
+	demo
+		Don't say {--to people that --}the world owes you a living....
+
+		Keep up the good work{++ and people will help++}.
+
+		&
+		  {-- .. --}   <- <del class=v01>
+		  {++ .. ++}   <- <ins class=v01>
+
+A label may be defined as a block label, and also for a different purpose as an inline label:
+sect
+	demo
+		*	The *first* point.
+			*	A *sub-pont* here..
+		*	The *second* point ...
+
+		&
+		  * ..    <- <div style='display:list-item; margin-left:40px'>
+		  * .. *  <- <em>
+
+###  Inline Keyword Labels
+
+A keyword label can be used for inline markup inside braces:
+sect
+	demo
+		Some {em for emphasis} markup.
+
+		Hit the {button return} key.
+
+		Some {warn dangerous} markup.
+
+		&
+			{ .. }  <- inline
+
+			em ..  <- <em>
+			button ..  <- <button>
+			warn ..  <- <span style='color:red'>
+
+This is a double level definition where the curly-bracket braces are defines as an "inline" type. This applies the key-word block labels to the content text.
+
+###  Place-holder Markup
+
+Square brackets can be used as a place-holder notation, which can be defined later in a label definition block:
+sect
+	demo
+		The [Alice In Wonderland] story.
+
+		&
+		  [Alice In Wonderland]  <- link
+		    https://en.wikipedia.org/wiki/Alice%27s_Adventures_in_Wonderland
+
+The square brackets are all that is needed to markup the authors place-holder text. Later the place-holder is defined as an HTML `link` to a URL.
+
+The place-holder could have been defined directly as an HTML element (as in earlier examples), but in this case it is easier to name a `link` transform, which will generate an HTML link element. Other convenient transforms can be used to generate other HTML elements, such as an image and other things, the use of transforms in label definitions will be explained shortly.
+
+
+###	Symbolic Entities
+
+Symbol characters can be defined as labels that have no content text:
+sect
+	demo
+		It's Joe's <- nice apostrophes.
+		---
+		X\/Y <: Z
+
+		&
+			'    <- &rsquo;
+			---  <- <hr/>
+			\/   <- &cup;
+			<:   <- &isin;
+			<-   <- &larr;
+
+Any word that starts with a symbol character can be used as a markup notation to represent any replacement text:
+sect
+	demo
+		\top-hat :smiley: ^1
+
+		&
+		  \top-hat  <- &#127913;
+		  :smiley:  <- &#x1f600;
+		  ^1  <- &#x1F44D;
+
+###	Label Scope
+
+Labels can be defined inside a local section of text, for example:
+sect
+	demo
+		##  A Header Line
+
+		The *Alice In Wonderland* story.
+
+		&
+		  ## ..   <- <h2 class='blue'>
+		  * .. *  <- <cite class='book'>
+&	@css
+		h2.blue {color:blue}
+		cite.book {color:firebrick}
+
+These local label definitions are defined inside a local block, and are only visible in that block and its children.
+
+A local definition applies to all the blocks at the same indent level or deeper. They are not seen by blocks at a higher level (i.e. with a smaller indent). Definitions at the top level (no indent) are global to the whole document.
+
+Each level of a MyWord document is a sequence of blocks. These blocks may be labelled blocks that may contain nested level(s) of children blocks, or an unlabelled blocks of prose that may contain inline markup.
+
+An `&` block contains label definitions that apply to the labels of all the sibling blocks (before or after the definition). A block label can define its own private syntax for it's own content, but by default the label definitions are visible from any descendant children.
+
+The label definitions therefore have a local lexical scope that can be inherited from parent levels. The resolution of a label definition starts with any definitions made in a sibling block at the same level, or otherwise in a sibling of the parent block, and so on up to the top level of the document.
+
+The first most local label definition will be used, so a local definitions can over-ride a more global definition. At any one level there can be only one definition for any given label, multiple definitions at the same level will be reported as a fault.
+
+A label definition may define it's own syntax translation, so a block may contain any terminal syntax, or even it's own embedded nested label structure.
+&
+	squote :: (c) => markit('myword',"&lsquo;"+c+"&rsquo;")
+	dquote :: (c) => markit('myword',"&ldquo;"+c+"&rdquo;")
+
+
+##	Give It A Try
+
+Here is a little example that you can play around with. just click into the left hand text and edit it.  For example, change the `*edit*` notation to `**edit**` to change if from italics to bold:
+demoH
+	##  Hello World
+
+	You can *edit* this text to *see* what happens.
+
+	The markup **definitions** can be edited too:
+
+	&
+		## ..     <- <h2>
+		* .. *    <- <i>
+		** .. **  <- <b>
+
+Don't worry, this example is a sand-box, your will not change anything else in this document. Your editing will not be saved, it will vanish if you reload this document.
+
+All the examples in this document can be edited. You may also notice that this example has an extra little HTML tag at the bottom. This allows you to see the HTML that your markup generates.
+
+
+##	Transforms
+
+A markup label can often be directly defined as an HTML (or XML) element, and by default the content text will be translated as MyWord markup that may contain nested MyWord markup (in the same way that HTML elements can contain nested HTML).
+
+However, sometimes the author may want the content text to contain some other kind of markup language, or to contain plain text without any markup language (so that markup notations will be presented as literal text). To do this the definition of a markup label can name a transform to specify how the content text should be translated.
+
+For example, if back-tick quote marks are defined to denote plain text source code, then the content text should be interpreted as literal text, regardless of any nested markup notations:
+demoH
+
+	Italics for maths *(`a*b+c*d`)*
+
+	Some *(``italic with *nested* text``)*.
+
+	&
+		* .. *    <- <i>
+		*( .. )*  <- <i>
+		` .. `    <- <code> text
+		`` .. ``  <- text
+
+In this example star quotes are used for emphasis, and the back-ticks for plain text. By default the content is interpreted as nested MyWord, but the definition for the back-tick quotes specify a `text` transform so that the content text is presented verbatim. The other examples are variations on the same theme.
+
+The transform for the `text` type, and some others, are pre-defined. However, just as custom markup labels can be defined, so too can custom transform functions. For the moment we will assume that all the types we need are pre-defined.
+
+A block label may be used to present programming language code as `text`. The label definition can specify attributes in an HTML element to enable syntax highlighting to be applied:
+sect
+	demoH
+		.js
+		  // sample JavaScript ...
+
+		  const greet = (who) =>
+		    console.log(`Hello ${who}!`)
+
+		  greet("World") // Hello World!
+
+		&
+		  .js ..  <- <pre class='js'> text
+	&  @css .js {background:lemonchiffon;}
+
+The `text` type is plain source text, but in general the content text can be any type. A transform can be used to translate any desired source text language into HTML.
+
+For example, MyWord can mimic the Markdown angle-bracket notation for a URL. In this case the content text is a URL that is translated into an HTML link:
+sect
+	demoH
+		A URL <www.csszengarden.com> link.
+
+		But <this *and* that> is not a link.
+
+		&  < .. >   <- linkURL
+	&
+		linkURL :: (contents) =>
+		  ((/(?:(?:^[a-z](?:[-a-z0-9+.])*:\/\/)|(?:^[\/]?[^\s\/]+[\/.][^\s]+)|(?:#))\S+$/.test(contents.trim()))
+		  ? `<a href='${contents.trim()}'>${contents}</a>`
+		  : ['&lt;', markit('myword', contents), '>'].join(''))
+
+The `linkURL` transform will check if the text content is a valid URL format. If it is, then the transform will generate an HTML link element. If not, then then the text will be translated as normal, as in the second example (since a URL can not contain white-space).
+
+Braces can be used as a markup notation for text that starts with a keyword label. The `inline` transform can be used to apply keyword definitions to the content of the braces:
+sect
+	demoH
+		Some {hot pepper curry}.
+
+		Some {mild spicy peas}.
+
+		&
+		  { .. }   <- inline
+		  hot ..   <- <span class=hot>
+		  mild ..  <- <span class=mild>
+	&
+		@css
+			.hot { color:red; }
+			.mild { color:green; }
+
+The place-holder notation is very similar. The square bracket notation uses an `asdefined` transform to find a definition that matches the content text:
+sect
+	demoH
+		See the [Zen Garden] web site.
+
+		The [top-hat] tea party.
+
+		&
+		  [ .. ]        <- asdefined
+		  [Zen Garden]  <- link http://www.csszengarden.com
+		  [top-hat]     <- is &#127913;
+
+Square brackets are a traditional notation that is used for various kinds of references. The MyWord place-holder notation follows this convention.
+
+Since *every* place-holder is expected to have it's own definition, any *undefined* place-holders can be highlighted. This very helpful for editing an incomplete draft:
+sect
+	demoH
+		The [Alice Through The Looking Glass] story.
+	&
+		@css .Undefined { background:yellow; }
+
+Notice that the square brackets for place-holder elements, and the braces for inline elements, are not built-in notations. If an author wants to use square brackets in prose for some other purpose, then the place-holder notation can be re-defined with some other pair of bracket symbols.
+
+A transform can provide a convenient way for an author to define a label without the need to write out a full HTML element definition. In the next example the `link` transform generates an HTML link element to the given target URL, and the `image` transform generates an HTML element for the given image URL:
+sect
+	demoH
+		The [Zen Garden] web-site.
+
+		The GO Gopher: [gopher]
+
+		&
+		  [Zen Garden]  <- link http://www.csszengarden.com
+		  [gopher]      <- image images/gopher.png
+	&  image :: (_, url) => `<img src='${url}' height=40 width=60 />`
+
+This is a convenient shorthand, on the other hand writing the HTML element out in full does allow all the HTML attributes to be explicitly specified.
+
+
+##	Transform Definitions
+
+Authors do not usually need to define their own transforms, but it is good to know that it is easy to do.
+
+In general a markup definition sheet can contain both label and transform definitions. So all the markup notations in a MyWord document can be fully self defined in the document itself, independent of the core MyWord translator.
+
+Transforms can be defined as standard JavaScript functions. For example, here is a simplified version of the `linkURL` transform that generates an HTML link element:
+sect
+	demoH
+		See <http://www.csszengarden.com>.
+
+		&
+		  < .. >   <- linkURL
+
+		  linkURL :: (url) => `<a href="${url}">${url}</a>`
+
+The `::` operator defines the transform as a JavaScript arrow function. The content text from the markup label notation is passed as an argument value to the transform function, in this case the content text is expected to be a URL.
+
+In addition to the content text a transform function can take a second argument value from the markup definition:
+sect
+	demoH
+		See [CSS Zen Garden].
+
+		&
+		  [CSS Zen Garden]  <- link http://www.csszengarden.com
+
+		  link :: (content, url) => `<a href="${url}">${content}</a>`
+
+This simplified `link` function has copied the content text into the HTML link element verbatim. Often the content text will have a transform applied to it. This next version translates the content text as MyWord:
+sect
+	demoH
+		See [CSS *Zen Garden*].
+
+		&
+		  [CSS *Zen Garden*]  <- link http://www.csszengarden.com
+
+		  link :: (content, url) =>
+		  	`<a href="${url}">${markit('myword',content)}</a>`
+
+The `markit` function is the API for the MyWord core translator that can apply any named transform to translate a text string.
+
+A transform can be defined as a JavaScript function, but it is often helpful to define it using BNF grammar rules.
+
+For example, here is a grammar for simple chemical formulae:
+sect
+	demoH
+		Butane ~CH3CH2CH2CH3~
+
+		Isobutane ~(CH3)3CH~
+
+		&
+			~ .. ~  <- <span class=chem> chem
+
+			chem   := (num / char)* :: string
+			  char :~ \D*           :: string
+			  num  :~ \d+           :: (n) => `<sub>${n}</sub>`
+
+The `:=` grammar rules are PEG (Parser Expression Grammar) rules, while the `:~` grammar rules are Regular Expressions. The `::` introduces a semantic action that can use any JavaScript code to process the parse tree.
+
+A JavaScript function can be written for any kind of custom transform. The grammar rules provide a convenient way to automate the creation of a parser for the transform.
+
+
+##	Conclusion
+
+MyWord markup can be used in much the same way as a light-weight markup language such as Markdown. The MyWord markup notations can mimic the easy to read Markdown notations. The difference is that MyWord is extensible, and authors can define their own markup notations for their own purposes.
+
+The means that MyWord documents do not depend a set of feature that are defined in a particular external translator. Instead the MyWord markup notations are determined by the author so that the document is self defined. A MyWord document together with its markup definitions can be loaded directly into any modern browser using a generic JavaScript MyWord to HTML translator.
+
+In a markup language such as Markdown the author must fall back to HTML for any features outside the built-in features of a particular Markdown translator. With MyWord the author can define custom markup notations to represent any desired HTML. The markup notations can be extended to suit any particular topic, and to suit the authors personal preferences.
+
+The MyWord notations can be defined in terms of HTML or XML, and custom text transforms (if required) can be defined using JavaScript. This ensures that MyWord documents will survive for generations, since their only external dependency is a standard web-browser. Browsers are rapidly evolving, but they have a strong commitment and incentive to remain backward compatible in order to preserve the millions of HTML web pages already published on the Internet.
+
+In fact, since a MyWord document (including the markup definitions) is easy to read as plain text, there is no essential external dependency at all.
+
+&
+	@import  pkgs/demo.mmk

@@ -1,258 +1,248 @@
-##.  Implementing Document Features for MyWord
-MyWord provides a flexible translation system for converting annotated text to HTML. But many useful features can't be done with only a translator. One example is a table of contents generator which needs to collect heading information from the entire document. Another example is an extension of the `(.demo) notation used in the MyWord documentation (e.g., @intro(MyWord Markup)) which permits a user to dynamically edit the contents. 
+[MyWordCSS]
+##  Implementing Document Features for MyWord
+MyWord provides a flexible translation system for converting annotated text to HTML. But some useful features can't be done with only a translator. One example is a table of contents generator which needs to collect heading information from the entire document. Another example is an interactive 'demo' feature which permits a user to dynamically edit MyWord source in one text area and instantaneously see the result of the changes in an adjacent area.
 
-One way of implementing such features is by using custom elements (introduced in HTML5; see @custom(Custom Elements)). MyWord labels can be easily defined to generate custom elements, and semantics can be added to those custom elements using JavaScript to access the full power of the environment. Both the label definitions and the associated JavaScript code can be collected into a single metamark package file which is then `(@import)ed by the source document. The remainder of this application note covers a number of examples of document level features that can be implemented in this way.
+One way of implementing such features is by using custom elements (introduced in HTML5; see [Custom Elements]). MyWord labels can be easily defined to generate custom elements, and semantics can be added to those custom elements using JavaScript to access the full power of the browser environment. Both the label definitions and the associated JavaScript code can be collected into a single metamark package file which is then `@import`ed by the source document. The remainder of this application note covers a couple of examples of document level features that can be implemented in this way.
 
 The examples in this document use a few of the newer language features available in ECMAScript 2015 (6th Edition), namely arrow functions, template strings, and default parameters, but it shouldn't be difficult to rewrite these for earlier versions of JavaScript if necessary.
 
-###.  Example 1: Content Substitution
-Consider a boiler-plate style document that has a number of *(variable) references, e.g., a contract date or an author. Elsewhere in the document is a definitions list containing the *(values) to be substituted for the corresponding references.
+###  Example 1: A Simple Table of Contents
+For this example, a "Table of Contents" is defined as a table of links to "headings" in the document. Headings are defined as any HTML element with an `id` attribute value whose prefix is the string `toc`. The following character is in the range `'0'` to `'9'` indicating the header level, and the remaining of the id uniquely identifies the header in the document. The header labels ((`'#'`) to (`'######'`)) in the [default lingo] generate compatible `id` values.
 
-For this example, the label `(%) will be used to identify references, e.g., `(%(version)). The content of the reference is the variable name, which will be associated with a value in a definitions list somewhere else in the document. A simple example:
-.demo
-	%(version) was released on *(%(release-date)). 
+A generated table of contents consists of a custom element `<myword-toc>` so a label must be defined to make this happen:
+>
+  ` &   myTOC .. <- toc 1 4`
+Using the `.toc` label will generate a table of headings in all levels (0-9). Any content in the block will be placed before the generated table. 
 
-	A %(missing) definition.
-	
-	%define
-		version		:b(v0.1)
-		release-date	September 3, 2016
+A custom element class is required to actually generate the table of links to the respective headings:
+eg
+	class MyWordTOC extends HTMLElement {
+		constructor() {
+			super();
+			this._minlevel = 0;
+			this._maxlevel = 9;
+		} // constructor()
 
-	&  @import pkgs/defines.mmk
-	   @css myword-def {font-size:smaller}
+		connectedCallback() {
+			var oldTOC = this.querySelector('.toc')
+			if (oldTOC) // if .toc already there, remove then rebuild
+				oldTOC.parentNode.removeChild(oldTOC)
+			var level
+			level = this.getAttribute('minlevel')
+			this._minlevel = (level) ? level : this._minlevel
+			level = this.getAttribute('maxlevel')
+			this._maxlevel = (level) ? level : this._maxlevel
+			var headers = document.querySelectorAll('*[id^=toc]')
+			var tocContent = [`${this.innerHTML}<table class=toc>`]
+			headers.forEach((header) => {
+				var level = Number.parseInt(header.id[3])  // id='tocN...'
+				if ((level >= this._minlevel) && (level <= this._maxlevel))
+					tocContent.push(`<tr><td><a href="#${header.id}">${header.innerHTML}</a></td></tr>\n`)
+			})
+			tocContent.push('</table>')
+			this.innerHTML = tocContent.join('')
+		} // connectedCallback()
+	} // MyWordTOC
 
-By default, if no definition is provided, a reference will be marked to identify possible problems. Here's the label definition for `(%):
-.eg
-	% = var_ref
+	if (!customElements.get('myword-toc'))
+	customElements.define('myword-toc', MyWordTOC)
 
-	var_ref :: (content) => (
-	        (ref = markit('text',content)) => `<myword-ref name="${ref}"><mark>%${ref}</mark></myword-ref>`
-	    )()
-
-Note that the reference will be contained in a `(myword-ref) custom element with a `(name) attribute value set to the name of the variable. The content of the custom element is a marked copy of the variable name in case there is no definition.
-
-Definitions will put in a `(%define) block using the `(deflist) transform provided by the @lingo(Core Lingo):
-.eg
-	%define = defineslist <myword-def>
-
-    defineslist :: (content) => `<dl class=var_define>${markit('deflist', content)}</dl>`
-
-A defines list is contained in a custom `(myword-def) element containing a `(dl.var_define) (using CSS selector syntax).
-
-The translation of MyWord content using these definitions will generate the necessary custom elements for references and definitions, but will not perform any content substitution. This requires adding semantic meaning to `(myword-def) elements. When a `(myword-def) gets added to the document, all the definitions should be used to scan for corresponding references. Their content is then replaced by the definition content. The code to accomplish this is:
-.eg
-  class MyWordDef extends HTMLElement {
-    constructor() { super(); } 
-    connectedCallback() {
-      var defs = this.firstChild.children               // <myword-def><dl>...
-      var var_name, var_value, var_p, refs
-      for (var def=0; def < defs.length; def++) {  // defs.length is even number for <dt><dd> pairs
-        var_name = defs[def].innerText      // name is innerText of <dt>
-        var_value = defs[++def].innerHTML   // value is innerHTML of <dd>
-        refs = this.parentElement.querySelectorAll('myword-ref[name="' + var_name + '"]')
-        for (var r = 0; r < refs.length; r++) {
-          refs[r].innerHTML = var_value
-        } // for
-      } // for
-    } // connectedCallback()
-  } // MyWordDef
-
-  if (!customElements.get('myword-def'))
-    customElements.define('myword-def', MyWordDef)
-
-The call to `(customElements.define) associates the `(MyWordDef) class with the custom tag `(myword-def). Whenever an instance of a `(myword-def) element is added to the DOM, the `(connectedCallback) method will be called. This method will scan the document for `(myword-ref)'s corresponding to its definitions, and substitute the associated value for the current content. Note that the scanning is restricted to the parent element of the `(MyWordDef) element, so only references in the same scope will be substitued
-
-The JavaScript and the label definitions can be combined in a single `(metamark) package file, as provided in the `(pkgs/defines.mmk) - see Appendix A for a source listing. 
-
-###.  Example 2: A Simple Table of Contents
-For this example, a "Table of Contents" is defined as a table of links to "headings" in the document. "headings" are `(<h1>..<h6>) elements with the custom attribute `(data-myword-toc). The actual table of contents will be an instance of the custom element `(myword-toc). This element has two optional attributes, `(min-level) and `(max-level), specifying the range of headings to be placed in the table of contents. For example, `(<myword-toc min-level=1 max-level=4>) will generate a table of links to elements between `(<h1>) and `(<h4>). The default range is `(min-level=1) to `(max-level=6).
-
-The label definitions required for this "Table of Contents" feature is:
-.eg
-  .toc      = <myword-toc minlevel=1 maxlevel=4>
-  .toc-all  = <myword-toc>
-
-  #.        = <h1 data-myword-toc>
-  ##.       = <h2 data-myword-toc>
-  ###.      = <h3 data-myword-toc>
-  ####.     = <h4 data-myword-toc>
-  #####.    = <h5 data-myword-toc>
-  ######.   = <h6 data-myword-toc>
-
-Using the `(.toc) label will generate a table of headings 1-4, while `(.toc-all) will generate a table of all the headings. A custom element class is required to actually generate the table of links to the respective headings:
-.eg
-  class MyWordTOC extends HTMLElement {
-    constructor() {
-      super();
-      this._minlevel = 1;
-      this._maxlevel = 6;
-    } // constructor()
-    connectedCallback() {
-      var oldTOC = this.querySelector('.toc')
-      if (oldTOC) // if .toc already there, remove then rebuild
-        oldTOC.parentNode.removeChild(oldTOC)
-      var level
-      level = this.getAttribute('minlevel')
-      this._minlevel = (level) ? level : this._minlevel
-      level = this.getAttribute('maxlevel')
-      this._maxlevel = (level) ? level : this._maxlevel
-      var hselector = []
-      for (var level = this._minlevel; level<= this._maxlevel; level++ ) {
-        hselector.push('h' + level.toString() + '[data-myword-toc]')
-      } // for
-      var headers = document.querySelectorAll(hselector.join(', '))	// gets all selected heading elements
-      var header, header_id, tocContent = [this.innerHTML, '<table class=toc>']	// generated table of contents
-      for (var h = 0; h < headers.length; h++) {
-        header = headers[ h ]
-        header_id = header.id
-        if (!header_id) {	// if heading doesn't have an id, generate one based on content
-          header_id = 'toc' + header.textContent.trim().replace(/[^\w$-@.&!*(),]/g, '_')
-          header.id = header_id
-        }
-        tocContent.push('<tr><td><a href="#', header_id, '">', header.innerHTML, '</a></td></tr>\n')
-      } // for
-      tocContent.push('</table>')
-      this.innerHTML = tocContent.join('')
-    } // connectedCallback()
-  } // MyWordTOC
+The custom class `MyWordTOC` will generate an innerHTML content consisting of the current `myword-toc` content followed by a `<table class=toc>` whose rows consist of links to the corresponding heading. The table of contents for this document:
+demoS
+  myTOC  **Table of Contents**
   
-  if (!customElements.get('myword-toc'))
-    customElements.define('myword-toc', MyWordTOC)
+  &  myTOC .. <- toc
 
-The custom class `(MyWordTOC) will generate an innerHTML content consisting of the current `(myword-toc) content followed by a `(<table class=toc>) whose rows consist of links to the corresponding heading. The table of contents for this document:
-.demo
-  .toc  :b(Table of Contents)
-A package implementing this simple TOC feature is found in `(pkgs/toc.mmk); a listing can be found in Appendix B.
+Note that the `<myword-toc>` custom element recognizes two attributes, `minlevel` and `maxlevel`. Values of these attributes determine the range of 'headers' that will appear in the table of contents. A package implementing this simple TOC feature is found in `pkgs/toc.mmk`; a listing can be found in Appendix B. The package also defines a type `toc` to hide the HTML details. For example, a table of Contents for levels 2 to 5 can be generated as follows:
+eg
+  myTOC  **Inner Contents**
+  
+  &  myTOC .. <- toc 2 5
 
-###.  Example 3: A Live "Demo"
-The `(.demo) markup used in this document displays MyWord content on the left side and the rendered HTML on the right. Let us now add the capability to edit the MyWord content and have rendered content immediately reflect the changes. To do this requires two new custom elements; one to support live editing, and one to monitor another element for changes which then can be reflected in its own content.
+###  Example 2: Examples and Demos
+It is difficult to document software without including many examples. MyWord pre-defines a `code` type which escapes both '`<`' and '`&`' which can be used to define an example code block label for any type of code. The `metamark` label defintion and related CSS is shown below in such a block:
+eg
+	//  Example code block
+	eg ..        <- <div class='eg'> code
 
-Editable content is commonly supported in modern browsers using the `(contentEditable) attribute. The only complication for a live `(.demo) is that we need to override the default behaviour for certain keys, e.g., `(tab). A custom `(myword-editable) element that implements this:
-.eg
-  class MyWordEditable extends HTMLElement {
-    constructor() { super(); } 
-    connectedCallback() {
-      this.contentEditable = true //; console.log('contentEditable=',this.contentEditable)
-      this.addEventListener('keydown', function (event) { // replace tab functionality
-        if (event.keyCode == 9 || event.which == 9) {
-          if (!event.defaultPrevented)		// Safari, Chrome issue: only insert on 'false'
-            document.execCommand('insertText', false, '\t')
-          event.preventDefault()
-        } else event.stopPropagation()
-        return false    // don't lose focus
-      })
-    } // connectedCallback()
-  } // MyWordEditable
+	@css
+		.eg { white-space:pre; font-family:monospace; background:whitesmoke; overflow-x:auto}
 
-  if (!customElements.get('myword-editable'))
-    customElements.define('myword-editable', MyWordEditable)
+'`eg`' blocks can be used to present code written in any language.
 
-The second custom element named `(myword-sink) observes the content of another element, the source. When a change in the source content is detected, the new contents are transformed and the result replaces the current `(myword-sink) contents. A `(myword-sink) element has two defining attributes: the `(data-source), whose value is a CSS selector used to find the closest neighbour matching that selector, and the `(data-type), whose value is the type of the source contents. Here are the label and type defintions for the current `(.demo) markup, and an extended version which allows editing source content will be reflected in the rendered HTML:
-.eg
-	.demo   = <table class='demo'> demo
+A useful addition is the capability to display the 'source' and the result side-by-side. A '`demo`' label which does this is:
+eg
+	//  Simple static demo split between source and rendered output
+	demoS ..      <- <div class='demo'> demo
 
-	demo    :: (content) => 
-		["<tr>",
-		 "<td class='A1'>", markit('text',content), "</td>",
-		 "<td class='B1'>", markit('myword',content), "</td>"
-		 "</tr>"].join('')
+	demo         :: (content) =>
+	                  `<div class='A1'><div class=hscroll>${markit('text',content)}</div></div>
+	                   <div class='B1'>${markit('myword',content)}</div>
+	                  `
 
-	.demo? = <table class='demo'> demoE
+	@css
+		div.demo {
+			display:table; table-layout:fixed; width:100%;
+			border-spacing:5pt 0pt;
+		}
 
-    demoE   :: (content) =>
-                `<tr>
-                    <td class='A1'><myword-editable>${markit('text', content)}</myword-editable></td>
-                    <td class='B1'><myword-sink data-source='.A1' data-type=myword>${markit('myword', content)}</myword-sink></td>
-                </tr>`
+		div.demo div.A1, div.demo div.B1 {display:table-cell;}
 
-The `(demoE) transform used for the live demo has an editable source element (`(td.A1)) and a sink element (`(td.B1)) which monitors it's closest neighbour (a direct descendant or ancestor's descendant) matching the selector `(.A1). When a change is observed the sink's contents are replaced by the result of applying the `(myword) transform to the modified source contents. Before looking at the code for the custom sink element, here's an example:
-.demo?  Edit MyWord source here! 
-The MyWordSink custom element uses a MutationObserver to monitor changes in the source element. When one occurs, the contents of the sink element are translated by sending a message to the window with the message data object `({transform: transformName, selector: sinkElementSelector}). (The second argument to `(postMessage) is the `(targetOrigin) which can be safely set to the no preference value `(*) since these messages are not used for cross origin access.) The `(sinkElementSelector) is a reference to the element which enables the message handler to locate the element to be translated, and will be of the form `(myword-sink#someID) where `(someID) will be a pre-existing value or an auto-generated value like `(sink123456).
-.eg
-  class MyWordSink extends HTMLElement {
-      constructor() { super() }
-      connectedCallback() {
+		div.eg, div.demo div.A1 {
+			padding-left:10pt; padding-right:10pt; padding-top:5pt; padding-bottom:5pt;
+			white-space:pre; font-family:monospace; background:whitesmoke;
+		}
 
-        var findClosest = (parentElem, selector) => {
-          // find the closest relative matching selector
-          var closest = null
-          if (parentElem) {
-            closest = parentElem.querySelector(selector)
-            if (!closest) closest = findClosest(parentElem.parentElement, selector)
-          }
-          return closest
-        } // findClosest(parentElem, selector)
+		div.demo div.A1 {width:50%; vertical-align:top;}
 
-        if (!this.id) this.id = 'sink' + Math.round(Math.random()*1000000)  // make sure element has an id
-        var sourceSelector = this.getAttribute('data-source')
-        var type = this.getAttribute('data-type')
-        if (sourceSelector) {
-          var source = findClosest(this, sourceSelector.trim())
-          if (source) {
-            var sourceObserver = new MutationObserver((mutations, observer) => {
-              if (observer.type) {
-                observer.sink.textContent = observer.source.innerText || observer.source.textContent
-                window.postMessage({transform: observer.type, selector: this.tagName.toLowerCase()+'#'+this.id}, '*')
-              } else {
-                observer.sink.textContent = observer.source.innerHTML // no type, display raw HTML as text
-              }
-            })
-            sourceObserver.source = source
-            sourceObserver.sink = this
-            sourceObserver.type = type ? type.trim() : null
-            sourceObserver.observe(source, {subtree: true, childList:true, characterData: true})
-          } else {
-            var errorInfo = "No source found in &lt;myword-sink> using selector " + sourceSelector
-            console.error(errorInfo)
-            this.innerHTML = ["<pre><mark style='color:blue'>\n*** Error *** ", errorInfo, "\n</mark></pre>"].join('')
-          }
-        }
-      } // connectedCallback()
+		div.demo div.A1 div.hscroll {overflow-x:auto;}
 
-  } // MyWordSink
+		div.demo div.B1 {vertical-align:top;}
 
-  if (!customElements.get('myword-sink'))
-    customElements.define('myword-sink', MyWordSink)
+And here's a simple example:
+demoS
+	###  A Header Line
+	The *Alice In Wonderland* story.
+Neither of these 'features' requires any custom extensions; they can be iimplemented within the constraints of the MyWord translator as provided. But suppose you now wanted to make the demo interactive, i.e., users can edit the source and see the changes reflected in the output. A simple translator can't support such interactive behaviour, but this can be done by having the translator generate two additional custom elements, one to support live editing, and one to monitor another element for changes which then can be reflected in its own content.
+
+Editable content is commonly supported in modern browsers using the `contentEditable` attribute. The only complication for a live `demo` is that we need to override the default behaviour for certain keys, e.g., `tab`. A simple custom `myword-editable` element that implements this:
+eg
+	class MyWordEditable extends HTMLElement {
+		constructor() {
+			super()
+			this.contentEditable = true
+			this.keyHandler = this.keydown.bind(this)  // initialize event handler bound to this object
+		} // constructor()
+
+		connectedCallback() {
+			this.addEventListener('keydown', this.keyHandler)
+		} // connectedCallback()
+
+		disconnectedCallback() {
+			this.removeEventListener('keydown', this.keyHandler)
+		} // disconnectedCallback()
+
+		keydown(event) {
+			if (!event.defaultPrevented) {  // Safari, Chrome issue: only insert if not defaultPrevented already
+				if (event.key === 'Tab' || event.keyCode == 9 || event.which == 9) {
+					document.execCommand('insertText', false, '\t')
+					event.preventDefault()
+				} else if (event.key === 'Enter' || event.keyCode == 13 || event.which == 13) {
+					// Work around for FireFox changing leading tab to a space
+					try {
+						document.execCommand('insertText', false, '\n')
+					} catch (err) { /*console.debug(err)*/ }  // first time on Firefox, ignore?
+					this.scrollLeft = 0  // for Safari, Chrome auto-scroll issue
+					event.preventDefault()
+				}
+			}
+			return false    // don't lose focus
+		} // keyHandler(event)
+	} // MyWordEditable
+
+	if (!customElements.get('myword-editable'))
+	customElements.define('myword-editable', MyWordEditable)
+
+In practice, browser idiosyncracies related to focus styles and scrolling creates additonal complexity. A more complete implementation is provided in the `demo.mmk` package listed in the appendix.
+
+The second custom element named `myword-sink` observes the content of another element, the source. When a change in the source content is detected, the new contents are transformed and the result replaces the current `myword-sink` contents. A `myword-sink` element has two defining attributes: the `data-source`, whose value is a CSS selector used to find the closest neighbour matching that selector, and the `data-type`, whose value is the type of the source contents. Here are the label and type defintions for the current `.demo` markup, and an extended version which allows editing source content will be reflected in the rendered HTML:
+eg
+	demo  <- <div class='demo'> demoI
+
+	demoI   :: (content) =>
+	             `<div class='A1'><div class=hscroll><myword-editable>${markit('text', content)}</myword-editable></div></div>
+	              <div class='B1'><myword-sink data-source='.A1' data-type=myword>${markit('myword', content)}</myword-sink></div>
+	             `
+
+The `demoI` transform used for the live demo has an editable source element ((`td.A1`)) and a sink element ((`td.B1`)) which monitors it's closest neighbour (a direct descendant or ancestor's descendant) matching the selector `.A1`. When a change is observed the sink's contents are replaced by the result of applying the `myword` transform to the modified source contents. Before looking at the code for the custom sink element, here's an example:
+demo  Edit MyWord source here!
+
+The MyWordSink custom element uses a MutationObserver to monitor changes in the source element. When one occurs, the contents of the sink element are translated by sending a message to the window with the message data object `{type: transformName, selector: sinkElementSelector}`. (The second argument to `postMessage` is the `targetOrigin` which can be safely set to the no preference value `*` since these messages are not used for cross origin access.) The `sinkElementSelector` is a reference to the element which enables the message handler to locate the element to be translated, and will be of the form `myword-sink#someID` where `someID` will be a pre-existing value or an auto-generated value like `sink123456`.
+eg
+	class MyWordSink extends HTMLElement {
+		constructor() {
+			super()
+			this.sourceObserver = new MutationObserver((mutations, observer) => {
+				if (observer.type) {
+					observer.sink.textContent = observer.source.innerText || observer.source.textContent
+					window.postMessage({type: observer.type, selector: this.tagName.toLowerCase()+'#'+this.id}, '*')
+				} else {
+					observer.sink.textContent = observer.source.innerHTML // no type, display raw HTML as text
+				}
+			}) // sourceObserver
+		} // constructor()
+
+		connectedCallback() {
+			var findClosest = (parentElem, selector) => {
+				// find the closest relative matching selector
+				var closest = null
+				if (parentElem) {
+					closest = parentElem.querySelector(selector)
+					if (!closest) closest = findClosest(parentElem.parentElement, selector)
+				}
+				return closest
+			} // findClosest(parentElem, selector)
+			if (!this.id) this.id = 'sink' + Math.round(Math.random()*1000000)  // make sure element has an id
+			var sourceSelector = this.getAttribute('data-source')
+			var type = this.getAttribute('data-type')
+			if (sourceSelector) {
+				var source = findClosest(this, sourceSelector.trim())
+				if (source) {
+					this.sourceObserver.source = source
+					this.sourceObserver.sink = this
+					this.sourceObserver.type = type ? type.trim() : null
+					this.sourceObserver.observe(source, {subtree: true, childList:true, characterData: true})
+				} else {
+					var errorInfo = "No source found in &lt;myword-sink> using selector " + sourceSelector
+					console.error(errorInfo)
+					this.innerHTML = ["<pre><mark style='color:blue'>\n*** Error *** ", errorInfo, "\n</mark></pre>"].join('')
+				}
+			}
+		} // connectedCallback()
+
+		disconnectedCallback() {
+			this.sourceObserver.disconnect()
+		} // disconnectedCallback()
+	} // MyWordSink
+
+	if (!customElements.get('myword-sink'))
+	customElements.define('myword-sink', MyWordSink)
 
 To add a collapsible display of the HTML representation of the rendered content, a second row is added to the table. The right handle element is the HTML and the left hand element is a button to toggle the display:
-.demo?+  Editable demo with optional HTML...
-The `(metamark) definitions for this extended feature:
-.eg
-    .demo?+	= demoEH <table class='demo'>
+demoIhtml  Editable demo with optional HTML...
+The `metamark` definitions for this extended feature:
+eg
+	//  Interactive demo with toggled HTML output display
+	demoH .. <- <div class='demo'> demoIH
 
-    demoEH   :: (content) => (
-                (source = content, html = markit('myword', content)) =>
-                    `<tr>
-                        <td class='A1'><myword-editable>${markit('text', source)}</myword-editable></td>
-                        <td class='B1'><myword-sink data-source='.A1' data-type=myword>${html}</myword-sink></td>
-                    </tr>
-                    <tr>
-                        <td style='vertical-align:top'><button onclick='((toHide) => toHide.hidden = !toHide.hidden) (this.parentElement.nextElementSibling)'>Toggle HTML Display</button></td>
-                        <td class='A3' hidden  style='overflow-x:auto'><myword-sink data-source='.B1>myword-sink'>${markit('text', html)}</myword-sink></td>
-                    </tr>`
-             )()
+	demoIH       :: (content) => (
+					  (source = content, html = markit('myword', content)) =>
+						`<div class=trow>
+						  <div class='A1'><div class=hscroll><myword-editable>${markit('text', source)}</myword-editable></div></div>
+						  <div class='B1'><myword-sink data-source='.A1' data-type=myword>${html}</myword-sink></div>
+						</div>
+						<div class=trow>
+						  <div style='display:table-cell; vertical-align:top'><button onclick='((toHide) => toHide.hidden = !toHide.hidden) (this.parentElement.nextElementSibling)'>Toggle HTML Display</button></div>
+						  <div class='A3' hidden><div><myword-sink data-source='.B1>myword-sink'>${markit('text', html)}</myword-sink></div></div>
+						</div>`
+	                ) ()
 
-A package implementing the extended demo package is found in `(pkgs/demoEdit.mmk); a listing can be found in Appendix C.
-###.  Support for Custom Elements
-Custom elements are a part of the HTML5 Web Components standard and are supported to various degrees in current browsers. Until ubiquitous support is available, a polyfill for custom elements can be found at @cePolyfill(webcomponentsjs).
-###.  Summary
-It is a fairly straight process to define MyWord labels which generate custom element tags, and then write JavaScript code in `(metamark) packages to provide semantics for those elements. In this way document level features can implemented that can't be easily done in a context insensitive translator like MyWord.
+A package supporting all the features in this section can be found in `pkgs/demo.mmk` as listed in Appendix C.
+###  Support for Custom Elements
+Custom elements are a part of the HTML5 Web Components standard and are supported to various degrees in current browsers. Until ubiquitous support is available, a polyfill for custom elements can be found at [webcomponentsjs].
+###  Summary
+It is a fairly straight process to define MyWord labels which generate custom element tags, and then write JavaScript code in `metamark` packages to provide semantics for those elements. In this way document level features can implemented that can't be easily done in a context insensitive translator like MyWord.
 
-###.(Appendix A: `(defines.mmk))
-@include  pkgs/defines.mmk
-###.(Appendix B: `(toc.mmk)) 
+###  Appendix A: `toc.mmk` 
 @include  pkgs/toc.mmk
-###.(Appendix C: `(demoEdit.mmk)) 
-@include  pkgs/demoEdit.mmk
+###  Appendix B: `demo.mmk`
+@include  pkgs/demo.mmk
 
-&  .mmk = <pre> text
-   @import pkgs/toc.mmk pkgs/demoEdit.mmk
-   @intro = hyperlink https://ridgeworks.github.io/MyWord/MyWord.html
-   @custom = hyperlink https://www.w3.org/TR/custom-elements/
-   @lingo = hyperlink https://ridgeworks.github.io/MyWord/MyWordLingo.html
-   @cePolyfill = hyperlink https://github.com/webcomponents/custom-elements
-   @docstyle = stylelink stylesheets/myword_std.css
-   hyperlink :: (txt, url) => `<a href='${((url)?url:markit('text', txt)).trim()}'>${markit('myword', txt)}</a>`
-   stylelink :: (_, url) => `<link rel='stylesheet' type='text/css' href='${markit('text', url.trim())}'>`
-
-@docstyle()
+&  .mmk .. <- <pre> text
+   
+   [MyWord Markup]   <- link https://ridgeworks.github.io/MyWord/MyWord.html
+   [Custom Elements] <- link https://www.w3.org/TR/custom-elements/
+   [default lingo]   <- link https://ridgeworks.github.io/MyWord/MyWordLingo.html
+   [webcomponentsjs] <- link https://github.com/webcomponents/custom-elements
+   [MyWordCSS]       <- is <link rel='stylesheet' type='text/css' href='stylesheets/myword_std.css'>
+   @import pkgs/toc.mmk pkgs/demo.mmk

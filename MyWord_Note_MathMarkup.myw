@@ -1,69 +1,68 @@
+[MyWordCSS]
 ##  Markup for Mathematics
 
-Mathematical Markup Language, or MathML, is part of the HTML5 standard. From the @MML[specification]:
+Mathematical Markup Language, or MathML, is part of the HTML5 standard. From the [MML specification]:
 
-:blockquote
-    "MathML is an XML application for describing mathematical notation and capturing both its structure and content. The goal of MathML is to enable mathematics to be served, received, and processed on the World Wide Web, just as HTML has enabled this functionality for text. :br()
-     ... :br()
+>
+    "MathML is an XML application for describing mathematical notation and capturing both its structure and content. The goal of MathML is to enable mathematics to be served, received, and processed on the World Wide Web, just as HTML has enabled this functionality for text.
+
+     ...
+
     While MathML is human-readable, it is anticipated that, in all but the simplest cases, authors will use equation editors, conversion programs, and other specialized software tools to generate MathML."
 
-@AM[AsciiMath] is a popular, easy-to-write markup language for mathematics. (For an introductory tutorial see @AMgray[ASCIIMath Tutorial]). The file `(asciimath.mmk), included with MyWord, is a package that translates AsciiMath markup to MathML. The package defines the transform `(asciimath) and two labels: `(:math) for inline mathematical expressions, and `(math:) for blocks of math. Some examples:
+[AsciiMath] is a popular, easy-to-write markup language for mathematics. (For an introductory tutorial see [ASCIIMath Tutorial]). The file `asciimath.mmk`, included with MyWord, is a package that translates AsciiMath markup to MathML. The package defines the transform `asciimath` and two labels: `('` .. `')` for inline mathematical expressions, and `math:` for blocks of math. Some examples:
 
-.demo
-    -  subscripts must come before superscripts: :math(int_0^1f(x)dx)
+demo
+    -  subscripts must come before superscripts: '`int_0^1f(x)dx`'
     -  spaces are optional but serve to split strings that should
-       not match: :math(sqrt sqrt root3x)
-    -  function names are treated as constants: :math(sin^-1(x))
+       not match: '`sqrt sqrt root3x`'
+    -  function names are treated as constants: '`sin^-1(x)`'
     -  We set
 
-       :math[a=3, \ \ \ b=-3,\ \ ] and :math[\ \ c=2].
+       '`a=3, \ \ \ b=-3,\ \ `' and '`\ \ c=2`'.
 
-       Thus :math[(a+b)(c+b)=0].
+       Thus '`(a+b)(c+b)=0`'.
     -  matrices and column vectors are simple to type:
        math:  [[a,b],[c,d]]((n),(k))
-    -  A :math[3xx3] matrix, :math[((1,2,3),(4,5,6),(7,8,9))],
-       and a :math[2xx1] matrix, or vector, :math[((1),(0))].
+    -  A '`3xx3`' matrix, '`((1,2,3),(4,5,6),(7,8,9))`',
+       and a '`2xx1`' matrix, or vector, '`((1),(0)`'.
     -  grouping brackets don't have to match:
        math:  (a,b]={x in RR | a < x <= b}
 
 
 If you are not seeing properly rendered math on the right hand side, your browser may not support MathML; see the end of this document for possible ways around this limitation.
 
-The `(asciimath) transform (which is implemented as a @grit[Grit] grammar) will generate the content of the MathML `(<math>) element, but the `(<math>) element itself is defined by the label. This enables alternative or overriding label definitions to customize the appearance of math in the document:
+The `[asciimath]` transform (which is implemented as a [Grit] grammar) will generate the content of the MathML `<math>` element, but the `<math>` element itself is defined by the label. This enables alternative or overriding label definitions to customize the appearance of math in the document:
 
-.demo
-	####  *[Solving the quadratic equation.]
-	Suppose :math[ax^2+b x+c=0] and :math[a!=0]. We first divide
-	by :math[a] to get :math[x^2+b/a x+c/a=0].
+demo
+	####  *Solving the quadratic equation.*
+	Suppose '`ax^2+bx+c=0`' and '`a!=0`'. We first divide
+	by '`a`' to get '`x^2+b/ax+c/a=0`'.
 
 	Then we complete the square and obtain
-	:math[x^2+b/a x+(b/(2a))^2-(b/(2a))^2+c/a=0].
-	The first three terms factor to give :math[(x+b/(2a))^2=(b^2)/(4a^2)-c/a].
+	'`x^2+b/ax+(b/(2a))^2-(b/(2a))^2+c/a=0`'.
+	The first three terms factor to give '`(x+b/(2a))^2=(b^2)/(4a^2)-c/a`'.
 	Now we take square roots on both sides and
-	get :math[x+b/(2a)=+-sqrt((b^2)/(4a^2)-c/a)].
+	get '`x+b/(2a)=+-sqrt((b^2)/(4a^2)-c/a)`'.
 
-	Finally we subtract :math[b/(2a)] from both sides and
+	Finally we subtract '`b/(2a)`' from both sides and
 	simplify to get the two solutions:
-	:math[x_(1,2)=(-b+-sqrt(b^2 - 4a c))/(2a)]
+	'`x_(1,2)=(-b+-sqrt(b^2-4ac))/(2a)`'
 
-	&   :math = <math display=inline mathcolor=Maroon> asciimath
+	&   '` .. `' <- <math display=inline mathcolor=Maroon> asciimath
 
-For more information on customizing the `(<math>) element, see @mathelement[The Top-Level `(math) Element].
+For more information on customizing the `<math>` element, see [https://www.w3.org/TR/MathML2/chapter7.html#interf.toplevel].
 
-While MathML is part of HTML5, its support in browsers is somewhat uneven to say the least; Firefox has a fairly complete implementation, while Chrome has nothing. As a workaround, @MJ[MathJax] can be used to translate MathML to conventional HTML (at a cost). Using the MathJax option to translate MathML requires the following `(<script>) to be paced in the head of the host HTML file:
-:blockquote  `(<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=MML_HTMLorMML"></script>)
-When MathJax is detected, `(x-markup.js) will invoke it to post-process any MathML present in HTML generated by MyWord. The MathJax configuration specified above will use MathML in browsers where it is well supported, but otherwise convert it to HTML-CSS.
+While MathML is part of HTML5, its support in browsers is somewhat uneven to say the least; Firefox has a fairly complete implementation, while Chrome has nothing. As a workaround, [MathJax] can be used to translate MathML to conventional HTML (at a cost). Using the MathJax option to translate MathML requires the following `<script>` (or equivalent) to be paced in the head of the host HTML file:
+>  `<script type="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=MML_HTMLorMML"></script>`
+When MathJax is detected, `x-markup.js` will invoke it to post-process any MathML present in HTML generated by MyWord. The MathJax configuration specified above will use MathML in browsers where it is well supported, but otherwise convert it to HTML-CSS.
 
-The `(asciimath) package provides a convenient way of incorporating math content, expressed in AsciiMath markup, into MyWord documents. MathJax can be used where browser support of MathML is inadequate.
+The `asciimath` package provides a convenient way of incorporating math content, expressed in AsciiMath markup, into MyWord documents. MathJax can be used where browser support of MathML is inadequate.
 
-&   @import pkgs/asciimath.mmk
-    @MML    = <a href='https://www.w3.org/TR/MathML2/'>
-    @AM     = <a href='http://asciimath.org'>
-    @AMgray = <a href='http://www.wjagray.co.uk/maths/ASCIIMathTutorial.html'>
-    @grit   = <a href='http://ridgeworks.github.io/MyWord/GritGrammarParser.html'>
-    @mathelement = <a href='https://www.w3.org/TR/MathML2/chapter7.html#interf.toplevel'>
-    @MJ     = <a href='https://www.mathjax.org/'>
-    @docstyle = stylelink stylesheets/myword_std.css
-    stylelink :: (_, url) => `<link rel='stylesheet' type='text/css' href='${markit('text', url.trim())}'>`
-
-@docstyle()
+&	@import pkgs/asciimath.mmk pkgs/demo.mmk
+	[MML specification]		<- link https://www.w3.org/TR/MathML2/
+	[AsciiMath]     		<- link http://asciimath.org
+	[ASCIIMath Tutorial] 	<- link http://www.wjagray.co.uk/maths/ASCIIMathTutorial.html
+	[Grit]   				<- link http://ridgeworks.github.io/MyWord/GritGrammarParser.html
+	[MathJax]     			<- link https://www.mathjax.org/
+	[MyWordCSS]             <- is <link rel='stylesheet' type='text/css' href='stylesheets/myword_std.css'>

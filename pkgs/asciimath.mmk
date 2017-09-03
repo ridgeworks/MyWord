@@ -1,7 +1,10 @@
 
-math:	= <math display=block> asciimath
+math: ..	<- asciimathblock display=block
 
-:math	= <math display=inline> asciimath
+'` .. `'	<- <math display=inline> asciimath
+
+asciimathblock	:: (content, mathattrs) => 
+				content.split('\n').map((line) => `<math ${mathattrs}>${markit('asciimath', line)}</math>`).join('')
 
 asciimath	    := E*							:: (Es) => this.flatten(Es).join('')
 
@@ -48,8 +51,10 @@ asciimath	    := E*							:: (Es) => this.flatten(Es).join('')
 
 
     ws 			:= (spaces / linebreak)*
-    spaces		:~ [ \t]+						:: () => []
-    linebreak	:~ [\r]? [\n]					:: () => "<mspace linebreak='newline'/>"
+    spaces		:~ [ \t]+						:: (sp) => ["<mspace width='",	//RWW experiment - add signicant white space 
+															Array.from(sp).reduce((len, ch) => len + ((ch == ' ') ? 0.3 : 1.2), 0).toString(),
+															"em'/>"]
+    linebreak	:~ [\r]? [\n]					:: () => "<mspace width='0.3em' Xlinebreak='newline'/>"
 
 
     S 			:=	S_bracketed /
@@ -224,6 +229,8 @@ asciimath	    := E*							:: (Es) => this.flatten(Es).join('')
                                                                 "Sigma"		:"&#x3a3;",
                                                                 "Theta"		:"&#x398;",
                                                                 "Xi"		:"&#x39e;",
+																"&&"		:"&&",			// RWW added
+																"||"		:"||",			// RWW added
                                                                 "*"			:"&#x22c5;",
                                                                 "**"		:"&#x2217;",
                                                                 "***"		:"&#x22c6;",
@@ -328,7 +335,7 @@ asciimath	    := E*							:: (Es) => this.flatten(Es).join('')
                                                             )()
 
     greekSyms	:~ Delta | Gamma | Lambda | Omega | Phi | Pi | Sigma | Theta | Xi
-    binarySyms	:~ [*]{1,3} | / (?: /|[_][\\]?) | \\ [\\ ] | ! (?: =|in) | : (?: =|[.]) | lt=? | <=>? | gt=? |
+    binarySyms	:~ [&]{2} | [|]{2} |[*]{1,3} | / (?: /|[_][\\]?) | \\ [\\ ] | ! (?: =|in) | : (?: =|[.]) | lt=? | <=>? | gt=? |
                     > (?: -=?|=) | int? | su[bp]e? | ~[=~|] | prop | setminus | xx | divide | - (?: :|<=?|=|lt) | @ |
                     o[+x.] | \^\^ | vv | nn | uu | and | or | not | if | =>? | AA | EE | TT | _[|]_ | [|] (?: --|==|__|~)
     miscSyms	:~ oint | del | grad | [+]- | O/ | oo | aleph | [.]{3} | ' | q?quad | [cvd]dots | diamond |

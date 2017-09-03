@@ -1,5 +1,0 @@
-###  Hello World
-
-The *[italics] is inherited, and .red[red text] is defined.
-
-&   .red = <span style='color:red'>
