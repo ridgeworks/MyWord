@@ -1,47 +1,50 @@
+[MyWordCSS]
 ##  Using External Transform Functions
 
-In MyWord, a transform function is simply a JavaScript function that takes the markup element's content text and returns the translated HTML as a string. Simple transforms can be written as @grit[Grit] rules in metamark blocks along with normal label defintions:
+In MyWord, a transform function is simply a JavaScript function that takes the markup element's content text and returns the translated HTML as a string. Simple transforms can be written as [Grit] rules in `metamark` blocks along with normal label defintions:
 
-:blockquote  `(transform :: (content) => function code...)
+>  `transform :: (content) => function code...`
 
-But if the transform is too complex to be implemented as a simple function, or if there are commonly available JavaScript modules that provide functions with the required signature (input = *(`(string)), returns *(`(HTMLstring))), it may be more convenient to load these from standard JavaScript files. Any global function names provided by such files are automatically available as transform functions to MyWord.
+But if the transform is too complex to be implemented as a simple function, or if there are commonly available JavaScript modules that provide functions with the required signature (input = *`string`*, returns *`HTMLstring`*), it may be more convenient to load these from standard JavaScript files. Any global function names provided by such files can be called from type defintions written in `metamark`.
 
-Since the MyWord translator runs in a Web Worker, there are some constraints on the implementation of external transform functions. The global environment for a Worker is different than the global environment for JavaScript running as part of the main document. The main restriction is that a Worker cannot do anything which directly affects the parent page. This includes manipulating the DOM and using that page's objects. And to load the script into the Worker global space, the `(@import) statement must be used.
+Since the MyWord translator runs in a Web Worker, there are some constraints on the implementation of external transform functions. The global environment for a Worker is different than the global environment for JavaScript running as part of the main document. The main restriction is that a Worker cannot do anything which directly affects the parent page. This includes manipulating the DOM and using that page's objects. And to load the script into the Worker global space, the `@import` statement must be used.
 
-###  An Example, `(highlight.js)
+###  An Example, `highlight.js`
 
-@hilite(`(highlight.js)) is a popular package used to provide syntax coloring for over 150 languages in more than 70 styles. Assuming a standard download configuration, the first step is to instruct MyWord to load the JavaScript along with a selected style:
+[highlight.js] is a popular package used to provide syntax coloring for over 150 languages in more than 70 styles. Assuming a standard download configuration, the first step is to instruct MyWord to load the JavaScript along with a selected style:
 
-.eg  &  @import highlight.pack.js styles/xcode.min.css
+eg  &  @import highlight.pack.js styles/xcode.min.css
 
-(Note: the filepaths may vary depending on the file system structure containing the document. All relative pathnames are relative to the file containing the `(@import) statement.)
+(Note: the filepaths may vary depending on the file system structure containing the document. All relative pathnames are relative to the file containing the `@import` statement.)
 
-The highlight module, `(hljs), contains a function `(highlightAuto) that almost does what we want; the problem is that the HTML return string is a property (`(value)) of the return value. So we have to define a simple wrapper to act as the transform function:
+The highlight module, `hljs`, contains a function `highlightAuto` that almost does what we want; the problem is that the HTML return string is a property ((`value`)) of the return value. So we have to define a simple wrapper to act as the transform function:
 
-.eg   &  highlight   :: (content) => hljs.highlightAuto(content).value
+eg  &  highlight   :: (content) => hljs.highlightAuto(content).value
 
-And now we can define labels which use this transform to syntax color blocks of code. From @intro(Introduction to MyWord),
+And now we can define labels which use this transform to syntax color blocks of code. From [Introduction to MyWord],
 
-.demo
-    A snippet of Python code:
+demo
+	A snippet of Python code:
 
 	.py
 		# this a blob of Python code
 		if x > 42:
 			print 'end of </script>.'
 
-    &   .py = <pre class=py> highlight
+	&	.py .. <- <pre class=py> highlight
 
-It's often convenient to package up the `(@import)'s and the auxiliary transforms (and maybe even label definitions) in their own package file, e.g., `(highlight.mmk) (again filepaths are dependant on file system configuration):
+Note: all these demos are editable so feel free to try your own examples.
 
-.eg
+It's often convenient to package up the `@import`'s and the auxiliary transforms (and maybe even label definitions) in their own package file, e.g., `highlight.mmk` (paths are dependent on file system configuration):
+
+eg
   @import highlight.pack.js
           styles/xcode.min.css
   highlight   :: (content) => hljs.highlightAuto(content).value
 
 and just import the package:
 
-.demo
+demo
   Some HTML:
   .htm
       <!DOCTYPE HTML>
@@ -80,17 +83,18 @@ and just import the package:
       }
 
   &   @import highlight.mmk
-      .htm = <pre class=htm> highlight
-      .js  = <pre class=js> highlight
-      .css = <pre class=css> highlight
+      .htm .. <- <pre class=htm> highlight
+      .js .. <- <pre class=js> highlight
+      .css .. <- <pre class=css> highlight
 
-###  Another Example, `(marked.js)
+###  Another Example, `marked.js`
 
-In MyWord, the translation of a labelled block is determined by the label definition which includes the identity of the transform function. So it's possible to embed blocks of text written in other lightweight markup languages, e.g., MarkDown, if the appropriate transform function is made available. @marked(`(marked.js)) provides just such a transform for MarkDown. Once it's `(@import)ed, the global `(marked) function it defines can be used directly:
+In MyWord, the translation of a labelled block is determined by the label definition which includes the identity of the transform function. So it's possible to embed blocks of text written in other lightweight markup languages, e.g., MarkDown, if the appropriate transform function is made available. [marked.js] provides just such a transform for MarkDown. Once it's `@import`ed, the type `markdown` can be defined to use the global `marked` function:
 
-.demo
-    &   .md = marked
-    .md
+demo
+	&   .md .. <- markdown
+	    markdown :: (content) => marked(content)
+	.md
 		A First Level Header
 		====================
 
@@ -178,25 +182,21 @@ In MyWord, the translation of a labelled block is determined by the label defini
 
 		[ny times]: http://www.nytimes.com/
 
-Notice that this example works because all the link definitions are contained in the block; link definitions are not shared between blocks.
+Notice that this example works because all the MarkDown link definitions are contained in the block; link definitions are not shared between blocks.
 
-Because the label defintion (`(.md)) is in the form of a file suffix, MarkDown content can be loaded from files using `(@include) label defined in the @lingo(default lingo), e.g.:
+Because the label defintion ((`.md`)) is in the form of a file suffix, MarkDown content can be loaded from files using `@include` label defined in the [default lingo], e.g.:
 
-.eg  @include  someDoc.md
+eg  @include  someDoc.md
 
 ###  Summary
 
-External global functions that meet the transform function signature requirements can be loaded into the MyWord Worker global space using `(@import). Any such global function is automatically accessible as a MyWord transform. `(metamark) packages provide a convenient way to bundle `(@import)'s (JavaScript, CSS, and other `(metamark)) with other transform and label defintions to provide modularity and ease of reuse.
+External global functions that meet the transform function signature requirements can be loaded into the MyWord Worker global space using `@import`. `metamark` packages provide a convenient way to bundle `@import`'s (JavaScript, CSS, and other `metamark`) with other transform and label defintions to provide modularity and ease of reuse.
 
+&	[highlight.js] 				<- link https://highlightjs.org/
+	[Introduction to MyWord] 	<- link http://ridgeworks.github.io/MyWord/MyWord.html
+	[marked.js] 				<- link https://github.com/chjj/marked
+	[default lingo] 			<- link http://ridgeworks.github.io/MyWord/MyWordLingo.html
+	[Grit] 						<- link http://ridgeworks.github.io/MyWord/GritGrammarParser.html
+	[MyWordCSS]                 <- is <link rel='stylesheet' type='text/css' href='stylesheets/myword_std.css'>
 
-&   @grit   = <a href='http://ridgeworks.github.io/MyWord/GritGrammarParser.html'>
-    @hilite = <a href='https://highlightjs.org/'>
-    @intro  = <a href='http://ridgeworks.github.io/MyWord/MyWord.html'>
-    @lingo  = <a href='http://ridgeworks.github.io/MyWord/MyWordLingo.html'>
-    @marked = <a href='https://github.com/chjj/marked'>
-    @import 3rdparty/Beautify/beautify.mmk
-    @import 3rdparty/marked.js
-    @docstyle = stylelink stylesheets/myword_std.css
-    stylelink :: (_, url) => `<link rel='stylesheet' type='text/css' href='${markit('text', url.trim())}'>`
-
-@docstyle()
+	@import pkgs/demo.mmk 3rdparty/Beautify/beautify.mmk 3rdparty/marked.js
