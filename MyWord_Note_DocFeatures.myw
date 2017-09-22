@@ -209,7 +209,7 @@ eg
 	customElements.define('myword-sink', MyWordSink)
 
 To add a collapsible display of the HTML representation of the rendered content, a second row is added to the table. The right handle element is the HTML and the left hand element is a button to toggle the display:
-demoIhtml  Editable demo with optional HTML...
+demoH  Editable demo with optional HTML...
 The `metamark` definitions for this extended feature:
 eg
 	//  Interactive demo with toggled HTML output display

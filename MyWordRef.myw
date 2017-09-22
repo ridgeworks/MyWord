@@ -1,39 +1,45 @@
 #   MyWord Reference
 
-MyWord is an extensible markup language, just like XML or HTML (with custom tags). A MyWord markup :em[label] is an easy-to-read shorthand that can represent any HTML element. A dictionary of label definitions establishes the vocabulary of a MyWord markup language, know as a :em[lingo].
-
-Myword does not require any reserved syntax characters, which means there are no restrictions on the content text in markup elements. This allows the author to write content text that can contain any data format, notation, markup, or programming language. A markup label can define any custom syntax for its content text.
-
-A document written with MyWord markup does not need to be translated into a separate HTML document, instead a standard HTML browser can be empowered to read and present MyWord documents directly.
+MyWord is an extensible markup language, just like XML or HTML (with custom tags). A MyWord *label* is an easy-to-read shorthand that can represent any HTML element. A dictionary of label definitions establishes the vocabulary of a MyWord markup language, know as a *lingo*.
 
 In a nutshell:
 
--   A MyWord document is read as lines of text that are grouped into blocks.
+-	A MyWord document is read as lines of text that are grouped into blocks.
 
--   The first word in a block may be a markup label, the remainder is the content text.
+-	The first word in a block may be a label, the remainder is the content text.
 
--   Blocks without a markup label are normal paragraphs of prose.
+-	The content of a block has an associated *type* which defines the 'meaning' of the content. The definition of a block label includes the type of the content.
 
--	Authors can define a vocabulary of labels for their own markup language.
+-	A MyWord document has content of type `myword`.
 
--	There are no special syntax characters, the text content can be used in any way the author desires.
+-	Blocks without a label are normal paragraphs of prose (type `paragraph`).
 
--	The translation of content into HTML (or XML) is determined by the definition of the markup label.
+-	Blank lines are used to separate blocks (where necessary) and can be used for vertical spacing (type `blankline`).
 
--   A standard browser can be empowered to read MyWord documents and present them as HTML.
+-	`paragraph` content may be marked up with inline notations.
 
+-	Authors can define a vocabulary of block labels and inline notations for their own markup language.
+
+-	There are no special syntax characters required to parse the block structure.
+
+-	Inline notations do use special characters, but a general character escape mechanism can be avoided by defining alternative equivalent notations.
+
+-	The translation of content into HTML (or XML) is determined by the content type, as specified in the label defintions.
+
+-	A standard browser can be empowered to read MyWord documents directly and present them as HTML.
+
+An important consequence of not requiring any reserved syntax characters for parsing the block structure is that there are no restrictions on the block content. This allows the author to write content text that can contain any data format, notation, markup, or programming language.
 
 ##	Blocks
 
-
-The first word in a block of text is a markup label if it has an offset format, otherwise it is simply the first word in a paragraph of prose. The offset format separates the label word from the content text with a tab character or two or more space characters, or with an indented line.
+The first word in a block of text is a label if it has an offset format, otherwise it is simply the first word in a paragraph of prose. The offset format separates the label from the content text with a tab character or two or more space characters, or with an indented line.
 
 Here is an example of a MyWord document with the source text is on the left, and the HTML presentation is on the right:
 
-.demo
+demoS
 	title:    The Title
 
-    author:   The Author
+	author:   The Author
 
 	This is a one line paragraph of prose.
 
@@ -49,54 +55,49 @@ Here is an example of a MyWord document with the source text is on the left, and
 
 	  It can contain nested blocks.
 
-This example has three markup labels for `[title:,  author:, and foot:]. These labels should be self evident, but they have not yet been defined, they are recognized as block labels simply because of their offset format.
 
-Markup labels that are undefined are highlighted in the HTML presentation of the document, as shown on above. An author will normally employ a standard lingo, that is, a pre-defined vocabulary of labels. Other new markup labels can be invented as required and defined within the document. The HTML translation of a draft document will highlight any labels that remain undefined.
+This example has three block labels for `title:,  author:, and foot:`. These labels should be self evident, but they have not yet been defined, they are recognized as labels simply because of their offset format.
 
-A markup label must start at the left margin, and the block may contain any number of indented lines of text. The block can contain blank lines, so the block will continue until the next line that is not indented from the left margin, or the end of the document.
+Block labels that are undefined can highlighted in the HTML presentation of the document, as shown on above using a yellow background. (This presentation is controlled by a CSS rule but is normally set to just display the block as pre-formatted, monospaced text.) An author will normally employ a standard lingo, that is, a pre-defined vocabulary of labels. New block labels can be invented as required and defined within the document.
 
-When the markup label is undefined the label and its content text will be shown verbatim in the HTML translation.
+A block label must start at the left margin, and the block may contain any number of indented lines of text. The block can contain blank lines, so the block will continue until the next line that is not indented from the left margin, or the end of the document.
 
-If the first word is not an offset label then the block is a paragraph of *[prose]. A paragraph may contain any number of lines, provided the lines do not start with a offset label, and are not blank or empty.
+If the first word is not a block label then the block is a paragraph of *prose*. A paragraph may contain any number of lines, provided the lines do not start with a offset label, and are not blank or empty. By default, each line of text inside a paragraph of prose will be rendered as a separate line. (This can be changed via CSS to flow the lines together like the standard way that HTML presents text in paragraph elements.) The prose may contain inline notations, but there are none in this first example.
 
-By default the lines of text inside a paragraph of prose flow together in the HTML translation. This is the standard way that HTML presents text in paragraph elements. The prose may contain inline markup labels, but there are none in this first example.
+Block labels can be defined to represent any HTML elements, for example:
 
-Markup labels can be defined to represent any HTML elements, for example:
+	demoS
+		title:    The Title
 
-:div
-    .demo
-        title:    The Title
+		author:   The Author
 
-        author:   The Author
+		This is a one line paragraph of prose.
 
-        This is a one line paragraph of prose.
+		Another paragraph of prose. This
+		one has more than one line.
+		but there can be no blank lines
+		in a paragraph.
 
-        Another paragraph of prose. This
-        one has more than one line.
-        but there can be no blank lines
-        in a paragraph.
+		foot:
+		  This is in a block of text that can
+		  have any number of indented lines,
+		  including blank lines.
 
-        foot:
-          This is in a block of text that can
-          have any number of indented lines,
-          including blank lines.
+		  It can contain nested blocks.
 
-	      It can contain nested blocks.
+	&   title: .. <- <h2>
+		author: .. <- <h3>
+		foot: .. <- <div class=foot>
 
-    &   title: = <h2>
-        author: = <h3>
-        foot: = myword <div class=foot>
-
-        @css
-          h2, h3 { text-align: center; }
-          .foot { border-top: thin solid gray; font-size: small; }
-
+		@css
+		  h2, h3 { text-align: center; }
+		  .foot { border-top: thin solid gray; font-size: small; }
 
 ##	Block Content
 
-The content text is the remainder of the block after the markup label. The block ends at the next line that is not indented under the markup label. This allows the content text to contain any characters without restriction, there are no special syntax characters to be escaped.
+The content text is the remainder of the block after the label. The block ends at the next line that is not indented under the markup label. This allows the content text to contain any characters without restriction, there are no special syntax characters to be escaped.
 
-This is different from most other markup languages, data languages, and programming languges. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required).
+This is different from most other markup languages, data languages, and programming languages. It is common practice to delimit a block of text with special syntax character(s), such as quotes or brackets. This restricts the content text since the syntax character(s) can not be allowed inside the content (an escape syntax is required).
 
 A length count is a perfect way to denote the end of a block of text that can contain any characters without restriction. Unfortunately a length count is impractical in documents that can be manually edited in a plain text editor.
 
@@ -104,35 +105,25 @@ The use of indentation to determine the end of a block of text is simple and int
 
 -   A content line may be inset using one tab character for each level of indentation.
 
--   A content line may be inset using 2 to 8 space characters for each level of indentation.
+-   A content line may be inset using 2 to 8 space characters for each level of indentation. A single space at the start of a line is not an inset indentation.
 
--   The minimum inset in a block determines the number of spaces for the first level of indentation.
+-   When spaces are used, the minimum inset in a block determines the number of spaces for the first level of indentation.
 
--   The inset for one level of indentation is deleted from every line to extract the content text.
+-   The inset for one level of indentation is deleted from every line to extract the content text, so that it starts at the left margin.
 
-An indented block may be inset with tabs or spaces, and the tab stop or spaces per inset may be anything from 2 to 8. A single space at the start of a line is not an inset indentation.
-
-A mixture of tab insets and space insets in the same block is not recommended. If tab and space insets are mixed in the same block then 4 space characters will be taken as equivalent to a tab character, and an inset of up to 4 spaces will be deleted. Mixed indents can be visually confusing unless the editor tab stop is 4, and 4 spaces are used per indent level.
+An indented block may be inset with tabs or spaces (2 to 8), but not a mixture.
 
 The white-space offset following the label, and the inset of indented lines, is all part of a skeleton format. The skeleton delimits the block content, but it is not part of the content text.
 
-Deleting the indentation shifts the content text left so that the content text starts at the left margin.
+An indented block of text without a label is treated as a block with an empty label whose content type is *insetblock*. A type defintion (similar to a label defintion) can be used to specify how indented blocks are to be translated.
 
-An indented block of text without a label is treated as a block with an empty label. An empty label can be defined in the same way as any other label, it is represented as :kbd[()]. This allows the content of an indented block to be shifted left and treated as a block of myword content, thus removing the restriction that block labels must start at the left margin.
-
-The block structure is parsed breadth first, the content of a nested block is only parsed after the outer levels have been parsed. This is important since the myword block grammar is not necessarily the grammar that will be used for the content of a block. The content grammar is determined by the markup label definition.
-
-This breadth before depth parsing process enables the composite grammar to be context sensitive.
-
+The block structure is parsed breadth first, the content of a nested block is only parsed after the outer levels have been parsed. This is important since the MyWord block grammar is not necessarily the grammar that will be used for the content of a block. The content grammar is determined by the block label definition. This breadth before depth parsing process enables the composite grammar to be context sensitive.
 
 ###  Content Syntax
 
-The myword block grammar is applied to the content of a label block by default.
+The use of indentation allows `myword` content to be nested:
 
-This allows myword documents to be nested:
-
-:div
-    .demo
+    demoS
         title:    The Title
 
         author:   The Author
@@ -164,26 +155,23 @@ This allows myword documents to be nested:
         in a paragraph.
 
         foot:
-          This is in a block of text that can
-          have any number of indented lines,
-          including blank lines.
+          This is in a block of text that can have any number of indented lines, including blank lines.
 
           It can contain nested blocks.
 
-    &   title: = <h2>
-        author: = <h3>
-        foot: = myword <div class=foot>
-        .box = myword <div class=box>
+    &   title: .. <- <h2>
+        author: .. <- <h3>
+        foot: .. <-  <div class=foot>
+        .box .. <-  <div class=box>
 
         @css
           h2, h3 { text-align: center; }
           .foot { border-top: thin solid gray; font-size: small; }
           .box { border:thin solid gray; }
 
-The .box label uses the default myword grammar, but the .box label can be replaced by a .viz label that is defined to use a text grammar that simply quotes the source text verbatim:
+The `.box` label specifies type `myword` the default myword grammar, but the `.box` label can be replaced by a `.viz` label that specifies content type `text` that simply quotes the source text verbatim:
 
-:div
-    .demo
+    demoS
         title:    The Title
 
         author:   The Author
@@ -221,120 +209,110 @@ The .box label uses the default myword grammar, but the .box label can be replac
 
           It can contain nested blocks.
 
-    &   title: = <h2>
-        author: = <h3>
-        foot: = myword <div class=foot>
-        .viz = text <pre class=box>
+    &   title: .. <- <h2>
+        author: .. <- <h3>
+        foot: .. <- <div class=foot>
+        .viz .. <- <pre class=box> text
 
         @css
           h2, h3 { text-align: center; }
           .foot { border-top: thin solid gray; font-size: small; }
           .box { border:thin solid gray; }
 
-Other blocks may have content with other formats. For example, the .array label uses a grammar that allows the layout of its content text to represent a table:
+Other blocks may have content with other types. For example, the `.array` label uses a grammar that allows the layout of its content text to represent a table:
 
-:div
-    .demo
+    demoS
         .array
             1    One      Line
             2    Two      Area
             3    Three    Volume
 
-    &   .array = <table class=array> tsv
+    &   .array .. <- <table class=array> tsv
+        tsv := row*                   :: (rows) => this.flatten(rows).join('')
+            row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
+            cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
+            item  := (!delim char)+
+            delim :~ %tsep | %nl
+            tsep  :~ [\t]|[ ]{4,}
+            nl    :~ [\n\f]|([\r][\n]?)
+            char  :~ [\s\S]
 
-:style
-    table.array {border-collapse:collapse;}
-    .array td { border:thin solid gray; padding:2pt 10pt; }
 
-&
-    tsv := row*                   :: (rows) => this.flatten(rows).join('')
-        row   := tsep* cell* nl?  :: (_,cell) => ["<tr>",cell,"</tr>"]
-        cell  := item tsep?       :: (item) => ["<td>",this.flatten(item).join('').replace(/</g,'&lt;'),"</td>"]
-        item  := (!delim char)+
-        delim :~ %tsep | %nl
-        tsep  :~ [\t]|[ ]{4,}
-        nl    :~ [\n\f]|([\r][\n]?)
-        char  :~ [\s\S]
-
+        @css
+            table.array {border-collapse:collapse;}
+            .array td { border:thin solid gray; padding:2pt 10pt; }
 
 ##  Prose Paragraphs
 
-Lines of prose (i.e. lines that do not begin with a block label) are collected together into paragraphs which are separated by blank lines. This is a very natural way to write plain text paragraphs.
+Lines of prose (i.e., lines that do not begin with a block label or indent) are collected together into paragraphs until the next block or blank line occurs. Within a paragraph, control characters, including line-breaks and tabs, are translated into `<span>` HTML elements, which allows CSS rules to control how these are presented. By default, line-breaks are honoured so paragraph lines correspond to source lines, rather than flow together into a line length that fits the width of the presentation. Spaces and tabs get the standard HTML presentation; any number of them get translated into a single space between words.
 
-The translation into HTML ignores line-breaks so that the lines flow into a line length that fits the width of the presentation. The HTML standard translates any number of white-space characters (space, tab, line-end) into a single space between words.
+demoS
+    The default:
+    This is the first line,
+    and the second line.
 
-.demo
-    This is a paragraph with
-    lines that
-    flow together.
+A CSS rule can be used to revert to standard HTML presentation:
 
-The line format can be preserved by using individual line blocks:
+    demoS
+        This is a paragraph  with
+        lines that
+        flow together.
 
-:div
-    .demo
-        .  This is the first line,
-        .  the second line
-        .  and the third line.
+    &   @css span.newline {white-space:normal;}
 
-    &   . = <div> prose
+###  Inline Notations
 
-The `[.] label has been defined to represent a line of prose.
+Paragraph content uses a standard prose grammar by default. The prose grammar enables markup of pieces of the paragraph content using inline notations. One kind of an an inline notation is a quote, which uses the same character sequence to delimit the content:
 
+demo
+	Nice "quote marks" markup.
 
-###  Inline Elements
+	A code fragment: `if (x>y) p=q`.
 
-Paragraph content uses a standard prose grammar by default. The prose grammar defines an inline markup element as a label prefix followed by content text in brackets. For example:
+	Some **bold and *italic* text** markup.
 
-.eg
-    label[content text...]
+This example uses four different quote notations: `"` for a double quote, `(`)` for monospaced code fragments, `**` for bold text, and `*` for italicized text. The end of the quote content is determined by the first occurence of the quote character sequence, so a quote sequence can't be part of the content. This can be circumvented by defining an equivalent alternative notation. This exampe just uses double `"`s and `(`)`s.
 
-The label must start with one or more symbols that are not alphanumeric word characters, it may have an optional alphanumeric word suffix, and there can be no white space before the opening bracket, for example:
+	demoS
+		Nice ""quote with a " inside"" markup.
 
-:div
-    .demo
-        A :bold[inline] markup element.
+		A code fragment: ``var templ = `<span class='${my_class}'>```.
 
-    &  :bold = <b>
+	&	"" .. "" <- <q class=my_dquo>
+		`` .. `` <- <code class=my_text> text
+In some cases more than one alternative may be required and they can be customized to accomodate whatever the content dictates.
 
-The brackets may be either [...], or (...). The content may contain nested pairs of brackets, but if the content text contains an odd unmatched bracket character then the markup brackets must use a different style of bracket character.
+An inline notation using brackets are similar to quotes, except the character sequences (or tag) delimiting the content of the notation are different, e.g., `[` and `]`, `(()` and `)`, etc. In fact the end tag, is the mirror image of the start tag. This can be generalized to any sequence of characters, e.g., `*|` and `|*`, or `**(` and `)**`. Bracket sequences like these are often a very natural way of delimiting content.
 
-The content of an inline element normally contains nested prose, but the label can define a custom grammar, for example to quote the content text verbatim:
+demoS
+	`*` alternative using `(( .. ))` brackets: *(`x = y * z;`)*
 
-:div
-    .demo
-        Some :em[nested :bold[inline] markup] elements.
+	A link <http://example.com> using angle brackets.
 
-        Or :eg[nested :bold[inline] markup] elements.
+Bracket notations have the additional advantage that they can nested, since the end tag is not the same as the begin tag.
 
-    &   :bold = <b>
-        :em   = <em>
-        :eg   = <i> text
+A bracket/quote tag can be any sequence of ASCII characters except control characters (including spaces) and alphanumerics.
 
-The details of label definitions are covered later, the point here is that the prose grammar does not define the grammar of the content, it only defines the format for the markup structure. The label itself defines the grammar of its content.
+The final kind of inline notation is the symbol, which really has no content at all. The label definition for a symbol contains all the information to translate it to an HTML output, and is frequently used to represent HTML entities or to escape characters that might otherwise be interpreted as quote/bracket tags.
 
-An inline element is a markup structure that starts with a label immediately followed by content text in brackets. The brackets are part of the markup skeleton, they are not part of the content text.
+	demoS
+			It's Joe's <- nice apostrophes.
+			---
+			w = x $* y $* z
+			X\/Y <: Z
+	&
+		\/	 <- &cup;
+		<:	 <- &isin;
+		<-	 <- &larr;
+		$*	 <- &ast;
 
-The inline markup format has some useful properties:
+In this example a single quote is replaced by a apostrophe, `---` becomes a HTML horizontal rule (although that's not quite in compliance with the HTML5 specification), and `$*` is a literal asterisk rather than a quote tag used for italics.
 
--   An unlimted number of labels are available.
+A symbol starts with a quote/bracket character (see defintion above) and ends with whitespace, so it can contain alphanumeric characters, unlike quote/bracket tags. In cases where a symbol is the same as a quote/bracket tag, the latter will take precedence. However, if the end tag is not found, it will be treated as a symbol. In any case, sequences that are quote/bracket/tags or symbols syntactically, but are not defined, are assumed to be literal text and translated verbatim.
 
--   Labels begin with a symbol that is not alphanumeric so they stand out well.
+Like labelled blocks, inline notations are defined using label defintions, as described below. The point here is that the prose grammar does not define the grammar of the content, it only defines the format for the markup structure. The label defintion specifies the grammar of its content, i.e., its type.
 
--   Any text can be concatenated before or after a markup element.
-
--   Brackets clearly delimit the content text and can be neatly nested.
-
--   Markup is not normal prose and undefined labels can be highlighted.
-
--   Labels can define their content grammar, so markup can be quoted verbatim.
-
--   There are a good variety of short format markup elements (single character label plus brackets).
-
--   The choice of bracket characters allows almost unrestricted content text.
-
-Unlike the content of an indented block the content of brackets is not completely "syntax free". It can not contain an unbalanced closing bracket. However, the bracket characters can be chosen to allow an odd different bracket character to be included.
-
-
+Unlike labelled blocks, the content of inline notations is not completely "syntax free". It can not contain an unbalanced closing bracket or quote tag. However, alternative notations can be defined to allow an odd different tag to be included.
 
 ##  Label Definitions
 
@@ -814,4 +792,5 @@ The metaword grammar is for the definition of labels and transforms.
 
 The `[@import] instruction imports the content of file(s) given a list of their URL(s), and translates the content as `[metaword].
 
-
+&	@import pkgs/demo.mmk @import  3rdparty/Beautify/beautify.mmk
+	@css pre.Undefined {background: yellow;}
