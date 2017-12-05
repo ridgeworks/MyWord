@@ -36,8 +36,14 @@ eg
 			var tocContent = [`${this.innerHTML}<table class=toc>`]
 			headers.forEach((header) => {
 				var level = Number.parseInt(header.id[3])  // id='tocN...'
-				if ((level >= this._minlevel) && (level <= this._maxlevel))
-					tocContent.push(`<tr><td><a href="#${header.id}">${header.innerHTML}</a></td></tr>\n`)
+				if ((level >= this._minlevel) && (level <= this._maxlevel)) {
+					var indents = ["<span style='white-space:pre'>"]
+					for (var l = 1; l < level; l++) indents.push('\t')
+					indents.push("</span>")
+					tocContent.push(
+						`<tr><td>${indents.join('')}<a href="#${header.id}">${header.innerHTML}</a></td></tr>\n`
+					)
+				}
 			})
 			tocContent.push('</table>')
 			this.innerHTML = tocContent.join('')
