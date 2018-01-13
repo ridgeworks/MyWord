@@ -1,0 +1,30 @@
+###  Type `external`
+
+Like computer programs or Web pages, at some point MyWord documents exceed a size that's easy to manage as a single file. The type `external` enables content in other files to be included in the final rendered document. The content of `external`'s is a single URL. For example:
+
+.myw
+	demo
+		@ext MUG_extra/sampleInclude.myw
+
+		@ext MUG_extra/sampleMD.md
+
+		@ext stylesheets/myword_std.css
+		
+		&
+			@ext .. <- external
+			css :: (rules) => `<div class=CSS>${markit('text', rules)}</div>`
+			@css
+				div.CSS {
+					margin:0;
+					white-space:pre;
+					font-family:monospace;
+					background: lightblue;
+				}
+
+The `external` type downloads the content referenced by the URL and the file suffix (`myw`, `md` and `css` in the example) are used as type names for the content. (`css` is locally defined inside the demo.)  And like nested `myword` blocks, any meta-content in external `myword` files is scoped; the included content can use any definitions from the enclosing file content, but cannot export any definitions back to the enclosing content. External (`myword`) files can include other files so a document can be composed of a tree of files.
+
+A note on relative URLs in MyWord documents: any relative URLs are interpreted to be relative to the resource (file) containing the URL reference. This is subtly different from HTML documents where relative URL's are normally relative to the base resource, i.e., the HTML file defining the Web page being rendered. The intent of this distinction is to make `myword` files independent of what uses them, only what they themselves use, so that different documents can use common sub-trees. (Debates on the desirability of using relative URLs in published Web content are ongoing, but that's another discussion.)
+
+<#TableOfContents>
+
+

@@ -1,0 +1,124 @@
+###  Type `prose`
+
+Type `prose` is used for content which is not line-oriented, e.g, the content of a `paragraph`. Notations inside `prose` content don't depend on end-of-lines or tab indents to delimit their content. Like `myword` and `markup`, `prose` content can defined with a simple PEG rule:
+eg
+	prose    := (inlinenotation / text / ctrl)*
+
+####  Type `inlinenotation`
+
+Type `inlinenotation` encompasses two kinds of notations: spans and symbols. Spans are composed content delimited by a begin tag and an end tag, similar in concept to the begin/end tags in HTML. If the begin and end tag are different, e.g., '`{`' and '`}`', the span notation is nestable; if they're the same, e.g., quote marks, the notation is not nestable.
+
+.myw
+	There are further restrictions on the begin and end tag of a span notation. They must be composed of one or more ASCII characters not including letters, numbers or whitespace characters. And the end tag must be the mirror image of the begin tag, i.e., reverse the order of the characters with any bracket characters replaced by their matching bracket. Recognized bracket pairs are `{( )}`, `[ ]`, `{{ }}`, and `< >`. So legal begin/end tags are `*` and `*`, `**` and `**`, `[` and `]`, `*(` and `)*`, `*]` and `[*`, etc. Here are some examples using span notations defined in the default lingo:
+	&
+		// Use nested block to define a custom notation for '( )' as code content.
+		`{ .. }` <- <code class=my_text> text
+demo
+	Nice "quote marks" markup.
+
+	For code `if (x>y) p=q` it's back-tick quotes.
+
+	Some **bold and *italic* text** markup.
+
+Span notations are defined just like `block` notations but they use a different label pattern on the left hand side, i.e., `begin .. end <- ...`, so exposing the span definitions from this example:
+
+demo
+	Nice "quote marks" markup.
+
+	For code `if (x>y) p=q` it's back-tick quotes.
+
+	Some **bold and *italic* text** markup.
+
+	&
+		` .. `       <- <code class=my_text> text
+		* .. *       <- <i>
+		** .. **     <- <b>
+		" .. "       <- <q class=my_dquo>
+
+		@css q.my_dquo {quotes: "\201c" "\201d"}
+
+For the notation definitions without a specified type (the last three) , the default type for all `inlinenotation`'s is `prose`.
+
+The other kind of an `inlinenotation` is a symbol. Symbols don't have any content, they're just meant to be replaced by a string that's specified in the symbol notation definition. A symbol must start with an ASCII symbol character as defined for spans above, but can be followed by any non-whitespace character; a whitespace character marks the end of the symbol. The symbol text is replaced as specified in the symbol's notation definition, which has the form `Symbol <- ...`. In place of the HTML tag, a character reference is permitted. Some examples:
+
+demo
+	It's Joe's <- nice apostrophes. +1
+	---
+	X\/Y <: Z
+	
+	Today is %date; MyWord:%version.
+
+	&
+		'        <- &rsquo;
+		---      <- <hr/>
+		\/       <- &cup;
+		<:       <- &isin;
+		<-       <- &larr;
+		+1       <- &#x1F44D;
+		%date    <- <code> date
+		%version <- viz `V0.4ß`
+		date     :: (_) => new Date().toDateString()
+		viz      :: (_, parmstring) => markit('prose', parmstring)
+
+Normally a type doesn't need to be specified for a symbol since there's no content, but, as the `%date` example shows, it's perfectly valid to use a type as long as the lack of content produces a useful result. `viz` is an example of a parameterized type. Transform functions optionally support a second argument which is a parameter string. `viz` uses this string rather than the content (which is the empty string for symbol notations) and interprets it as `prose`. The notation definition for `%version` specifies the value of the parameter string (`(`V0.4ß`)`) following the type name.
+
+Whereas the choice of labels used in `labeledblock` notations is a relatively minor issue, the problem is more serious in inline notations. The same symbolic character may appear in span notations, symbols and in plain text usage. MyWord has a built-in precedence that will determine how `prose` content is parsed (see below) but it may not always produce the expected result. A "good" lingo design will define inline notations that minimizes the possibility of ambiguity.
+
+If the same character sequence can match both a span notation and a symbol notation, the span has a higher priority. In addition, a longer match (either span or symbol) takes precedence over a shorter one. For example:
+
+demo
+	&
+		* .. * <- <i>
+		** .. ** <- <b>
+		* <- &times;
+		
+	So:
+	
+	*emphasis* and **bold** and ***emphasis* in bold** and 2*3=6.
+	
+	all look OK but:
+	
+	***Some content...***
+	
+	may not be what you expect.
+	(It's parsed as `**(*Some content...)**(*)`).
+	
+If this isn't clear (and it probably isn't), use the demo to try your own examples.
+
+The possible conflict between symbolic characters used in inline notations and normal text content is a slightly different problem which is commonly addressed by adding some kind of escape mechanism. MyWord tries to avoid such a general mechanism since it potentially requires the alteration of content (i.e., by injecting escape characters). Instead, use an alternative equivalent, as shown in this example:
+
+demo
+	&
+		* .. *   <- <i>
+		*( .. )* <- <i>
+		
+	This: *(2*3=6)* instead of: *2*3=6*.
+
+As many alternatives can be defined to meet the needs imposed by the document content. One might think this would lead to confusion if these alternate definitions were global to the whole document, but meta-content can be scoped as described later in this guide.
+
+There's no equivalent solution for symbols; one just has to define symbols that aren't commonly used in the surrounding content. In the symbols example above, perhaps `+1` isn't a good choice if the surrounding content has lots of math; perhaps `^1` or `+one` would be better. Again scoping can be used to limit the reach of symbol definition so its effect doesn't permeate the whole document.
+
+####  Type `text`
+
+The remaining `prose` content, excluding any control characters, are instances of type `text`. The only necessary translation required on `text` content is to escape any characters that have special significance to the HTML parser, so the type definition for `text` (as seen previously) is just:
+eg
+	text :: (txt) => txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+
+####  Type `ctrl`
+
+Unlike `myword` and `markup` which use tabs and end-of-lines as part of the defining syntax, `prose` has no such requirements. But rather than treat control characters (`/[\x00-x01f]/`) just like any other character, they are assigned to type `ctrl` so a transform can be specified to interpret them however you like. The default *lingo* maps control characters to HTML `<span>` elements so CSS rules can be applied to control presentation:
+eg
+	ctrl  :: (ctl) => {
+	             switch (ctl) {
+	               case '\n' : return '<span class=newline>\n</span>'
+	               case '\t' : return '<span class=tab>\t</span>'
+	               default   : return `<span class=my_ctl data-code='${ctl.charCodeAt(0).toString()}'>\ufffd</span>`
+	             }
+	           }
+	@css  span.newline {white-space:pre}
+
+Due to the `@css` rule , an end-of-line character in the input will result in a new line in the output, rather than the conventional HTML (or Markdown) treatment of just treating it as generic white space and replacing it with a single space character. MyWord (by default) allows the author to have explicit control over vertical spacing in the output, e.g., for lines of poetry, using hard line breaks. Soft line breaks are normally inserted by the browser as required, and when composing paragraphs, content can just be one long line which most text editors will soft-wrap automatically. Optionally, a CSS rule for `span.newline` can be used to revert to the standard HTML newline semantics.
+
+<#TableOfContents>
+
+

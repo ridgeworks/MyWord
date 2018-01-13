@@ -3,7 +3,8 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, serif;
     font-size: 1em;
     line-height: 1.5;
-    color: #6d6d6d;
+    color: #505050;
+    /*color: #6D6D6D;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
-    background: #e7e7e7;
+    background: #e7e7e7;*/
 }

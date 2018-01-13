@@ -1,0 +1,4 @@
+	.-----------.                                     .------------.
+	|  custom   |-----[typeName, elementSelector]---->|  x-markup  |
+	|  element  |                                     |            |
+	'-----------'                                     '------------'

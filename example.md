@@ -1,3 +1,0 @@
-##  Markdown Example
-
-Some *text with emphasis* and so on...

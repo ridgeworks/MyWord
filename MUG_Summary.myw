@@ -1,0 +1,9 @@
+###  Summary
+
+If your only requirement in a light-weight markup language is Markdown with an extra bell or whistle, there are lots of alternatives available. But if you need the ability to easily add new notations and types without getting immersed in application code, MyWord should be an interesting option. By including a formal meta-language which can be used for defining both new notations and user metadata (like Markdown reference definitions), MyWord is fully customizable without detailed knowledge of the MyWord "machinery". At the same time, while not fully a Markdown compliant language, MyWord defaults to common Markdown notations so new users can start writing in a familiar *lingo*.
+
+MyWord also includes mechanisms for modularity so that both content and meta-content can be captured in separate resources (files). This promotes sharing and easier content management. Third party translators can be easily incorporated without impacting the MyWord software components. And by executing the translation in the browser, MyWord avoids adding yet another tool to the publishing process - a decent text editor is the only requirement. Adding a `<script>` for loading the translator and a `<div class='x-markup'>` to any HTML document file is all that's required to incorporate MyWord content into any Web page.
+
+<#TableOfContents>
+
+

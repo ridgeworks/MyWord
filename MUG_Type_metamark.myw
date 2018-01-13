@@ -1,0 +1,186 @@
+###  Type `metamark`
+
+The purpose of type `metamark` is to define meta-content for use by the other MyWord types, in particular `labelledblock`, `inlinenotation` and `external`. Much of this topic has been discussed in previous sections of this guide. The metamark type must be used inside a & block so that the definitions are pre-processed and the definitions made available for use. Any meta-content once defined is immutable in the current scope. Any attempt to redefine a notation or type will be flagged as a duplicate definition, although they can be overridden in a nested scope.
+
+This section more formally and completely covers the `metamark` language. Syntactically, the `metamark` language consists of a sequence of statments; each statement starts in column 1 of a line and includes any subsequent lines that begin with whitespace. A statement can by any of the following:
+-  Type definition
+-  Notation definition
+-  Import statement (`@import`)
+-  CSS statement (`@css`)
+-  JavaScript statement (`@javascript`)
+-  Doc statement (`@doc`)
+-  Single line comment (`//`)
+
+As can be seen in previous examples, `metamark` content does not normally generate any visible output, but it can produce HTML content in the form of `<style>` and `<script>` elements as well as any error messages produced by the processing of the meta-content.
+
+####  Type Defintions
+There are several examples of type definitions in earlier examples but so far only one form of the type definition has been used. For example, the `text` transform just specifies a function which maps content to rendered output:
+eg
+	text :: (txt) => txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+As seen previously, MyWord also supports parameterized types (remember `viz`), so the more general form (as an arrow function) is:
+eg
+	TypeName :: (Content, ParameterString) => Expression..
+There is no universal meaning of `parameterString`; the function body defines the meaning. Parameter string values are frequently specified in notation definitions (see below).
+
+Internally, MyWord uses the [Grit] JavaScript module which defines a language for specifying grammars. It uses a grammar specification to generate a parser which can be used to parse content in the grammar. Most type definitions can be written using the simple functional form shown above, but here's a small example of what can be done using Grit rules to define a grammar for expressing simple chemical formulae:
+demo
+	Butane ~CH3CH2CH2CH3~
+
+	Isobutane ~(CH3)3CH~
+
+	&
+		~ .. ~  <- <span class=chem> chem
+
+		chem   := (num / char)* :: string
+		  char :~ \D*           :: string
+		  num  :~ \d+           :: (n) => `<sub>${n}</sub>`
+This defines an inline notation, '`~ .. ~`' for writing the formulae and a type `chem` for mapping the content of the notation to an HTML fragment. Notice there is just one type defined, the grammar rules for `char` and `num` are part of the `chem` definition since they're offset from the start of the line defining `chem`.
+
+The `:=` grammar rules are PEG rules, while the `:~` grammar rules are JavaScript regular expressions. The `::` introduces a semantic action that can use any JavaScript code to process the parse tree. `string` is a Grit built-in function (see the Grit documentation for details), but the semantic action for `num` is just an arrow function, which takes the matched input string as a parameter. The grammar rules provide a convenient way to automate the creation of a parser for a type.
+
+####  Notation Defintions
+The general form of a notation definition is defined by the following quasi-PEG rule:
+eg
+	notationDefintion := labelPattern '<-' (htmlTag / charReference)? (typeName parameterString?)?
+where `labelPattern` is any string defined by the type, e.g., `markup` or `prose`, parsing the notation. Some examples seen previously include '`* ..`', '`#### ..`' (block label patterns), '`* .. *`', '`" .. "`' (span label patterns), and '`<-`', and '`%version`' (symbol label patterns). Other types can define different patterns to meet their requirements. The pattern can even include the '`<-`' operator as seen in the symbols example (`<- <- &larr;`). The last occurrence of '`<-`' on the first line of a notation definition separates the `labelPattern` from the rest of the definition.
+
+The wrapper (tag or character reference) and type specification are both optional; if neither is present, it's a `null` definition which "undefines" any outer definition visible in the current scope. The optional `parameterString`, if present will be passed to the type's transform as the second parameter. Recall that definitions are immutable so a notation can only be defined (or undefined) once in a scope.
+
+Some examples:
+demo
+	These links are the same: @Google and <http://google.com>.
+	
+	Tricky code `(`foo`)` to quote.
+	
+	Using some Critic Markup (<http://criticmarkup.com>) notations:
+	
+	Don't say {--to people that --}the world owes you a living....
+
+	Keep up the good work{++ and people will help++}.
+
+	&
+		@Google   <- is <a href='http://google.com'>Google</a>
+		< .. >    <- link
+		is   :: (_, parmstring) => parmstring
+		link :: (content, url) => 
+		    `<a href='${url?url:content.trim()}'>${markit('prose',content)}</a>`
+			
+		` .. `    <- <code> text
+		`( .. )`  <- <code> text
+
+		{-- .. --}   <- <del class='critic delete'>
+		{++ .. ++}   <- <ins class='critic insert'>
+		@css
+			ins.critic.insert {background:lightgreen}
+			del.critic.delete {background:lightsalmon}
+
+####  `@import`
+`@import` addresses much the same need for `metamark` as  type `external` does for `myword`, but on a more limited set of file types. The `@import` statement takes a whitespace separated list of URLs and uses the same interpretation of relative URLs (i.e., relative to the file containing the `@import` statement). The file types supported are:
+-  `.mmk` for modularizing meta-content into separate sharable files.
+-  `.css` for loading external style sheets to be applied to the current scope (like the `@css` statement).
+-  `.js` for loading JavaScript modules to make any exported (global) functions available to transforms.
+Importing `metamark` injects the content of the file into the `metamark` block being processed at the location of the `@import` statement. Any conflicting names will be treated as duplicates, and flagged. There is only a single name space for type and notation definitions.
+
+The meaning of `@import`ed CSS content is defined by the transform for type `metacss`; the default is:
+eg
+	metacss     :: (css) => `<style scoped>${css}</style>`
+This transform wraps the content in a `<style scoped>` element which limits the scope of the rules to the block containing the `metamark` block with the `@import`.
+
+Regarding JavaScript `@import`'s, some additional explanation of the browser runtime environment for transforms is required. The evaluation of transform functions takes place in a [Web Worker], i.e., in a background thread. This means the main web page is responsive while the document is translated and provides some level of security and robustness since transforms can't access the main Web page global data, in particular the DOM. `@import`ing `.js` files loads JavaScript into the MyWord Worker environment so that any exported (global) functions are made available to transforms. They are not loaded into the browser global `window` (the environment containing the DOM) so they're not visible to any scripts running there.
+
+As an example, consider the previous Graphviz example. It just `@import`ed a package (`gv.mmk`) but if we look inside that package it will contain the following:
+eg
+	.gv .. <- gv
+	gv     :: (dotgraph) => Viz(dotgraph)
+	@import viz-lite.js
+`viz-lite.js` defines a global function `Viz(dotgraph)` which translates `dot` source to `svg` (Scalable Vector Graphics), a Web standard XML-based markup language supported by all browsers. So the type definition for `gv` just has to call `Viz` to translate the `dot` content. The block label defintion '`.gv .. <- gv`' follows a useful convention: define the label to be the same as a file suffix for that type, i.e., labels of the form '*`.name`*' are containers for content of type *`name`*. 
+
+[`marked.js`] is a JavaScript Markdown translator that is Worker compatible, so it's pretty easy to add a `md` type:
+demo
+	&
+		.md .. <- md
+		md :: (markdown) => marked(markdown)
+		@import 3rdparty/marked.js
+	.md
+		A First Level Header
+		====================
+
+		A Second Level Header
+		---------------------
+
+		The quick brown fox jumped over the lazy
+		dog's back.
+
+		### Header 3
+
+		> This is a blockquote.
+		>
+		> ## This is an H2 in a blockquote
+		
+		This is an [example link](http://example.com/).
+
+		Optionally, you may include a title attribute in the parentheses:
+
+		This is an [example link](http://example.com/ "With a Title").
+
+		Reference-style links allow you to refer to your links by names, which you define elsewhere in your document:
+
+		I get 10 times more traffic from [Google][1] than from
+		[Yahoo][2] or [MSN][3].
+
+		[1]: http://google.com/        "Google"
+		[2]: http://search.yahoo.com/  "Yahoo Search"
+		[3]: http://search.msn.com/    "MSN Search"
+Note that each `.md` block is like an independent piece of Markdown so you can't use a definition from a different `.md` block.
+
+To be used by a MyWord transfrom, a global function can't depend on anything that isn't available to a dedicated Web Worker; see [Worker Globals] and [Worker Functions].
+
+####  `@css`
+The `@css` statement allows style rules to be specified in `metamark` co-located with the type and notation definitions that generate the HTML tags that match the CSS selectors. Inline style rules (like `@import`ed CSS content) are transformed using type `metacss` (see above) so any rules are scoped to the block containing the `mmk` block. This means that global style rules, e.g., rules applying to the HTML document or `<body>` element can't be specified using `@css` or `@import`. A notation can be defined for a global <style> element in the same way as any other HTML element. For example:
+eg
+	[DocStyle]
+	Document content ...
+	...
+	&
+		[DocStyle] <- <style type='text/css'> is
+			body { font-family: 'Helvetica Neue', Helvetica, Arial, serif; }
+This place-holder definition could be put in a separate package and `@import`ed so it could be shared across documents (like CSS stylesheets).
+
+####  `@javascript`
+Unlike `@import`ing JavaScript into the MyWord worker environment for use by transforms, the content of a `@javascript` statement is transformed using the type `metajs`. The default transform injects a `<script>` element into the DOM of the Web page:
+eg
+	metajs      :: (javascript) => `<script type=application/javascript>${javascript}</script>`
+
+This is only useful for writing life-cycle handlers for custom elements that a transform might generate, and that topic will be addressed later in this guide.
+
+####  `@doc`
+The `@doc` statement allows blocks of documentation to be included in `metamark` content. (An analogy in programming languages is Javadoc.) The rest of the statement following the `@doc` and following whitespace is transformed using type `metadoc`, with default transform:
+eg
+	metadoc :: (content) => ''
+
+This just discards the content, but `metadoc` can be overridden to provide any desired behaviour.
+
+####  `//` comments
+Any line in `metamark` content beginning with `//` that isn't a valid notation or type definition is discarded. These statements can be used as local comments in `metamark` source.
+
+###  Packages and Lingos
+A *package* is just a `metamark` file containing a related set of definitions. And a *lingo* is just one or more packages that provide a vocabulary of notations for authors to use. Rather than requiring each document author define his own lingo, it makes sense for the "experts" to define a common lingo that all the authors can just `@import`. Some basic `metamark` skills are still required to define a few content dependent symbols or notations, but one should be able to use a common lingo just like other light-weight markup language where all the notations are built-in and fixed.
+
+The "default lingo" is a lingo that doesn't even have to be imported; it comes for free. But nobody is required to use any of the notations it defines. These can be overriden by any imported lingos or by any notations defined in the document itself. In the extreme case, a document could be totally self-defining and not require any external lingo at all.
+
+Designing a "good" lingo is challenging and the root cause is related to the definition of a markup language: "a system for annotating a document in a way that is syntactically distinguishable from the text". Therefore anything "syntactically distinguishable" can't be represented directly in "the text" and what can be represented is constrained by the set of defined notations. In most markup languages this limitation is addressed by adding a character level escape mechanism, e.g., '`\`', but that's just another notation, which in turn must be escaped.
+
+As an example, consider expressing some arbitrary text as a JavaScript string literal with double quotes. In addition to adding the begin and end quotes (a trivial exercise), the following need to be "escaped" using a backslash ('`\`'): any double quote characters, any end-of-line characters, and any backslashes. Because string literals can use either single or double quotes, some of this escaping can be avoided by picking a quote that doesn't occur in the content. And template strings which use a backtick ('`(`)`') don't require end-of-lines to be escaped. So escaping can be reduced by supporting alternative notations. Markdown selectively employs this strategy by providing either '`*`' or '`_`', and allowing code spans to be enclosed in as many backticks as necessary.
+
+MyWord is all about user defined notations so its predefined types do not support character level escaping at all. Instead, alternative notations can be defined and scoped to avoid any ambiguities between notation syntax and content. This avoids any need to change content. Most span notations in the default lingo already have alternatives defined, but additional local definitions can added as required. This is less of a problem with block labels and symbols, but defining a symbol character equivalent (analogous to an HTML character reference) is a simple workaround.
+
+<#TableOfContents>
+
+
+&
+	[Web Worker]  <- link https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
+	[`marked.js`] <- link https://github.com/chjj/marked
+	[Worker Globals] <- link
+	        https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope
+	[Worker Functions] <- link
+	        https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Functions_and_classes_available_to_workers

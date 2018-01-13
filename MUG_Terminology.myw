@@ -1,0 +1,24 @@
+###  Terminology
+
+A *[markup language]* is "a system for annotating a document in a way that is syntactically distinguishable from the text". The purpose of the annotations are to give information regarding the structure of the text or instructions for how it is to be displayed. Hypertext Markup Language (HTML) is the "lingua franca" of the Web, but the information content of HTML documents is often lost in the sea of annotations using the familiar `<tag ..>some content</tag>` structure, making HTML difficult to read and write.
+
+For authoring purposes, *light-weight* markup languages are designed to replace the powerful but cumbersome HTML/XML tag structure with annotations which are more user-friendly, e.g., `*emphasized*` instead of `<em>emphasized</em>`. But such languages come with a predefined set of notations which can limit these tools' effectiveness. For example, [Markdown] doesn't have any standard support for tables; instead raw HTML can be inserted in Markdown content for this purpose but this somewhat defeats the purpose of having a light-weight markup language in the first place. In many cases this doesn't matter, but the number of Markdown variants available is, at least in part, a testament to the limits imposed by the core set of Markdown notations. MyWord aims to overcome this problem by allowing the user to define new notations, and/or re-define existing ones.
+
+So if one considers plain text to also be a *notation* (one with no "additional information or instructions"), any markup document is just text that can broken down into a sequence of *notations*. *Notations* typically contain *content* which in turn is constructed from other *notations* until a terminal notation, e.g., plain text, is reached. For example, `*emphasized*` is a `* .. *` *notation* whose *content* is a `text` *notation* with *content* '`emphasized`'.
+
+The definition of a *notation* should specify the *type* of its *content*. Most people are familiar with the concept of a *type* from file names. The dot-suffix of a file name is typically used to "name" the *type* of its *content*, e.g., `.c` for C source code, `.css` for Cascading Style Sheets, `.py` for Python source,  `.md` for Markdown, etc. MyWord uses this notion of *type* extensively; the name of the *type* for MyWord content is `myword` (or `myw` for use as a file suffix). (In this guide, the term *type* is often used in place of "the name of the *type*" when the meaning is clear.)
+
+Inherent in a *type* is the syntax of the *type*, i.e., what constitutes a valid instance of that *type*. But the syntax of a *type* does not define the (semantic) "meaning" of that *type*. In fact the meaning may differ depending on the application. The meaning of C source is different to a C compiler than a pretty-printer, even though the source syntax is identical. A *transform* is a function (in the general sense) that defines the meaning of a *type* for a particular application context. In MyWord, meaning is expressed as (a fragment of) HTML, so MyWord *transforms* translate *type* instances (strings) to HTML fragments (also strings). The browser will eventually convert this HTML to pixels on a display.
+
+aside> Aside: This usage of *type* is a subset of common usage in programming languages which usually include a set of operators (or methods) which can be applied to instances of any given type, e.g., artithmetic operators for integers, concatentation for strings, etc. In the context of a *markup language*, for simplicity, the only useful operator is translation which maps one *type* instance to a different *type* instance. Referencing the Wikipedia article on *[data type]*, MyWord *type*s specify the *Value Space* and *transform*s specify the *Behaviour*.
+
+So these are the key MyWord concepts: *notations* are what is written. A *notation* can be decomposed to *content* and the content's *type*. The *transform* for that *type* is then used to map the *content* to the output which, in MyWord, is a fragment of HTML.
+
+A MyWord *document* is defined as one or more files/resources that get rendered in a single browser window or "Tab" (analogous to an HTML document). Every *document* starts with a "root" MyWord file (file type `.myw`).
+
+<#TableOfContents>
+
+
+&
+	[markup language] <- link https://en.wikipedia.org/wiki/Markup_language
+	[data type]       <- link https://en.wikipedia.org/wiki/Data_type

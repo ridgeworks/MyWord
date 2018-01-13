@@ -1,0 +1,41 @@
+###  Scoping *metamark* Defintions
+
+The notion of scoping meta-content was introduced in the previous section as a solution to the problem of managing the effect of defining new types and notations. Meta-content is defined in `metablock`'s, i.e. `labelledblock`s with the label `&`. The definitions in these blocks only apply to content in the parent of that block.
+
+A new `myword` scope is created whenever a block of type `myword` is used. Block labels have `myword` type content by default, also any user defined types may be generate instances of `myword` (by calling `markit`). An internal optimization avoids creating empty scopes for any `myword` blocks that do not define any new meta-content.
+
+A simple example:
+
+demo
+	An outer block containing some !colored! text.
+	
+	.myw
+		And an inner block with a different !hue!.
+		&
+			! .. ! <- <b style='color:orange'>
+	
+	&
+		.myw .. <- myword
+		! .. !  <- <span style='color:red'>
+
+Another example: all the "demos" in this document are just blocks containing `myword` content, and any definitions inside a demo (including any you might add), have no effect outside the demo.
+
+Scoping isn't limited to type and notation definitions, any `@css` definitions are similarly scoped. So a better way of writing the previous example might be:
+demo
+	An outer block containing some !colored! text.
+	
+	.myw
+		And an inner block with a different !hue!.
+		&
+			@css  span.colored {color:orange; font-weight:bold;}
+	
+	&
+		.myw .. <- myword
+		! .. ! <- <span class=colored>
+		@css  span.colored {color:red;}
+
+aside>  Aside: Style scoping uses the now abandoned HTML `<style scoped>` element. Polyfill emulating the original standards proposal is included in MyWord.
+
+<#TableOfContents>
+
+

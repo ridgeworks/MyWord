@@ -1,0 +1,14 @@
+###  Acknowledgements
+
+MyWord is a collaborative effort of Peter Cashin and Rick Workman, retired Bell Northern Research engineers, apparently with time on their hands.
+
+Thanks go to Thomas Park for a small but critical piece: the implementation of a [polyfill for scoped styles] which were dropped from a Web standards track due to lack of interest from the main browser developers.
+
+And the [MathJax] organization deserves much credit for filling the gap while MathML support remains spotty or non-existant. Although it would be nice to have a simple polyfill that *just* converts MathML to HTML.
+
+<#TableOfContents>
+
+
+.mmk
+	[polyfill for scoped styles]     <- link https://github.com/thomaspark/scoper
+	[MathJax]                        <- link https://www.mathjax.org/

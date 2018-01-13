@@ -1,0 +1,183 @@
+{#id document_feature}
+### Custom Elements and Document Features
+
+MyWord provides a flexible translation system for converting annotated text to HTML. But some useful features can't be done with only a translator. Two such features are used in this guide: the table of contents and the interactive demo. Tables of contents (TOCs) require global document knowledge, but transforms only see a small piece of the content, i.e., the piece they're currently translating. Generating a TOC requires the rest of the document to be built before the TOC can be generated. In essence, this means that this must be done after translation. In theory one could use the HTML string directly as data to find all the headers and build the TOC, but it's much easier if the generated HTML is used to update the browser's DOM (Domain Object Model), and then use the DOM API's to do this job.
+
+The non-worker portion of MyWord (`x-markup.js`) is responsible for updating the DOM, but it's undesirable to require `x-markup` to support all the document level features that users might like to build. A possible solution is to define an API that could interact with user written Javascript so it could be notified of DOM updates in order to perform the necessary magic. But a cleaner approach is to take advantage of the recent Web standard for [Custom Elements] which requires no MyWord API extensions at all.
+
+A custom element tag name starts with a lowercase ASCII letter, does not contain any uppercase letters, and does contain a hyphen. There are a small number of existing HTML tags that fit this syntax, e.g., `font-face` and `color-profile`, but any future extensions will not use this syntax so it's safe to use it for custom elements. Custom elements are easy to generate using `metamark` definitions so now it's a simple matter of defining the lifecycle methods for those custom elements.
+
+This can all be implemented in a `metamark` package using `@javascript` statements to specify the lifecycle code. The `toc.mmk` package is distributed with the MyWord release and is used for this guide, but it is used here as an example of how to construct a custom element to implement a document feature.
+
+The `toc.mmk` package uses knowledge about how headers are defined in the default lingo. Recall the definition of the type `header`:
+eg
+	header :: (c, level) =>
+			`<h${level} class=my_h${level} id='toc${level}${c.trim().replace(/[^\w$-@.&!*(),]/g, '_')}'>${markit('prose', c)}</h${level}>`
+The '`#`' header notations use this to generate `<h1>` to `<h6>` with an `id` attribute that can be used as a target for links in the table of contents. The `id` also contains an encoding of the level, e.g.,:
+eg
+	<h5 class=my_h5 id='toc5Introduction'>Introduction</h5>
+The first thing that the `toc` package must define is a type to be used to build a custom element which can be placed in the document where the table of contents is to appear:
+eg
+	toc :: (title, minmax) => {
+			 var levels = /(\d)\s+(\d)/.exec(minmax)
+			 if (!levels) levels = ['', '0', '9']
+			   return `<myword-toc minlevel=${levels[1]} maxlevel=${levels[2]}>${markit('prose', title)}</myword-toc>`
+		   }
+The content passed to the transform will be used for the title of the table of contents. The parameter string consists of the minimum and maximum level headers to be included in the table; the default is everything (0 to 9). The custom element tag name is `myword-toc`. The type `toc` is then used in a notation definition for the table of contents, e.g.,
+demo
+	toc>  *Minor* Table of Contents
+	
+	#####  Introduction
+	Some introductory words ...
+	
+	#####  Conclusion
+	And in conclusion, ...
+	
+	&
+		toc> .. <- toc 5 6
+Note that `toc.mmk` was already imported to build the table of contents at the beginning of this guide, so it doesn't need to be re-imported here.
+
+The JavaScript code to implement the `myword-toc` custom element in the `toc.mmk` package is:
+eg
+	@javascript
+		// <myword-toc> table of contents
+		( () => {
+
+			class MyWordTOC extends HTMLElement {
+				constructor() {
+					super();
+					this._minlevel = 0;
+					this._maxlevel = 9;
+				} // constructor()
+
+				connectedCallback() {
+					var oldTOC = this.querySelector('.my_toc')
+					if (oldTOC) // if .toc already there, remove then rebuild
+						oldTOC.parentNode.removeChild(oldTOC)
+					var level
+					level = this.getAttribute('minlevel')
+					this._minlevel = (level) ? level : this._minlevel
+					level = this.getAttribute('maxlevel')
+					this._maxlevel = (level) ? level : this._maxlevel
+					var headers = document.querySelectorAll('*[id^=toc]')
+					var tocContent = [`<div class=my_toc>${this.innerHTML}`]
+					var closing = 0  // number of open nested list items
+					var currentlevel = this._minlevel - 1
+					headers.forEach((header) => {
+						var level = Number.parseInt(header.id[3])  // id='tocN...'
+						if ((level >= this._minlevel) && (level <= this._maxlevel)) {
+							if (currentlevel >= level)      // unindent
+								tocContent.push('</div>'.repeat(currentlevel - level + 1))
+							if (level > (currentlevel + 1))  // deeply nested
+								tocContent.push('<div class=my_listitem style="list-style-type:none">'.repeat(level - (currentlevel + 1)))
+							tocContent.push(  // add a list item with a link
+								`<div class=my_listitem><a href="#${header.id}">${header.innerHTML}</a>`
+							)
+							closing = closing + level - currentlevel
+							currentlevel = level
+						}
+					})
+					tocContent.push('</div>'.repeat(closing+1))  // close open list items and outer div.my_toc
+					this.innerHTML = tocContent.join('')
+				} // connectedCallback()
+			} // MyWordTOC
+
+			if (!customElements.get('myword-toc'))
+				customElements.define('myword-toc', MyWordTOC)
+
+		})()
+
+Recall that code in `metamark @javascript` statements generate `<script>` elements that will be executed by the browser when they're written into the DOM. In this case, the code declares a class `MyWordTOC` and then registers it for `<myword-toc>` elements. Class `MyWordTOC` has a constructor method, which just initializes some defaults, and a `connectedCallback` method which gets called whenever a `<myword-toc>` element is added to the DOM. When called, this method scans the document for relevant elements (everything whose `id` begins with `toc`) and generates a `table.toc` element containing references to the elements within the prescribed range (as specified by the `minlevel` and `maxlevel` attributes in the `myword-toc` element). The `table` element is than appended to the existing `myword-toc` content (which is just the title) from the source notation. (Obviously there's a bit more going on in the `connectedCallback` method, but it's irrelevant detail for the purposes of this discussion.)
+
+The interactive demos in this guide demonstrate another use for custom elements. First there is a need to associate two elements in the DOM: the source editor and the rendered content display. So this is already beyond the capabilties of a translator. Secondly, the content is dynamic, so after the initial document load and translate phase, some piece of the document (but not all) is modified and has to be re-translated. This is accomplished by using two custom elements: `<myword-editable>` and `<myword-sink>` which are created by types defined in the `demo.mmk` package. `<myword-sink>` monitors another element (like an instance of `<myword-editable>`) for changes and translates the contents of that element to HTML using the messaging interface `x-markup.js` provides. The messages contain a CSS selector to reference the element to be translated and the type of the content:
+@include
+	WindowMsgs.box
+Note that there is no return message to the custom element, it will be automatically updated when the content is translated. A more general and robust messaging protocol could be implemented, but this simple version is sufficient for this purpose. A more detailed description of interactive demos is included in the `demo.mmk` package section.
+
+aside>  Aside: The `scope` marking and use of `contextID` described earlier are required to support dynamic content. The Worker maintains a list of contexts referenced by `contextID` and when an element needs to be retranslated, its `contextID` can be retrieved from the `scope` element in the DOM. This is sent to the Worker to establish the correct `metamark` context before the translation is started.
+
+Another application of custom elements occurs when a client side library provides a useful transform but cannot be executed in the Worker. In this case, the Worker side transform can generate a custom element which just contains the raw content. The lifecycle methods in the main thread can then be used to invoke the necessary translation function and translate the contents to the final rendered form. Here's an example package to which interfaces the [Mermaid] library for producing various graphics notations:
+eg
+	@import mermaid.css
+	
+	@javascript
+		// <my-mermaid> mermaid graphics
+		( () => {
+
+			class MyMermaid extends HTMLElement {
+				constructor() {
+					super();
+				} // constructor()
+
+				connectedCallback() {
+					var container = this
+					renderMermaid()
+
+					function renderMermaid() {
+						// may need to wait until 'mermaidAPI' is available.
+						if (typeof mermaidAPI !== 'undefined') {
+							if (!container.querySelector('svg'))  // not already rendered?
+								mermaidAPI.render('mermaid' + new Date().getTime(), container.textContent, insertSvg)
+						} else {
+							setTimeout(renderMermaid,250)
+						}
+					} // renderMermaid()
+
+					function insertSvg(svgCode) {
+						container.innerHTML = svgCode
+						container.style.visibility = 'visible'
+						container.querySelector('svg').style.height = 'inherit'
+					} // insertSvg(svgCode)
+
+				} // connectedCallback()
+			} // MyMermaid
+
+			if (!customElements.get('my-mermaid'))
+				customElements.define('my-mermaid', MyMermaid)
+
+		})()
+
+Note that the `renderMermaid()` function incorporates a `setTimeout` delay to ensure `mermaidAPI` is available before calling it. Here's a simple demo:
+demo
+	@require 3rdparty/Mermaid/mermaidAPI.min.js
+	
+	mgraf>
+		graph TD;
+			A-->B;
+			A-->C;
+			B-->D;
+			C-->D;
+	&
+		@import 3rdparty/Mermaid/mermaid.mmk
+		mgraf> ..   <- <my-mermaid style='visibility:hidden'> rawtext
+		rawtext     :: (content) => content
+		@require .. <- require
+		require     :: (urllist) => urllist.trim().split(/\s+/)
+									.map((url) => `<script src='${url.trim()}'></script>`)
+									.join('')
+
+The local type `require` generates the `<script>` elements to load the Mermaid JavaScript that is used for the final translation on the custom element contents. It will be inserted into the DOM at the same time as instances of the custom element, hence the earlier requirement to wait before calling the `mermaidAPI.render` function.
+
+It's still relatively early days for the custom elements standard (MyWord assumes V1) and not all browsers support it. Fortunately a [polyfill] is available and can be loaded with the MyWord `lib` via the host HTML file, e.g.,
+eg
+	<!DOCTYPE HTML>
+	<html>
+	<head>
+		<meta lang=en charset="UTF-8">
+		<script src='lib/x-markup.js'></script>
+		<script src='javascripts/custom-elements.min.js'></script>
+	</head>
+	<body>
+		<div class=x-markup src=myMyWordDoc.myw></div>
+	</body>
+	</html>
+
+Defining notations in `metamark` which generate custom elements and then linking them to `@javascript` code with access to the DOM is an effective way of building document level features which can't implemented as part of the translation step. In addition, this permits the addition of such features without requiring any changes to MyWord itself.
+
+<#TableOfContents>
+
+
+&
+	[Custom Elements] <- link https://www.w3.org/TR/custom-elements/
+	[polyfill] <- link https://github.com/webcomponents/custom-elements
+	[Mermaid] <- link https://mermaidjs.github.io

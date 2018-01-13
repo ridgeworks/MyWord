@@ -1,0 +1,5 @@
+	.------------.                                                      .------------.
+	|            |-----[id, typeName, content, contextID, basePath]---->|   markit   |
+	|  x-markup  |                                                      |  (Worker)  |
+	|            |<---------------[id, generatedHTML]-------------------|            |
+	'------------'                                                      '------------'

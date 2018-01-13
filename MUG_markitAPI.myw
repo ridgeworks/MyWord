@@ -1,0 +1,34 @@
+###  The `markit` API
+
+The `markit` API is a global function for transform writers and has been informally documented peviously. `markit` is the only name defined in the Worker global scope, but it includes a number of "sub-functions" which provide additional functionality, although the top level `markit()` is usually all that's needed. The full API is:
+
+eg
+	markit(TypeName:String, Content:String, Parameters:String) ==> String
+	            // calls the transform associated with TypeName passing it Content and Parameters.
+	
+	markit.applyLabel(LabelPattern:String, Content:String, DefaultTypeName:String) ==> String
+	            // uses the notation definition associated with LabelPattern to translate Content.
+	            // if the definition does not specify a type, the type DefaultTypeName will be used.
+	            // Special case: if the content is `null`, return the empty string if the definition exists
+	            //   and `null` if it doesn't (efficient existence check for a notation definition).
+	
+	markit.newNode(TypeName:String, Content:String, Parameters:String) ==> Node
+	            // A node represents a deferred transform call (call to markit()).
+	            // Parsers use newNode() to construct a list of nodes to be rendered later (see renderNodes()).
+	            // An item in the list can also be a list, so the end result may be a tree of Nodes.
+	
+	markit.renderNodes(Nodes) ==> String
+	            // Renders a list of Nodes.
+	
+	markit.setDefaultLingo(MetamarkSource:String) ==> String
+	            // set the default lingo. this function cannot be called from a transform, but can
+	            // be used to "bootstrap" MyWord in other JavaScript environments.
+	
+	markit.translate(URL:String) ==> String
+	            // transform a *document* addressed by URL. This function cannot be called from 
+	            // a transform, but can used translate documents in other JavaScript environments.
+The last two functions are provided so applications that don't run in a browser (like MyWord) can be built using the common `markit` framework. The application structure of MyWord is described in the next section.
+
+<#TableOfContents>
+
+

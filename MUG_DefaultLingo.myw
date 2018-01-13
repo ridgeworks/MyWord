@@ -1,0 +1,562 @@
+###  Default Lingo
+
+The default lingo is a lingo provided with MyWord that doesn't have to be explicitly `@import`ed by the MyWord document. There are two main objectives for this default lingo: 1) provide an HTML specific implementation of the transforms for predefined types, and 2) define a basic set of notations that cover the same functionality to Markdown in a similar way. Note that any of the definitions in the default lingo (or even the predefined types) can be overridden by definitions in the MyWord document, but there may be unintended consequences.
+
+####  Type Definitions for Generating HTML
+
+The "core" MyWord translator is designed to just map the input to the output in the absence of any lingo. To ouput HTML, a set of transforms for the predefined types are required:
+eg
+	@doc
+		***** Default Lingo *****
+		Type definitions required for basic HTML generation
+
+	text        :: (content) => content.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+
+	ctrl        :: (ctl) => {
+					 switch (ctl) {
+					   case '\n' : return '<span class=newline>\n</span>'
+					   case '\t' : return '<span class=tab>\t</span>'
+					   //default   : return '<span class=my_ctl data-code=\''+ctl.charCodeAt(0).toString()+'\'>\ufffd</span>'
+					   default   : return `<span class=my_ctl data-code='${ctl.charCodeAt(0).toString()}'>\ufffd</span>`
+					 }
+				   }
+
+	insetblock  :: (content) => `<pre><code class=my_text>${markit('text', content)}</code><pre>`
+
+	paragraph   :: (content) => `<p class=my_p>${markit('prose', content)}</p>`
+
+	blankline   :: (_) => '<div class=my_blank>&nbsp;</div>'
+
+	scope       :: (content, context) =>
+					 (context) ? `<span class=myword data-context=${context}>${content}</span>` : content
+
+	errorString :: (content) => {
+					 if (console) console.error('markit: ' + content)
+					 return `<pre><mark style='color:blue'>*** Error *** ${markit('text', content)}</mark></pre>`
+				   }
+
+	metajs      :: (javascript) => `<script type=application/javascript>${javascript}</script>`
+	metacss     :: (css) => `<style scoped>${css}</style>`
+
+
+	@doc
+		set default tab size to 4 spaces; inherited by all body content unless overridden
+		set newline to be significant, i.e., a line break.
+		set default paragraph margin to 0 (overrides user agent spacing).
+		set default style for 'text' blocks
+
+	@css
+		body {tab-size:4; -moz-tab-size:4;}
+		span.newline {white-space:pre}
+		p.my_p {margin:0}
+		div.block_text {margin:0; white-space:pre; font-family:monospace;}
+Notes:
+1..
+	*  For the most part, these transforms generate HTML with a class attribute value, e.g., `my_p` or `my_blank`, so CSS rules can be used to change the presentation without having to override the type definition.
+	*  `typedblock` is a parameterized type whose transform takes a type name as the second parameter.
+	*  `errorString`, in addition to formatting the error message (the content) for rendering purposes also logs a message to the browser console, which is sometimes useful in finding the cause of the error.
+	*  Although it was stated earlier that the `@css metamark` statement could not be used to style the `<body>` element, its use in the default lingo works because the scope of the meta-content is the `<body>` element.
+	*  The `@css` rules provide basic document formatting rules for all document content, e.g., by setting the tab size to 4 or turning newlines into hard breaks. Like any other meta-content, this can be overridden in the document.
+	*  The CSS rule for `span.newline` preserves any explicit line breaks in `prose` content. Override this rule to revert to the standard HTML treatment.
+	*  `metacss` and `metajs` define how CSS and JavaScript content defined in `metamark` is rendered. Polyfill is provide in MyWord for `<style scoped>` elements if they are not supported in the browser.
+	*  `scope` is another parameterized type which takes a unique (to the document) `context` identifier which is then used to wrap the `content` which is contained by that scope. This marking is normally only required by internal MyWord processing, and not by any other transform.
+	
+####  General Purpose Types and Notations
+The default lingo also provides a few useful types and notations that may used in building other definitions or do not correspond directly to features provided in other light-weight markup languages:
+eg
+	@doc
+		Types for treating parmstring in notation definitions as the content for symbols
+
+		`viz` treats parmstring as `prose`
+		`is` treats parmstring as raw text
+
+	viz         :: (_, parmstring) => markit('prose', parmstring)
+	is          :: (_, parmstring) => parmstring
+
+
+	@doc	`{ .. }` span notation (with alternative) for labeled inline content
+
+	{ .. }      <- inline { }
+	{( .. )}    <- inline {( )}
+
+	inline      :: (content, brackets) => {
+					  const parsed = /(\s*)(\S+)\s*([\S\s]*)/.exec(content)	// parsed=[all, leading, label, content]
+					  const br = brackets.split(' ')
+					  return (!parsed[1] && (markit.applyLabel(parsed[2]+' ..', null) !== null) && parsed[3])
+						? markit.applyLabel(parsed[2]+' ..', parsed[3], 'prose')
+						: [br[0], markit('prose', parsed[0]), br[1]].join('')
+					}
+
+
+	@doc	`[ .. ]` span notation for place-holders (references to label definitions)
+
+	[ .. ]      <- asdefined
+	asdefined   :: (contents) => ((defined = markit.applyLabel('['+contents.trim()+']', contents, 'prose')) =>
+					 defined
+					   ? defined
+					   : `<span class=Undefined>[${markit('text', contents)}]</span>`
+				   ) ()
+Notes:
+1..
+	*  `viz` and `is` are useful types for replacing content (if any) with a `parmstring`. The earlier example used `viz` to define a replacement for a symbol. `viz` interprets the `parmstring` as `prose` content, while `is` treats it as literal content, i.e., not even escaped `text`. The latter is useful for generating actual HTML content.
+	*  Inline span notations are quite flexible, but sometimes the constraints on the span tags (only symbolic characters allowed) or ambiguity between the content and the tags causes problems. The `{ .. }` notation allows the first word of the content to be treated like a `markup` block label, i.e., minimal constraints to address the more difficult cases. The alternative `{( .. )}` can be used if even that content contains problematical curly brackets.
+	*  The `inline` transform uses a `markit` subfunction: `markit.applyLabel(labelPattern, content, defaultType)`, which applies the notation definition associated with `labelPattern` to the `content`; the `defaultType` specifies the *type* of the `content` in case the notation definition doesn't specify one.
+	*  For similar reasons, square brackets are used to define a notation that can be used overcome the limitations of the inline symbol syntax. Anything in square brackets becomes a label pattern that can be used to lookup a definition to be used to replace the original notation. These notations are called place-holders, and square brackets are a traditional notation used for various kinds of references; hence their use for this purpose here.
+
+Some examples:
+demo
+	A button: %ClickMe
+
+	Inline "blocks":
+	Some {hot pepper curry} or some {mild spicy peas}.
+
+	Place-holders:
+	This document was originally published in [Publication Date].
+	Have you read [Alice In Wonderland] or [Treasure Island]?
+
+	&
+		%ClickMe <- is <button>Click Me!</button>
+
+		hot ..   <- <span class=hot>
+		mild ..  <- <span class=mild>
+
+		[Publication Date] <- viz `November, 2017`
+		[Alice In Wonderland]  <- link
+			https://en.wikipedia.org/wiki/Alice%27s_Adventures_in_Wonderland
+		@css
+			span.hot        {color:red}
+			span.mild       {color:green}
+			span.Undefined  {background:yellow}
+Note that place-holders that don't have a definition are given a class '`Undefined`'. The author has the choice of leaving these as is in the output, or highlighting them using a CSS rule as shown here. This can be very helpful for editing an incomplete draft.
+
+####  Basic Markup Notations
+
+The default lingo defines a set of notations that mimic Markdown in functionality and in most cases use the same syntax and semantics that Markdown uses:
+eg
+	@doc
+		Common Light-weight Markup:
+		-  block notations for headers (with id's) and block quote
+		-  span notation for escaping inline notations.
+		-  span notations for simple markup:`italics`, `bold` (with `alternatives), and `code`.
+		-  span notation for typograhical double quotes
+		-  symbols for horizontal rule and apostrophe
+
+	# ..         <- header 1
+	## ..        <- header 2
+	### ..       <- header 3
+	#### ..      <- header 4
+	##### ..     <- header 5
+	###### ..    <- header 6
+
+	header       :: (c, level) =>
+					  `<h${level} class=my_h${level} id='toc${level}${c.trim().replace(/[^\w$-@.&!*(),]/g, '_')}'>${markit('prose', c)}</h${level}>`
+
+	> ..         <- <blockquote class=my_blockquote> blockquote
+
+	// if no content in a blockquote, treat as a blank line (for MD compatability)
+	blockquote   :: (content) => markit((content) ? `markup` : 'blankline', content)
+
+	// inlines including span alternatives. Note class attribute for more refined style rules if necessary
+	//		\ .. \                : escape
+	//		` .. `                : code
+	//		* .. * and _ .. _     : emphasis
+	//		** .. ** and __ .. __ : strong
+	//		" .. "                : quotes
+
+	\ .. \       <- <span class=my_text> text
+	\( .. )\     <- <span class=my_text> text
+
+	` .. `       <- <code class=my_text> text
+	`` .. ``     <- <code class=my_text> text
+	`( .. )`     <- <code class=my_text> text
+
+	* .. *       <- <em>
+	*( .. )*     <- <em>
+	_ .. _       <- <em>
+	_( .. )_     <- <em>
+
+	** .. **     <- <strong>
+	**( .. )**   <- <strong>
+	__ .. __     <- <strong>
+	__( .. )__   <- <strong>
+
+	" .. "       <- <q class=my_dquo>
+	"( .. )"     <- <q class=my_dquo>
+
+	---          <- <hr class=my_hr />
+	'            <- &rsquo;
+
+	@css
+		h1.my_h1, h2.my_h2, h3.my_h3, h4.my_h4, h5.my_h5, h6.my_h6 {margin:0}
+		blockquote.my_blockquote {margin:0 40px}
+		q.my_dquo {quotes: "\201c" "\201d"}
+		.my_text {white-space:pre}
+		hr.my_hr + span.newline {display:none}
+
+
+	@doc
+		`< .. >` span notation for hyperlinks, content is URL or email address, or notation can be literal `prose`
+		(Note: `link` type also used in place-holder definitions which supply the URL and optional attributes in the parmstring.)
+
+	< .. >      <- link
+	link        :: (contents, spec) =>
+	              ((attrs=spec?spec.match(/\s*(\S+)([\s\S]*)/):null) =>
+	                attrs
+	                  ? `<a href='${attrs[1]}' ${attrs[2].trim()}>${markit('prose',contents)}</a>`
+	                  : ((/[\w!#$%&‘*+–/=?^`.{|}~]+@[\w-.]+/.test(contents.trim())))
+	                    ? `<a href='mailto:${contents.trim()}'>${contents}</a>`
+	                    : ((/(?:(?:^[a-z](?:[-a-z0-9+.])*:\/\/)|(?:^[\/]?[^\s\/]+[\/.][^\s]+)|(?:#))\S+$/.test(contents.trim())))
+	                      ? `<a href='${contents.trim()}'>${contents}</a>`
+	                      : ['&lt;', markit('prose', contents), '>'].join('')
+	              ) ()
+
+
+	@doc
+		`#id ..` block notation for internal link targets, which are hidden by default.
+		`id` attribute value is the first word of the content, any remaining content is treated as `myword`.
+
+
+	#id ..       <- target
+	target       :~ (\S+\s*)([\S\s]*) :: (_, id, content) =>
+						   `<span class=target id='${id.trim()}'>${markit('text', id)}</span>${markit('prose', content)}`
+
+	@css
+		span.target {visibility:hidden; height:1px; width:1px; position:absolute;}
+
+
+	@doc	`image` type for use with placeholders, e.g., `[gopher] <- image images/gopher.png`
+
+	image        :: (contents, spec) =>
+	                   ((attrs=spec?spec.match(/\s*(\S+)([\s\S]*)/):[spec,'']) =>
+			   `<img src='${attrs[1]?attrs[1]:contents.trim()}'${attrs[2]} alt='${markit('text',contents)}'/>`
+					   ) ()
+
+
+	@doc
+		Lists:
+		Alternative block notations for list items: `*` or `+` or `-`
+		`*..` block notation for unordered list
+		Several block notations for ordered list for numbers, letters, roman numerals etc.
+
+	* ..         <- <div class=my_listitem>
+	+ ..         <- <div class=my_listitem>
+	- ..         <- <div class=my_listitem>
+	*.. ..       <- <ul class=my_list style="list-style-type:disc">
+	1.. ..       <- orderedlist decimal
+	01.. ..      <- orderedlist decimal-leading-zero
+	i.. ..       <- orderedlist lower-roman
+	I.. ..       <- orderedlist upper-roman
+	A.. ..       <- orderedlist upper-latin
+	a.. ..       <- orderedlist lower-latin
+
+	orderedlist  :: (content, type) =>
+					  `<ol class=my_list style="list-style-type:${type}">${markit('markup',content)}</ol>`
+
+	@css
+		.my_list {margin:0px}
+		.my_list div.my_listitem {margin-left:0px}
+		div.my_listitem {display:list-item; margin-left:40px}
+		div.my_listitem > div.my_listitem {list-style-type:circle; margin-left:40px}
+		div.my_listitem > div.my_listitem > div.my_listitem {list-style-type:square}
+
+aside>  Aside: By way of explanation, the header notations use type `header` which adds additional `class` and `id` attributes that can be used in generating tables of content.
+
+Probably the easiest way to document these notation definitions is by example (don't forget these are interactive so try out a few of your own):
+.myw
+	demo
+		Headers use the `#` Markdown convention, e.g.,
+		###  *Level 3* Header
+		(Setext headers using underlines are not supported.)
+		
+		A blockquote:
+		>	According to Wikipedia, a **markup language** is "a system for annotating a document in a way that is syntactically distinguishable from the text".
+		>
+		>	For authoring purposes, light-weight markup languages are designed to replace the powerful but cumbersome HTML/XML tag structure with annotations which are more user-friendly.
+			
+		or just use indentation with a single label:
+		>	According to Wikipedia, a **markup language** is "a system for annotating a document in a way that is syntactically distinguishable from the text".
+
+			For authoring purposes, light-weight markup languages are designed to replace the powerful but cumbersome HTML/XML tag structure with annotations which are more user-friendly.
+			
+		The presentation can be changed using CSS selector `blockquote.my_blockquote`.
+		
+		Use single back-ticks for code and backslash for literal content. In both cases the content is `text`, so you don't have to worry about nested notations. For example:
+		` (x>=0) ? "positive" : "negative"`
+		an \*HTML*\ element or an email address \<me@somewhere.org>\.
+		
+		But you do have to worry about backticks in content so an alternative is provided, e.g.,
+		Some `code` containing `(`backticks`)` or ``` is a backtick``.
+		
+		Emphasis and strong use Markdown '`*`' and '`_`' notations:
+		*emphasis* or _emphasis_ and **strong** or __strong__
+		
+		Nesting can be a bit tricky; again alternatives are provided:
+		***emphasis* in strong** but *__strong__ in emphasis*.
+		
+		Bracket notations are an even better alternative:
+		**(*emphasis* in strong)** or *(**strong** in emphasis)*.
+
+		There is just one notation for Horizontal rule
+		(but you can always invent your own.)
+		---
+		Fancy "quotes" and apostrophe's special treatment.
+		"(some "quotes" in quotes)".
+	&
+		// OK, we have to redefine a few things so a) example header
+		// doesn't show up in the table of contents, and b) default
+		// apostrophe behaviour gets restored.
+		header  :: (c, level) => `<h${level}>${markit('prose', c)}</h${level}>`
+		' <- &rsquo;
+
+Links and image support form another group of default notations. Some examples:
+demo
+	Here's a normal inline link: <http://example.com>. Other uses of
+	angle brackets shouldn't get interpreted as links, e.g., <html> element.
+
+	But it's probably better to use the `link` type with place-holders, e.g.,
+	For useful tips on using CSS for presentation, see [Zen Garden].
+	
+	Links internal to the document are supported, e.g.,
+	<#TableOfContents> (don't click on it unless you want to go there.)
+	Undefined targets will be wrapped with `span.Undefined` so they can be marked using CSS, e.g., <#nowhere>.
+	
+	Targets for internal links are defined using the `#id ..` notation:
+	This is the (invisible) target{#id anyID} for the link <#anyID>.
+	
+	Internal links and targets can be used with place-holders to link terminology to the corresponding definitions somewhere else in the document, e.g.,
+	
+	Markup content consists of a sequence of *[notation]*s.
+	...
+	*notation*{#id notationdef}: any sequence of characters with a defined syntax.
+	
+	The `image` type is similar to the link type and is designed to work with place-holders, e.g.,
+	
+	This is the **Go** gopher:[gopher]
+	
+	There's no other notation defined in the default lingo for images, but it's easy to add one:
+	The *ridgeworks* avatar: {! images/RWgear.png}
+	
+	&
+		[Zen Garden] <- link http://www.csszengarden.com/
+		[notation]   <- link #notationdef
+		[gopher]     <- image images/gopher.png width=60 height=40 style='vertical-align:middle'
+		! ..         <- image
+		@css span.Undefined {background:salmon}
+
+Note that the `image` and `link` transform parameter string can just be the image's URL, but additional attributes for the generated `<img>` element can be added to the end. In the example, size and alignment for the `[gopher]` image are specified. (The '`!..`' notation would take a bit more work to add the same functionality.)
+
+Any URLs in `link` and `image` types are inserted into the generated HTML as is. So relative URLs are relative to the the base HTML document file, unlike relative URLs in `.include`s and `@import`s which are relative to the source file that contains the reference. In many cases this is the same, but it's important to keep this distinction in mind.
+
+aside>  Aside: The `image` transform might be a bit confusing; it's written in a functional programming style enabled by recent JavaScript features (in this case, default parameter values). An equivalent using a more common "imperative" style (with `var`'s) would look like:
+eg
+	image  :: (contents, spec) => {
+				var attrs = spec ? spec.match(/\s*(\S+)([\s\S]*)/) : [spec,'']
+				return
+	  `<img src='${attrs[1]?attrs[1]:contents.trim()}'${attrs[2]} alt='${markit('text',contents)}'/>`
+			  }
+
+While the basic notations like headers and emphasis are similar to Markdown, `link`s and `image`s diverge somewhat, and so do `list`s. Unordered lists are just sequences of "bullet" items (like Markdown), but ordered list items must be grouped in a block. Nested lists are expressed as nested blocks. Some examples:
+demo
+	Like Markdown, list items can use `*`, `+`, or `-`:
+	* Item 1
+	+ Item2
+	- Last Item
+	although it's probably better to use the same label for any given list.
+	
+	For nested unordered lists use indented blocks:
+	- First point
+	- Second point
+		- First sub-point.
+		- Second sub-point.
+	- Last point.
+	
+	Ordered lists a use a `labeledblock`:
+	1..
+		+	First numbered point
+		+	Second point
+			i..
+				- First sub-point.
+				- Second sub-point.
+		+	Last numbered point.
+	
+	List items can be paragraphs (or any other markup block):
+	1..
+		*  `viz` and `is` are useful types for replacing content (if any) with a `parmstring`. The earlier example used `viz` to define a replacement for a symbol.
+		*  Inline span notations are quite flexible, but sometimes the constraints on the span tags (only symbolic characters allowed) or ambiguity between the content and the tags causes problems.
+		*  The `inline` transform uses a subfunction of `markit`:
+			`markit.applyLabel(labelPattern, content, defaultType)`.
+		*  For similar reasons, square brackets are used to define a notation that can be used overcome the limitations of the inline symbol syntax.
+
+While many other features could be included in the default lingo, a decision was made to limit it to a functional equivalent of Markdown as a "starter kit". Other features like tables, math notations, and simple box drawings (like the figure for "Predefined Types") can be provided as separate packages and selectively imported into those documents that need them. Several such packages are included with the MyWord release.
+
+####  Including External Content
+
+The default lingo defines the `@include` block label{#id @include} for including content from external resources. The block content is a list of whitespace separated URL's; each URL is included using type `external` documented previously. In additon, `myw` and `txt` types are defined so they can be used as file types. Finally, a reference implementation of [CommonMark] is used to support type `md` and block label `.md`.
+eg
+	@doc
+		`@include` block notation for including external content via a whitespace separated URL list.
+		It applies core type `external` to each URL in the list.
+		`myw` and `txt` types defined for file suffixes used with `@include`
+
+	@include .. <- reflist
+
+	reflist     :: (list) =>
+					  list.trim().split(/\s+/).map((ref) => 
+						 markit('external', ref)
+					  ).join('')
+	// file types
+	myw         :: (content) => markit('myword', content)
+	txt         :: (content) => `<pre class=txtInclude>${markit('text', content)}</pre>`
+
+	@doc
+		Type md  and block label .md for CommonMark content
+
+	.md ..      <- md
+	md          :: (content) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(content))
+	@import commonmark.min.js
+
+Example:
+demo
+	@include	MUG_extra/sampleInclude.myw
+				MUG_extra/sampleMD.md
+& [CommonMark] <- link http://commonmark.org/
+
+#### Markdown Compatability
+
+The MyWord default lingo mimics Markdown notations so that Markdown users can use a familiar set of notations, but MyWord is not strictly Markdown compliant. (Where full Markdown compliance is required, the block label '`.md`' is defined using the reference CommonMark implementation; see [`@include`].) Some differences are subtle (hard/soft line breaks); others, not so much (ordered lists and double bracket links):
+1..
+	- MyWord has no inline HTML but a block or span notation for HTML content is simple enough to write if necessary. However, it's usually preferable to write a specific notation definition, like the button example above, rather than clutter up the document content with HTML.
+	- MyWord does not recognize HTML character references (entities) as anything special, e.g., `&copy;` is '&copy;' not '©'. What you write is what you get (WYWIWYG). Any special HTML characters, i.e., '`<`' and '`&`' will be escaped when the HTML is generated (see the `text` type definition).
+	- By default (controlled by a CSS rule), MyWord treats newlines as hard breaks inside paragraphs (WYWIWYG). If you don't want them don't insert newlines and use your text editor to soft wrap content for readability purposes. Markdown takes a different approach and uses significant trailing white space on a line to insert a hard break.
+	- In Markdown, any number of blank lines between paragraphs are rendered as a single blank line. MyWord treats them as multiple blank lines to enable the explicit control of vertical spacing. (WYWIWYG)
+	- MyWord only supports ATX style headers (using '`#`'s). Markdown also supports Setext (underlining) headers. The default lingo does not support closing an ATX header, so the trailing '`#`'s will just be part of the header's contents. (A span notation could be defined to do this but if both block and span notations are in effect, there's an ambiguity to be resolved.)
+	- Block quotes in MyWord are mostly equivalent to those in Markdown. (If the Markdown option of prefixing every line with `>` is used, MyWord will generate a sequence of block quotes with hard line breaks between each one. If this is not the intent, use a `> .. labeledblock` with indented content.)
+	- Unordered lists use the same notation in Markdown and MyWord, but ordered lists in MyWord use '`labeledblock`'s to group list items. Both MyWord and Markdown support nested lists through indentation, but the results can be subtly different due to MyWord's universal block semantics (see demo below).
+	- MyWord doesn't support Markdown's "double bracket" style links; just use the `[ .. ]` place-holder notation instead. (In MyWord, double brackets are the conjunction of two spans which requires a *[document feature]* to implement the equivalent functionality.) Also, the default link transform doesn't obfuscate email addresses as Markdown automatic links do; if that's an issue write one that does.
+	- MyWord uses place-holders to support images rather than a `!` prefixing a hyperlink.
+	- Markdown has a few special cases for '`*`' and '`_`' spans: '`_`' cannot be used for in-word emphasis and a '`*`' surrounded by whitespace is a literal '`*`'. MyWord has no such special cases; if a particular notation syntax is inappropriate , an alternative local span notation can be defined which is better suited to the the content.
+	- Markdown has a special case for code spans: a space after the opening backtick and before the closing one are omitted to allow a leading/trailing backtick in the content. There are no such special cases with MyWord spans. Alternative span notations are helpful for some cases or use a custom notation.
+	- MyWord only defines one horizontal rule, `---`, as a symbol, but others can be added if required. Markdown predefines a general syntax supporting a wide variety of horizontal rules.
+	- MyWord does not use backslash escaping on characters. The backslash span notation (`\ .. \`) can be used for escaping one or more characters.
+	- Markdown "meta-content" is limited to link and image reference definitions. MyWord uses place-holder definitions in `metamark` blocks for this purpose.
+&
+	[document feature] <- link #document_feature
+	[`@include`] <- link #@include
+
+Some obvious differences between MyWord and Markdown:
+.myw
+	demo
+		Unordered lists are the same in MyWord and Markdown.
+		**MyWord**:
+		.myw
+			* first
+			* second
+				* sub-itemX
+				* sub-itemY
+			* last
+		**Markdown**:
+		.md
+			* first
+			* second
+				* sub-itemX
+				* sub-itemY
+			* last
+
+		But ordered lists are quite different.
+		**MyWord**:
+		.myw
+			1.. -	item 1
+					1.. - sub-item 1 and more
+						- sub-item 2
+				-	item 2
+		**Markdown**:
+		.md
+			1. item 1
+				1. sub-item 1
+			and more.
+				2. sub-item 2
+			2. item 2
+			
+		Code blocks are similar:
+		**MyWord**:
+		.myw
+			Here is an example of AppleScript:
+				tell application "Foo"
+					beep
+				end tell
+		**Markdown**:
+		.md
+			Here is an example of AppleScript:
+			
+				tell application "Foo"
+					beep
+				end tell
+
+		MyWord does not support "double bracket" style hyperlinks:
+		**MyWord**:
+		.myw
+			[an example] or <http://example.com/> or <me@mail.com>
+
+			MyWord uses place-holder references, so not:
+			[an example][id] or [an example](http://example.com/ "Title")
+
+			&	[an example] <- link http://example.com/ title="Title"
+		**Markdown**:
+		.md
+			[an example][id] or <http://example.com/> or <me@mail.com>  
+
+			also  
+			[an example](http://example.com/ "Title")  
+
+			[id]: http://example.com/  "Title"
+
+		MyWord uses place-holders for images rather the `!` link prefix:
+		**MyWord**:
+		.myw
+			The gopher from GO:[Go gopher]
+			&
+				[Go gopher] <- image images/gopher.png
+			                       title="Go gopher" width=60 height=40
+		**Markdown**:
+		.md
+			Just the "[id]" version:  
+			The gopher from GO:![Go gopher][gopher]  
+
+			[gopher]: images/gopher.png "Go gopher"
+
+		MyWord uses `\ .. \` spans for escaping rather than `\` character prefix escapes:
+		**MyWord**:
+		.myw
+			\*\literal *asterisks*\*\ or \[an example]\ or \<me@mail.com>\
+		**Markdown**:
+		.md
+			\*literal *asterisks*\* or \[an example] or \<me@mail.com> (depends on Markdown variant)
+
+		No special cases for spans in MyWord:
+		**MyWord**:
+		.myw
+			*ab*,  * ab * , ab*cd* and  ab_cd_
+		**Markdown**:
+		.md
+			*ab*,  * ab * , ab*cd* and  ab_cd_
+
+		Tricky cases for code spans:
+		**MyWord**:
+		.myw
+			Quote in quotes needs extra spaces:  
+			`` `abc` `` OR ```abc` ``
+
+			So better to use brackets:
+			`(`abc`)`
+		**Markdown**:
+		.md
+			Special case in code, spaces are ignored:  
+			`` `abc` ``
+
+			but not:  
+			```abc``` (triple back-tick span).
+
+
+<#TableOfContents>
+
+

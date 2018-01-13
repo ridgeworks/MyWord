@@ -1,0 +1,13 @@
+###  Significant White Space
+
+Most formal and informal languages treat whitespace characters (space, tab, end-of-line, etc.) as insignificant in the sense that they're only used to separate words/tokens. Which whitespace characters are used and how many are used usually doesn't matter. This allows writers using the language to "format" the source as they choose without changing the meaning of that source. Most programming languages and HTML, for example, use this approach. Notations in these languages are delimited by something other than whitespace characters, e.g., brackets or quote marks.
+
+Expressions of natural language usually introduce some additional meaning using whitespace. For example, two successive end-of-line characters are used to separate paragraphs. Lines of poetry are separated by an end-of-line. In either case, an end-of-line is semantically different than a space or a tab.
+
+MyWord uses indented lines, i.e., content starting with a tab character (or four spaces) and ending with an end-of-line as a basic piece of syntax. Indented lines are used to build containers with arbitrary content since the content can be extracted by simply removing the tab character at the start of each line. The end of the content is independent of anything in the content itself, so nothing has to be 'escaped' to avoid a premature termination of the content. Nested content can be expressed using multiple levels of indentation. (But note that the meaning of any content is dependent on its type so indented lines may, or may not, be significant in nested containers.) Tabs used elsewhere in content have no special significance.
+
+Since indented lines are fundamental to the predefined MyWord types, it's helpful that most text editors support a) making whitespace characters visible when creating or editing content, and b) provide simple ways to indent/un-indent a block of text. It is recommended that these editor features be enabled (if necessary) when using them to compose MyWord content. And although it is recommended that only one form, e.g., a tab, is consistently used in a file, setting the tab size to four spaces results in a uniform presentation while editing.
+
+<#TableOfContents>
+
+

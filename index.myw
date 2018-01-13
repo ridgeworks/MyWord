@@ -1,0 +1,14 @@
+The essence of any markup language is to enable an author to label pieces of text to enhance their presentation or convey special meaning. In MyWord the authors can define their own markup labels and embed any kind of markup language or notation. If this is your first encounter with MyWord, it is suggested that the documents be read in the order listed below.
+
+[Introduction To MyWord]
+An overview of common usage of MyWord as a lightweight markup language.
+
+[A Guide To MyWord]
+The MyWord reference document. (technical document)
+
+[Grit Grammar Parser]
+Details for building type defintions with Grit. (advanced topic)
+
+&	[Introduction To MyWord]  <- link myword-intro.html
+	[A Guide To MyWord]    <- link MyWordGuide.html
+	[Grit Grammar Parser]   <- link GritGrammarParser.html

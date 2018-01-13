@@ -1,10 +1,71 @@
-@doc
-	###	`demo.mmk`
-	This package provides useful block notations for software documentation: examples and side-by-side demos. These notations are available by importing this package into your document:
-	
-	 `&   @import pkgs/demo.mmk`
-// to terminate @doc without a blank line.
+@doc .myw
+	####  Package `demo.mmk`
+	This package provides useful block notations for software documentation: examples and side-by-side demos. It defines four `block` notations: `eg ..`, `demoS ..`, `demo ..`, and `demoH ..`. Here are examples of each:
+	#####	Example code block
+	A code (or other) example can be written using the `eg` block label. It wraps the literal content in a `<div class='eg'>` element and applies some simple style rules.
+	eg
+		###  A Header
+	#####	Static Demo
+	The `demoS` block notation splits generates a table with two columns displaying `myword` source on the right and the rendered version on the left. For example:
+	demoS
+		###  A Header
+		This content is contained in a static `demoS` block.
+	#####	Interactive Demo
+	The `demo` block notation is similar to `demoS` except the user can modify the `myword` source on the left side of the document. When the source is in focus, i.e., editable, the background colour changes to light yellow.
+	demo
+		*Modify me!*
+		This content is contained in an interactive `demo` block.
+	#####	Interactive Demo with HTML
+	The `demoH` block notation further enhances `demo` to add the generated HTML under the rendered source along with a button under the source itself to toggle the HTML display. The initial state is HTML hidden.
+	demoH
+		*Modify me!*
+		This content is contained in an interactive `demoH` block with a button to toggle the display of the generated HTML code.
 
+	The `eg` and `demoS` defintions are fairly simple, but make heavy use of CSS to control presentation:
+	eg
+		eg ..        <- <div class='eg'> text
+
+		demoS ..     <- <div class='demo'> demo
+
+		demo         :: (content) =>
+			              `<div class='A1'><div class=hscroll>${markit('text', content)}</div></div>
+			               <div class='B1'>${markit('myword', content)}</div>
+			              `
+		@css
+			div.eg {overflow-x:auto;}
+
+			div.demo {
+				display:table; table-layout:fixed; width:100%;
+				border-spacing:5pt 0pt;
+			}
+
+			div.demo {display:table-row;}
+
+			div.demo div.A1, div.demo div.B1 {display:table-cell;}
+
+			div.eg, div.demo div.A1 {
+				padding-left:10pt; padding-right:10pt; padding-top:5pt; padding-bottom:5pt;
+				white-space:pre; font-family:monospace; background:whitesmoke;
+			}
+
+			div.demo div.A1 {width:50%; vertical-align:top;}
+
+			div.demo div.A1 div.hscroll {overflow-x:auto;}
+
+			div.demo div.B1 {vertical-align:top;}
+
+	The interactive variants of `div.demo` have much the same structure and  CSS rules but require two custom elements to implement dynamic updating, i.e., when the source content (the left hand side) is changed the MyWord Worker must be used to translate the modified content; the result is then used to update the rendered content (the right hand side).
+	
+	The source content is an instance of the `<myword-editable>` custom elmement which is bound to JavaScript class `MyWordEditable`. The class code is responsible for setting the `contentEditable` attribute to `true` and for overriding standard browser behaviour for the `Tab` and `Enter` keys.
+	
+	The rendered content is contained in an instance of `<myword-sink>` and implemented via the `MyWordSink` class. The `data-source` attribute of this element is a selector identifying an element to be monitored for changes (via a `MutationObserver`). If multiple elments match the selector pattern, a nearest neighbour algorithm is used to find the closest one. In this case the `<myword-editable>` element and the `<myword-sink>` element share a common ancestor (`div.demo`) and so the desired relationship is guaranteed. 
+	
+	When the `<myword-sink>` receives notification of a change, the current contents of the element are replaced by the contents of the `<myword-editable>` element and a message is sent via the `window` messaging interface to request that translation of `<myword-sink>` element be started. When translation finishes the newly rendered content replaces the current content.
+	
+	&
+		// local def of ### and ##### so it doesn't end up in table of contents
+		### ..   <- <h3> prose
+		##### .. <- <h5> prose
 
 eg ..        <- <div class='eg'> text
 
@@ -12,8 +73,8 @@ eg ..        <- <div class='eg'> text
 demoS ..     <- <div class='demo'> demo
 
 demo         :: (content) =>
-	              `<div class='A1'><div class=hscroll>${markit('text',content)}</div></div>
-	               <div class='B1'>${markit('myword',content)}</div>
+	              `<div class='A1'><div class=hscroll>${markit('text', content)}</div></div>
+	               <div class='B1'>${markit('myword', content)}</div>
 	              `
 
 
@@ -75,8 +136,6 @@ demoIH       :: (content) => (
 	myword-editable {display:block; word-wrap:normal; overflow-x:inherit;}
 	myword-editable:focus {outline:none; background:lightyellow;}
 
-//	/*RWW.eg, table.demo {margin:5pt 0pt;}*/
-
 // Javascript to implement custom elements (v1) for interactive demos.
 @javascript
 	( () => {
@@ -99,7 +158,7 @@ demoIH       :: (content) => (
 			
 			keydown(event) {
 				//console.log('keydown='+event.key)
-				// Safari, Chrome issue: 
+				// Safari, Chrome issue:
 				//   auto scroll doesn't happen if 'insertText'ing off the right, corrects on any other key
 				if (!event.defaultPrevented) {  // Safari, Chrome issue: only insert if not defaultPrevented already
 					if (event.key === 'Tab' || event.keyCode == 9 || event.which == 9) {
@@ -156,7 +215,8 @@ demoIH       :: (content) => (
 						this.sourceObserver.source = source
 						this.sourceObserver.sink = this
 						this.sourceObserver.type = type ? type.trim() : null
-						this.sourceObserver.observe(source, {subtree: true, childList:true, characterData: true})
+						this.sourceObserver.observe(source, {subtree: true, childList:true, characterData: true, attributes:true})
+						source.setAttribute('my-init', 'true')  // trigger an event
 					} else {
 						var errorInfo = "No source found in &lt;myword-sink> using selector " + sourceSelector
 						console.error(errorInfo)
@@ -175,29 +235,3 @@ demoIH       :: (content) => (
 			customElements.define('myword-sink', MyWordSink)
 
 	}) ()
-
-// This @doc block must appear after the defintions to use them.
-@doc
-	####	Example code block
-	A code (or other) example can be written using the `eg` block label. It wraps the literal content in a `<div class='eg'>` element and applies some simple style rules.
-	demo
-		eg
-			###  A Header
-
-	####	Demo
-	The `demo` block notation splits the document in two displaying `myword` source on the right and the rendered version on the left, as used throughout this documentation. For example:
-	demo
-		demo
-			###  A Header
-
-	####	Interactive Demo
-	The `demoI` block notation is similar to `demo` except the user can modify the `myword` source on the left side of the document. When the source is in focus, i.e., editable, the background colour changes to light yellow.
-	demo
-		demoI
-			*Modify me!*
-
-	####	Interactive Demo with optional HTML
-	The `demoIhtml` block notation further enhances `demoI` to add the generated HTML under the rendered source along with a button under the source to toggle the HTML display. The initial state is HTML hidden.
-	demo
-		demoIhtml
-			*Modify me!*

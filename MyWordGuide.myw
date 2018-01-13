@@ -1,0 +1,49 @@
+[MyWordDocStyle]
+title>	A Guide to MyWord
+centreblock>
+	"Markup, your way"
+	Version 0.4, January 2018
+
+MyWord is a light-weight markup language focused on publishing content on the Web. The main distinguishing characteristic between MyWord and other markup languages (e.g., the many [Markdown] variants) is the ability for the user to easily define his own custom markup notations to match the needs of the document content. MyWord provides a default *lingo* (a set of notations) which can be used by anyone with some familiarity with Markdown, but these can be augmented by defining new notations or changed by overriding the defintions of existing notations.
+
+MyWord documents are modular, i.e., they can be broken down into smaller pieces and stored in separate files. And the separate pieces need not be MyWord, they can be Markdown, or programming language source files, even HTML fragments, as long as the *lingo* provides a translator for the content type. Common *lingos* can be packaged as separate files that can be shared among a family of documents.
+
+Like other light-weight markup languages (and, most people would say, unlike HTML) MyWord documents are readable as plain text, but are intended to be rendered by a Web browser. Rendering is performed by a MyWord translator which is loaded along with a MyWord document and runs in the browser. There is no separate compile/export step required for publishing content on a Web server; just save any source changes and they are immediately reflected in any subsequent requests to the server.
+
+This guide covers how to author documents in MyWord and how to publish MyWord content either locally or on the Web. It is intended as a "complete" guide and requires some basic familiarity with the main technologies underpinning the Web, i.e., HTML, CSS, and JavaScript. But it includes many examples (most are interactive) so it's also tutorial in nature.
+
+TOC>	{#id TableOfContents}`        `**Contents**
+
+@include
+	MUG_Terminology.myw
+	MUG_Type_myword.myw
+	MUG_Significant_White_Space.myw
+	MUG_Type_prose.myw
+	MUG_Scoping_Defintions.myw
+	MUG_Type_external.myw
+	MUG_Type_metamark.myw
+	MUG_PredefinedTypes.myw
+	MUG_DefaultLingo.myw
+	MUG_markitAPI.myw
+	MUG_PublishingMyWord.myw
+	MUG_DocumentFeatures.myw
+	MUG_Packages.myw
+	MUG_Summary.myw
+	MUG_Acknowledgements.myw
+	
+&
+	[Markdown]    <- link https://en.wikipedia.org/wiki/Markdown
+	[Grit]        <- link GritGrammarParser.html
+	@import MyWordDocStyle.mmk pkgs/demo.mmk pkgs/toc.mmk pkgs/box.mmk pkgs/tsv.mmk
+	.myw ..     <- myword
+	// Turn off fancy apostrophe so it can be used as single quote
+	' <-
+	TOC> .. <- toc 3 4
+	title> ..       <- <h1 class=_centre>
+	centreblock> .. <- <div class=_centre>
+	aside> ..       <- <aside class=my_aside>
+	@css
+		._centre {text-align: center;}
+		div.eg, div.demo {margin: 4pt 0;}
+		aside.my_aside {font-size:smaller}
+
