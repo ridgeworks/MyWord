@@ -421,7 +421,6 @@ However, sometimes the author may want the content to contain some other kind of
 
 For example, if back-tick quote marks are defined as a notation for plain text source code, then the content should be interpreted as literal text, regardless of any nested markup notations:
 demoH
-
 	Italics for maths *(`a*b+c*d`)*
 
 	Some *(``italic with `nested` text``)*.
