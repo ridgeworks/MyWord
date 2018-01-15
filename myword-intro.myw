@@ -439,7 +439,7 @@ sect
 			// sample JavaScript ...
 
 			const greet = (who) =>
-			console.log(`Hello ${who}!`)
+				console.log(`Hello ${who}!`)
 
 			greet("World") // Hello World!
 

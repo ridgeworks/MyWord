@@ -381,11 +381,21 @@ demo
 	
 	List items can be paragraphs (or any other markup block):
 	1..
-		*  `viz` and `is` are useful types for replacing content (if any) with a `parmstring`. The earlier example used `viz` to define a replacement for a symbol.
-		*  Inline span notations are quite flexible, but sometimes the constraints on the span tags (only symbolic characters allowed) or ambiguity between the content and the tags causes problems.
-		*  The `inline` transform uses a subfunction of `markit`:
+		*	`viz` and `is` are useful types for replacing content
+			(if any) with a `parmstring`. The earlier example used 
+			`viz` to define a replacement for a symbol.
+		*	Inline span notations are quite flexible, but sometimes 
+			the constraints on the span tags (only symbolic 
+			characters allowed) or ambiguity between the content
+			and the tags causes problems.
+		*	The `inline` transform uses a subfunction of `markit`:
 			`markit.applyLabel(labelPattern, content, defaultType)`.
-		*  For similar reasons, square brackets are used to define a notation that can be used overcome the limitations of the inline symbol syntax.
+		*  For similar reasons, square brackets are used to
+			define a notation that can be used overcome the
+			limitations of the inline symbol syntax.
+		& @css span.newline {white-space:normal}
+	
+	In this list note that hard line breaks have been disabled using a CSS rule.
 
 While many other features could be included in the default lingo, a decision was made to limit it to a functional equivalent of Markdown as a "starter kit". Other features like tables, math notations, and simple box drawings (like the figure for "Predefined Types") can be provided as separate packages and selectively imported into those documents that need them. Several such packages are included with the MyWord release.
 

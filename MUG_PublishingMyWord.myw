@@ -36,7 +36,7 @@ The `<div class='x-markup' src='myMyWordDoc.myw'>` element is interpreted as `ty
 
 The simple host file results in a Web page with only the MyWord content (`myMyWordDoc.myw`) but the `<div class='x-markup'>` element can be embedded in any HTML `<body>` content. The host could even embed multiple MyWord documents - these would share the same default lingo, but would be otherwise independent, e.g., no shared place-holder definitions. (Of course, those could be defined in a separate package which could then be shared.)
 
-The MyWord application software is packaged in the `lib/` directory referenced from the `<script>` element. This directory can be anywhere named by the `src` URL, but the four files must be in the same directory.
+The MyWord application software is packaged in the `lib/` directory referenced from the `<script>` element. This directory can be anywhere named by the `src` URL, but the five files must be in the same directory.
 .box
 		lib/
 		|
