@@ -9,6 +9,6 @@ And the [MathJax] organization deserves much credit for filling the gap while Ma
 <#TableOfContents>
 
 
-.mmk
+&
 	[polyfill for scoped styles]     <- link https://github.com/thomaspark/scoper
 	[MathJax]                        <- link https://www.mathjax.org/
