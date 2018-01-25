@@ -12,7 +12,15 @@ ctrl        :: (ctl) => {
 	             }
 	           }
 
-insetblock  :: (content) => `<pre><code class=my_text>${markit('text', content)}</code></pre>`
+insetblock  :: (content, codeclass) =>
+	                  `<pre><code class=${codeclass ? codeclass : 'my_text'}>${markit('text', content)}</code></pre>`
+
+fencedblock :: (content, infostring) =>
+	             ( (label = infostring.match(/(\S*)/)[1]) =>
+	                 (markit.applyLabel(label + ' ..', null) !== null)
+	                   ? markit('labeledblock', content, label + ' ..')
+	                   : markit('insetblock', content, (label ? 'language-' + label : ''))
+	             ) ()
 
 paragraph   :: (content) => `<p class=my_p>${markit('prose', content)}</p>`
 
@@ -31,16 +39,14 @@ metacss     :: (css) => `<style scoped>${css}</style>`
 
 
 @doc
-	set default tab size to 4 spaces; inherited by all body content unless overridden
-	set newline to be significant, i.e., a line break.
-	set default paragraph margin to 0 (overrides user agent spacing).
-	set default style for 'text' blocks
+	document level CSS rules
 
 @css
-	body {tab-size:4; -moz-tab-size:4;}
-	span.newline {white-space:pre}
-	p.my_p {margin:0}
-	div.block_text {margin:0; white-space:pre; font-family:monospace;}
+	body {tab-size:4; -moz-tab-size:4}   /* default tab size=4 spaces; inherited by all body content */
+	span.newline {white-space:pre}       /* newline is a hard line break */
+	p.my_p {margin:0}                    /* paragraph margin=0 (overrides user agent spacing) */
+	div.my_blank {visibility:hidden}     /* blankline is spacing only, no visibles */
+
 
 @doc
 	Types for treating parmstring in label defintions as the content for symbols
@@ -57,13 +63,11 @@ is          :: (_, parmstring) => parmstring
 { .. }      <- inline { }
 {( .. )}    <- inline {( )}
 
-inline      :: (content, brackets) => {
-	              var parsed = /(\s*)(\S+)\s*([\S\s]*)/.exec(content)	// parsed=[all, leading, label, content]
-	              var br = brackets.split(' ')
-	              return (!parsed[1] && (markit.applyLabel(parsed[2]+' ..', null) !== null) && parsed[3])
+inline      :: (content, brackets) => ((parsed = content.match(/(\s*)(\S+)\s*([\S\s]*)/), br = brackets.split(' ')) =>
+	              (!parsed[1] && (markit.applyLabel(parsed[2]+' ..', null) !== null))
 	                ? markit.applyLabel(parsed[2]+' ..', parsed[3], 'prose')
 	                : [br[0], markit('prose', parsed[0]), br[1]].join('')
-	            }
+	            ) ()
 
 
 @doc	`[ .. ]` span notation for placeholders (references to label defintions)
@@ -164,16 +168,14 @@ __( .. )__   <- <strong>
 " .. "       <- <q class=my_dquo>
 "( .. )"     <- <q class=my_dquo>
 
----          <- <hr class=my_hr />
+--- ..       <- <hr class='my_hr'/>
 '            <- &rsquo;
-
 
 @css
 	h1.my_h1, h2.my_h2, h3.my_h3, h4.my_h4, h5.my_h5, h6.my_h6 {margin:0}
 	blockquote.my_blockquote {margin:0 40px}
 	q.my_dquo {quotes: "\201c" "\201d"}
 	.my_text {white-space:pre}
-	hr.my_hr + span.newline {display:none}
 
 
 @doc
@@ -215,15 +217,9 @@ reflist     :: (list) =>
 	              list.trim().split(/\s+/).map((ref) => 
 	                 markit('external', ref)
 	              ).join('')
-// file types
+	              
+// file types, including `md` for Markdown
 myw         :: (content) => markit('myword', content)
 txt         :: (content) => `<pre class=txtInclude>${markit('text', content)}</pre>`
-
-@doc
-	Types markdown and md for CommonMark content
-	
-.md ..      <- md
 md          :: (content) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(content))
 @import commonmark.min.js
-
-
