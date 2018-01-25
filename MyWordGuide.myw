@@ -36,6 +36,7 @@ TOC>	{#id TableOfContents}`        `**Contents**
 	[Grit]        <- link GritGrammarParser.html
 	@import MyWordDocStyle.mmk pkgs/demo.mmk pkgs/toc.mmk pkgs/box.mmk pkgs/tsv.mmk
 	.myw ..     <- myword
+	.md ..      <- md
 	// Turn off fancy apostrophe so it can be used as single quote
 	' <-
 	TOC> .. <- toc 3 4

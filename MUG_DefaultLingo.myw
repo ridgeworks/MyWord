@@ -21,7 +21,16 @@ eg
 					 }
 				   }
 
-	insetblock  :: (content) => `<pre><code class=my_text>${markit('text', content)}</code><pre>`
+	insetblock  :: (content, codeclass) =>
+	                  `<pre><code class=${codeclass ? codeclass : 'my_text'}>${markit('text', content)}</code></pre>`
+
+	fencedblock :: (content, infostring) =>
+	             ( (label = infostring.match(/(\S*)/)[1]) =>
+	                 (markit.applyLabel(label + ' ..', null) !== null)
+	                   ? markit('labeledblock', content, label + ' ..')
+	                   : markit('insetblock', content, (label ? 'language-' + label : ''))
+				 ) ()
+
 
 	paragraph   :: (content) => `<p class=my_p>${markit('prose', content)}</p>`
 
@@ -40,16 +49,13 @@ eg
 
 
 	@doc
-		set default tab size to 4 spaces; inherited by all body content unless overridden
-		set newline to be significant, i.e., a line break.
-		set default paragraph margin to 0 (overrides user agent spacing).
-		set default style for 'text' blocks
-
+		document level CSS rules
+	
 	@css
-		body {tab-size:4; -moz-tab-size:4;}
-		span.newline {white-space:pre}
-		p.my_p {margin:0}
-		div.block_text {margin:0; white-space:pre; font-family:monospace;}
+		body {tab-size:4; -moz-tab-size:4}   /* default tab size=4 spaces; inherited by all body content */
+		span.newline {white-space:pre}       /* newline is a hard line break */
+		p.my_p {margin:0}                    /* paragraph margin=0 (overrides user agent spacing) */
+		div.my_blank {visibility:hidden}     /* blankline is spacing only, no visibles */
 Notes:
 1..
 	*  For the most part, these transforms generate HTML with a class attribute value, e.g., `my_p` or `my_blank`, so CSS rules can be used to change the presentation without having to override the type definition.
@@ -78,14 +84,11 @@ eg
 
 	{ .. }      <- inline { }
 	{( .. )}    <- inline {( )}
-
-	inline      :: (content, brackets) => {
-					  const parsed = /(\s*)(\S+)\s*([\S\s]*)/.exec(content)	// parsed=[all, leading, label, content]
-					  const br = brackets.split(' ')
-					  return (!parsed[1] && (markit.applyLabel(parsed[2]+' ..', null) !== null) && parsed[3])
-						? markit.applyLabel(parsed[2]+' ..', parsed[3], 'prose')
-						: [br[0], markit('prose', parsed[0]), br[1]].join('')
-					}
+	inline      :: (content, brackets) => ((parsed = content.match(/(\s*)(\S+)\s*([\S\s]*)/), br = brackets.split(' ')) =>
+		              (!parsed[1] && (markit.applyLabel(parsed[2]+' ..', null) !== null))
+		                ? markit.applyLabel(parsed[2]+' ..', parsed[3], 'prose')
+		                : [br[0], markit('prose', parsed[0]), br[1]].join('')
+		            ) ()
 
 
 	@doc	`[ .. ]` span notation for place-holders (references to label definitions)
@@ -183,7 +186,7 @@ eg
 	" .. "       <- <q class=my_dquo>
 	"( .. )"     <- <q class=my_dquo>
 
-	---          <- <hr class=my_hr />
+	--- ..       <- <hr class='my_hr'/>
 	'            <- &rsquo;
 
 	@css
@@ -191,7 +194,6 @@ eg
 		blockquote.my_blockquote {margin:0 40px}
 		q.my_dquo {quotes: "\201c" "\201d"}
 		.my_text {white-space:pre}
-		hr.my_hr + span.newline {display:none}
 
 
 	@doc
@@ -414,14 +416,9 @@ eg
 					  list.trim().split(/\s+/).map((ref) => 
 						 markit('external', ref)
 					  ).join('')
-	// file types
+	// file types, including `md` for Markdown
 	myw         :: (content) => markit('myword', content)
 	txt         :: (content) => `<pre class=txtInclude>${markit('text', content)}</pre>`
-
-	@doc
-		Type md  and block label .md for CommonMark content
-
-	.md ..      <- md
 	md          :: (content) => new commonmark.HtmlRenderer().render(new commonmark.Parser().parse(content))
 	@import commonmark.min.js
 
@@ -441,6 +438,7 @@ The MyWord default lingo mimics Markdown notations so that Markdown users can us
 	- In Markdown, any number of blank lines between paragraphs are rendered as a single blank line. MyWord treats them as multiple blank lines to enable the explicit control of vertical spacing. (WYWIWYG)
 	- MyWord only supports ATX style headers (using '`#`'s). Markdown also supports Setext (underlining) headers. The default lingo does not support closing an ATX header, so the trailing '`#`'s will just be part of the header's contents. (A span notation could be defined to do this but if both block and span notations are in effect, there's an ambiguity to be resolved.)
 	- Block quotes in MyWord are mostly equivalent to those in Markdown. (If the Markdown option of prefixing every line with `>` is used, MyWord will generate a sequence of block quotes with hard line breaks between each one. If this is not the intent, use a `> .. labeledblock` with indented content.)
+	- Unlike CommonMark fenced blocks, MyWord fenced block fenceposts must begin at the start of a line (no indents) and the closing fencepost must be identical to the opening fencepost.   
 	- Unordered lists use the same notation in Markdown and MyWord, but ordered lists in MyWord use '`labeledblock`'s to group list items. Both MyWord and Markdown support nested lists through indentation, but the results can be subtly different due to MyWord's universal block semantics (see demo below).
 	- MyWord doesn't support Markdown's "double bracket" style links; just use the `[ .. ]` place-holder notation instead. (In MyWord, double brackets are the conjunction of two spans which requires a *[document feature]* to implement the equivalent functionality.) Also, the default link transform doesn't obfuscate email addresses as Markdown automatic links do; if that's an issue write one that does.
 	- MyWord uses place-holders to support images rather than a `!` prefixing a hyperlink.
@@ -471,7 +469,7 @@ Some obvious differences between MyWord and Markdown:
 				* sub-itemX
 				* sub-itemY
 			* last
-
+		---
 		But ordered lists are quite different.
 		**MyWord**:
 		.myw
@@ -486,7 +484,7 @@ Some obvious differences between MyWord and Markdown:
 			and more.
 				2. sub-item 2
 			2. item 2
-			
+		---
 		Code blocks are similar:
 		**MyWord**:
 		.myw
@@ -501,7 +499,29 @@ Some obvious differences between MyWord and Markdown:
 				tell application "Foo"
 					beep
 				end tell
-
+		---
+		Fenced blocks are stricter than CommonMark:
+		**MyWord**:
+		.myw
+			Same:
+			~~~
+			No indent; opening = closing
+			~~~
+			Different:
+			  ~~~
+			  indented content and longer closing fencepost.
+			  ~~~~
+		**Markdown**:
+		.md
+			Same:
+			~~~
+			No indent; opening = closing
+			~~~
+			Different:
+			  ~~~
+			  indented content and longer closing fencepost.
+			  ~~~~
+		---
 		MyWord does not support "double bracket" style hyperlinks:
 		**MyWord**:
 		.myw
@@ -519,7 +539,7 @@ Some obvious differences between MyWord and Markdown:
 			[an example](http://example.com/ "Title")  
 
 			[id]: http://example.com/  "Title"
-
+		---
 		MyWord uses place-holders for images rather the `!` link prefix:
 		**MyWord**:
 		.myw
@@ -533,7 +553,7 @@ Some obvious differences between MyWord and Markdown:
 			The gopher from GO:![Go gopher][gopher]  
 
 			[gopher]: images/gopher.png "Go gopher"
-
+		---
 		MyWord uses `\ .. \` spans for escaping rather than `\` character prefix escapes:
 		**MyWord**:
 		.myw
@@ -549,7 +569,7 @@ Some obvious differences between MyWord and Markdown:
 		**Markdown**:
 		.md
 			*ab*,  * ab * , ab*cd* and  ab_cd_
-
+		---
 		Tricky cases for code spans:
 		**MyWord**:
 		.myw

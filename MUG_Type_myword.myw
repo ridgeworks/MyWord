@@ -2,16 +2,17 @@
 
 MyWord provides a hierarchy of predefined *types*; the top-level type is `myword` whose content consists of a sequence of notations as expressed in the following PEG (Parser Expression Grammar) rule:
 eg
-	myword := (metablock / insetblock / labeledblock / blankline / paragraph)*
+	myword := (metablock / insetblock / labeledblock / fencedblock / blankline / paragraph)*
 A `metablock` is a `labeledblock` with a predefined label `&` and content of *type* `metamark` which is used to define *notation*s and *type*s which determine how the other `myword` content is interpreted. The position of the `metablock` in the `myword` content doesn't matter, because they are processed before the other content, enabling any meta-definitions to apply anywhere in the rest of the content. `metamark` will be covered in detail in a later section, but will be introduced as required in examples of block and inline notations.
 
 ####  Type `insetblock`
 
-An inset block is a sequence of one or more indented lines. An indented line begins with a tab character or exactly four spaces. This indent will be removed in constructing the block's content.  The default transform for `insetblock` generates a code block (for Markdown compatability) as expressed in the following `metamark` type defintion:
+An inset block is a sequence of one or more indented lines. An indented line begins with a tab character or exactly four spaces. This indent will be removed in constructing the block's content.  The default transform for `insetblock` generates a code block (for Markdown compatability) as expressed in the following `metamark` type definition:
 eg
-	insetblock  :: (content) => `<pre><code class=my_text>${markit('text', content)}</code><pre>`
+	insetblock  :: (content, codeclass) =>
+                    `<pre><code class=${codeclass ? codeclass : 'my_text'}>${markit('text', content)}</code></pre>`
 
-A type defintion uses the `::` operator to associate the *type* name, in this case `insetblock` with a JavaScript function which takes the content as a parameter and returns the rendered result. The `markit` function called in the template string is just a global function available to transforms to call other transform functions by specifying their type name, in this case `text`. Here's an example:
+A type definition uses the `::` operator to associate the *type* name, in this case `insetblock` with a JavaScript function which takes the content as a parameter and returns the rendered result. The `markit` function called in the template string is just a global function available to transforms to call other transform functions by specifying their type name, in this case `text`. The transform also takes a parameter string which is interpreted as the value of the class attribute of the `<code>` element with a default value of `my_text`. Here's an example:
 demo
 	The following is a `insetblock` whose default transform
 	renders it as a code block:
@@ -83,14 +84,70 @@ aside> Aside: The default transform for type `metamark` returns the empty string
 
 Although the choice of `labeledblock` labels is unconstrained, words that could naturally occur at the beginning of normal text should be avoided. The easiest way around this is to adapt a prefix convention using a rarely used symbol character, eg., '`!`', '`$`', or '`^`' as in `!section` or `$demo` or `^table`. And any line that begins with a space will never be interpreted as a label.
 
+####  Type `fencedblock`
+
+The `fencedblock` is an alternative container notation commonly supported in extended Markdown implementations to provide the similar functionality to labeled and inset blocks. The contents of a `fencedblock` is the sequence of lines between and opening and closing "fencepost". A fencepost is a line starting with three or more tildas or backticks (`~` or `(`)`). The closing fencepost must exactly match the opening fencepost; otherwise the line is considered part of the block content. The opening fencepost may contain additional trailing text (non-whitespace) called the `infostring`. The closing fencepost may not contain any such text content. Fenced blocks may be nested by using different length fenceposts or different characters, i.e., tildas rather than backticks.
+
+aside> Aside: MyWord `fencedblock`'s are similar to CommonMark fenced blocks but, unlike those in CommonMark, they cannot be indented (one to three spaces) and the closing fencepost must be an exact match of the opening fencepost.
+
+The default transform of a `fencedblock` is:
+eg
+	fencedblock :: (content, infostring) =>
+					 ( (label = infostring.match(/(\S*)/)[1]) =>
+						 (markit.applyLabel(label + ' ..', null) !== null)
+						   ? markit('labeledblock', content, label + ' ..')
+						   : markit('insetblock', content, (label ? 'language-' + label : ''))
+					 ) ()
+which translates to: if the first word of the `infostring` is a defined block label, then the `fencedblock` is just an alternative syntax for a labelled block; otherwise it's an alternative syntax for an `insetblock`. To mimic CommonMark, an undefined label is used to construct a class attribute value for `insetblock`.
+
+Some examples:
+demo
+	~~~#### 
+	A Section Header
+	~~~
+	
+	Javascript fenced block using CommonMark language class attribute:
+	```js
+	// sample JavaScript ...
+	
+	const greet = (who) =>
+		console.log(`Hello ${who}!`)
+	
+	greet("World") // Hello World!
+	```
+	
+	Some `YAML` meta-data:
+	~~~ .meta
+	Title: A Guide to MyWord
+	Date: January, 2018
+	~~~
+	
+	A list item with a nested code block.
+	~~~*
+	An `insetblock` generates:
+	~~~~html
+	<pre><code class='my_text'>content...</code></pre>
+	~~~~
+	~~~
+	&
+		#### ..  <- <h4> myword
+		* ..     <- <div class=my_listitem> myword
+		.meta .. <- <div class='meta_yaml'> text
+		@css  
+			div.my_listitem {display:list-item; margin-left:40px}
+			div.meta_yaml {display:none} /* just make .meta content invisible */
+			pre code.language-js {color:green}
+
+MyWord `fencedblock`'s replicate the functionality of `labeledblock`'s and `insetblock`'s using fenceposts rather than indents. Each has strengths and weaknesses. Indented blocks are insensitive to the block content, provide better visibility of nested blocks, and permit single line blocks (like headers and list items). But "invisible" whitespace characters are used as significant synatx, which some people find objectionable. Fenced blocks avoid this problem, at the expense of additional syntax, and the selection of the particular fencepost syntax is dependent on the content, i.e., the content cannot contain something that looks like the closing fencepost. Providing both fenced and indented blocks provides the flexibility to use the option that best fits the content.
+ 
 ####  Type `blankline`
 
-The syntax of `blankline` is pretty simple; it's a line containing only whitespace characters (spaces or tabs) that doesnt start with an insert (one tab or four spaces) followed by a newline. `blankline`s are used to explicitly control vertical spacing between the other `myword` notaions and has the default transform:
+The syntax of `blankline` is pretty simple; it's a line containing only whitespace characters (spaces or tabs) that doesnt start with an insert (one tab or four spaces) followed by a newline. `blankline`s are used to explicitly control vertical spacing between the other `myword` notations and has the default transform:
 eg
 	blankline  :: (_) => '<div class=my_blank>&nbsp;</div>'
-Users can override this type defintion or use CSS rules to modify vertical spacing behaviour.
+Users can override this type definition or use CSS rules to modify vertical spacing behaviour.
 
-When one or more `blankline`s are preceeded and succeeded by indented lines, the `blankline` is part of the containing indented block and the meaning of the `blankline` is determined by the type of the block's content. `blankline`s cannot be used to separate indented blocks.
+While it is good practice to properly indent content in labeled or inset blocks, an exception is made for `blankline`'s. Any `blankline` in the content of such blocks, need not be indneted if there is any following indented content. Only blank lines at the end of an indnted block need be indented if they are to be included in the content. Otherwise, they generate a blankline` immediately following the block. `blankline`'s cannot be used to separate indented blocks.
 
 ####  Type `paragraph`
 
