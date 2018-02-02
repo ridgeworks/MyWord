@@ -1,25 +1,32 @@
-@doc .myw
+@doc
 	####  Package `demo.mmk`
-	This package provides useful block notations for software documentation: examples and side-by-side demos. It defines four `block` notations: `eg ..`, `demoS ..`, `demo ..`, and `demoH ..`. Here are examples of each:
+	
+	This package provides useful block notations for software documentation: examples and side-by-side demos. It
+	defines four `block` notations: `eg ..`, `demoS ..`, `demo ..`, and `demoH ..`. Here are examples of each:
 	#####	Example code block
-	A code (or other) example can be written using the `eg` block label. It wraps the literal content in a `<div class='eg'>` element and applies some simple style rules.
+	A code (or other) example can be written using the `eg` block label. It wraps the literal content in a
+	`<div class='eg'>` element and applies some simple style rules.
 	eg
 		###  A Header
 	#####	Static Demo
-	The `demoS` block notation splits generates a table with two columns displaying `myword` source on the right and the rendered version on the left. For example:
+	The `demoS` block notation splits generates a table with two columns displaying `myword` source on the right and
+	the rendered version on the left. For example:
 	demoS
 		###  A Header
 		This content is contained in a static `demoS` block.
 	#####	Interactive Demo
-	The `demo` block notation is similar to `demoS` except the user can modify the `myword` source on the left side of the document. When the source is in focus, i.e., editable, the background colour changes to light yellow.
+	The `demo` block notation is similar to `demoS` except the user can modify the `myword` source on the left side
+	of the document. When the source is in focus, i.e., editable, the background colour changes to light yellow.
 	demo
 		*Modify me!*
 		This content is contained in an interactive `demo` block.
 	#####	Interactive Demo with HTML
-	The `demoH` block notation further enhances `demo` to add the generated HTML under the rendered source along with a button under the source itself to toggle the HTML display. The initial state is HTML hidden.
+	The `demoH` block notation further enhances `demo` to add the generated HTML under the rendered source along with
+	a button under the source itself to toggle the HTML display. The initial state is HTML hidden.
 	demoH
 		*Modify me!*
-		This content is contained in an interactive `demoH` block with a button to toggle the display of the generated HTML code.
+		This content is contained in an interactive `demoH` block with a button to toggle the display of the generated
+		HTML code.
 
 	The `eg` and `demoS` defintions are fairly simple, but make heavy use of CSS to control presentation:
 	eg
@@ -54,13 +61,29 @@
 
 			div.demo div.B1 {vertical-align:top;}
 
-	The interactive variants of `div.demo` have much the same structure and  CSS rules but require two custom elements to implement dynamic updating, i.e., when the source content (the left hand side) is changed the MyWord Worker must be used to translate the modified content; the result is then used to update the rendered content (the right hand side).
+	The interactive variants of `div.demo` have much the same structure and  CSS rules but require two custom elements
+	to implement dynamic updating, i.e., when the source content (the left hand side) is changed the MyWord Worker must
+	be used to translate the modified content; the result is then used to update the rendered content (the right hand side).
 	
-	The source content is an instance of the `<myword-editable>` custom elmement which is bound to JavaScript class `MyWordEditable`. The class code is responsible for setting the `contentEditable` attribute to `true` and for overriding standard browser behaviour for the `Tab` and `Enter` keys.
+	The source content is an instance of the `<myword-editable>` custom elmement which is bound to JavaScript class
+	`MyWordEditable`. The class code is responsible for setting the `contentEditable` attribute to `true` and for 
+	overriding standard browser behaviour for the `Tab` and `Enter` keys.
 	
-	The rendered content is contained in an instance of `<myword-sink>` and implemented via the `MyWordSink` class. The `data-source` attribute of this element is a selector identifying an element to be monitored for changes (via a `MutationObserver`). If multiple elments match the selector pattern, a nearest neighbour algorithm is used to find the closest one. In this case the `<myword-editable>` element and the `<myword-sink>` element share a common ancestor (`div.demo`) and so the desired relationship is guaranteed. 
+	The rendered content is contained in an instance of `<myword-sink>` and implemented via the `MyWordSink` class. 
+	The `data-source` attribute of this element is a selector identifying an element to be monitored for changes (via
+	a `MutationObserver`). If multiple elments match the selector pattern, a nearest neighbour algorithm is used to
+	find the closest one. In this case the `<myword-editable>` element and the `<myword-sink>` element share a common
+	ancestor (`div.demo`) and so the desired relationship is guaranteed. 
 	
-	When the `<myword-sink>` receives notification of a change, the current contents of the element are replaced by the contents of the `<myword-editable>` element and a message is sent via the `window` messaging interface to request that translation of `<myword-sink>` element be started. When translation finishes the newly rendered content replaces the current content.
+	When the `<myword-sink>` receives notification of a change, the current contents of the element are replaced by
+	the contents of the `<myword-editable>` element and a message is sent via the `window` messaging interface to
+	request that translation of `<myword-sink>` element be started. When translation finishes the newly rendered
+	content replaces the current content.
+
+	Note: To render this documentation, define:
+	eg
+		metadoc :: (doc) => markit('myword', doc.replace(/(\n|\r\n?)(\t|[ ]{4})/g, '\n'))
+	and `@import` this package.
 	
 	&
 		// local def of ### and ##### so it doesn't end up in table of contents

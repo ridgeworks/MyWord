@@ -1,7 +1,9 @@
-@doc .myw
+@doc
 	####  Package `asciimath.mmk`
 	
-	[AsciiMath] is a markup language for mathematics. This package defines two types: `asciimath` for MathML fragments that are then wrapped in the required `<math>` in a span definition, and `am` for blocks of math content. In the latter case, each line of the block produces a `<math>` element.
+	[AsciiMath] is a markup language for mathematics. This package defines two types: `asciimath` for MathML fragments
+	that are then wrapped in the required `<math>` in a span definition, and `am` for blocks of math content. In the
+	latter case, each line of the block produces a `<math>` element.
 	
 	The `am` transform accepts a parameter string specifying additional attributes to be attached to each `<math>` element.
 	demo
@@ -39,7 +41,8 @@
 
 		Some other examples:
 
-		You may wish to use this for fractions that appear as indices, because it is easier to read '`e^(x//2)`' than '`e^(x/2)`'.
+		You may wish to use this for fractions that appear as indices, because it is easier to read
+		'`e^(x//2)`' than '`e^(x/2)`'.
 
 		We set '`a=3, b=-3, "and" c=2`'.
 		Thus '`(a+b)(c+b)=0`'.
@@ -63,6 +66,11 @@
 
 				|x|= {(x,if x >= 0","),(-x,if x < 0.):}
 
+	Note: To render this documentation, define:
+	eg
+		metadoc :: (doc) => markit('myword', doc.replace(/(\n|\r\n?)(\t|[ ]{4})/g, '\n'))
+	and `@import` this package.
+	
 	&
 		[AsciiMath] <- link http://asciimath.org
 		[MathML]    <- link https://en.wikipedia.org/wiki/MathML
