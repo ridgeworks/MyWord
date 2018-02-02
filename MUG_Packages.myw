@@ -1,17 +1,16 @@
+{#id myword_packages}
 ###  Packages with MyWord
 
 A package is a file of type `metamark` (suffix `.mmk`) that documents can import to augment any custom sub-lingos defined in the document. Like style sheets, packages can be shared among documents to encourage a common authoring style based on the same notations. The packages included in the MyWord release (directory `pkgs/`) not only provide some useful functionality but also serve as examples to demonstrate more advanced ways, e.g., Grit grammars, of using the `metamark` language. Packages are imported using the `metamark @import` statement and any definitions have the same scope as the block containing the `@import`.
 
-The package documentation for this section is actually contained in the package files themselves using the `metamark @doc` statement. When importing packages, the documentation can be rendered by overriding the default `metadoc` type definition:
-eg
-	metadoc :: (doc) => markit('myword', doc)
-	
 Some of the packages, e.g., `tsv.mmk` and `ascimmath.mmk`, are examples of using Grit grammars in parsing content.
+
+aside> Aside: The package documentation for this section is largely contained in the package files themselves using the `metamark @doc` statement. How this is done is described in the `@doc` block of each package. 
 
 .myw
 	&
 		// Display the documentation contained in the various packages.
-		metadoc :: (doc) => markit('myword', doc)
+		metadoc :: (doc) => markit('myword', doc.replace(/(\n|\r\n?)(\t|[ ]{4})/g, '\n'))
 		@import pkgs/tsv.mmk
 	The example from Wikipedia:
 	demo

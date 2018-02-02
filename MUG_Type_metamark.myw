@@ -154,17 +154,36 @@ eg
 This is only useful for writing life-cycle handlers for custom elements that a transform might generate, and that topic will be addressed later in this guide.
 
 ####  `@doc`
-The `@doc` statement allows blocks of documentation to be included in `metamark` content. (An analogy in programming languages is Javadoc.) The rest of the statement following the `@doc` and following whitespace is transformed using type `metadoc`, with default transform:
+The `@doc` statement allows blocks of documentation to be included in `metamark` content and is primarily used for user documentation in `@import`ed package files. (An analogy in programming languages is Javadoc.) The rest of the statement following the `@doc` and following whitespace is content of type `metadoc` whose default transform outputs an empty string (package documentation is normally not desired when rendering a MyWord document):
 eg
 	metadoc :: (content) => ''
 
-This just discards the content, but `metadoc` can be overridden to provide any desired behaviour.
+The documentation in `@doc` statements can be plain text, or written using a markup language, e.g., Markdown, MyWord, or even HTML. MyWord is often used to provide examples that can be inserted into a MyWord document. If needed the `@doc` content can be rendered as part of the document by providing a `metadoc` transform that handles the markup language used. Here's an example for MyWord content; the leading inset is stripped from the `@doc` content and the result is transformed using type `myword`:
+demo
+	Here's a nested `&` block containing `@doc` content.
+	
+	&
+		@doc
+			
+			The `@doc` statement allows blocks of documentation
+			to be included in `metamark` content and is primarily
+			used for user documentation in `@import`ed package
+			files. The rest of the statement following the `@doc`
+			and following whitespace is content of type `metadoc`
+			whose default transform outputs an empty string:
+			eg
+				metadoc :: (content) => ''
+	To render the `@doc` content above, override `metadoc`:
+	eg
+		metadoc :: (doc) => markit('myword', doc.replace(/(\n|\r\n?)(\t|[ ]{4})/g, '\n'))
+	&
+		metadoc :: (doc) => markit('myword', doc.replace(/(\n|\r\n?)(\t|[ ]{4})/g, '\n'))
 
 ####  `//` comments
 Any line in `metamark` content beginning with `//` that isn't a valid notation or type definition is discarded. These statements can be used as local comments in `metamark` source.
 
 ###  Packages and Lingos
-A *package* is just a `metamark` file containing a related set of definitions. And a *lingo* is just one or more packages that provide a vocabulary of notations for authors to use. Rather than requiring each document author define his own lingo, it makes sense for the "experts" to define a common lingo that all the authors can just `@import`. Some basic `metamark` skills are still required to define a few content dependent symbols or notations, but one should be able to use a common lingo just like other light-weight markup language where all the notations are built-in and fixed.
+A *package* is just a `metamark` file containing a related set of definitions. And a *lingo* is just one or more packages that provide a vocabulary of notations for authors to use. Rather than requiring each document author define his own lingo, it makes sense for the "experts" to define a common lingo that all the authors can just `@import`. Some basic `metamark` skills are still required to define a few content dependent symbols or notations, but one should be able to use a common lingo just like other light-weight markup language where all the notations are built-in and fixed. The MyWord release contains a small set of useful (example) packages as described [\elsewhere\] in this document
 
 The "default lingo" is a lingo that doesn't even have to be imported; it comes for free. But nobody is required to use any of the notations it defines. These can be overriden by any imported lingos or by any notations defined in the document itself. In the extreme case, a document could be totally self-defining and not require any external lingo at all.
 
@@ -184,3 +203,4 @@ MyWord is all about user defined notations so its predefined types do not suppor
 	        https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope
 	[Worker Functions] <- link
 	        https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Functions_and_classes_available_to_workers
+	[\elsewhere\] <- link #myword_packages

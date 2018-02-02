@@ -1,6 +1,9 @@
-@doc .myw
+@doc
 	####  Package `box.mmk`
-	The `box` type provides support for simple box and arrow diagrams using Unicode box drawing characters. The notation consists of short sequences of ASII characters representing the various corners and sides of a box, intersections to support nested boxes, and vertical and horizontal arrows, as follows:
+	
+	The `box` type provides support for simple box and arrow diagrams using Unicode box drawing characters. The
+	notation consists of short sequences of ASII characters representing the various corners and sides of a box,
+	intersections to support nested boxes, and vertical and horizontal arrows, as follows:
 	.tsv
 		To Represent a:			Use		Notes
 		Vertical line			`|`		also a verical bar but slightly higher
@@ -22,7 +25,8 @@
 	The box diagram is wrapped in `<pre class=my_box>` so users can apply their own styles; the default is:
 	 `    pre.my_box {font-size:smaller; font-family: Menlo, Consolas, Courier New, monospace}`
 
-	The rendered output is heavily dependent on the monspaced font used to draw the Unicode box characters and can vary between platforms. Cross-platform testing is required to achieve the best results.
+	The rendered output is heavily dependent on the monspaced font used to draw the Unicode box characters and can vary
+	between platforms. Cross-platform testing is required to achieve the best results.
 	Examples:
 	demo
 		.box
@@ -55,6 +59,12 @@
 			Forks/Joins:          |     |   |     --.         .--
 			                    .-'-.   '-.-'       |--     --|
 			                    |   |     |       --'         '--
+
+	Note: To render this documentation, define:
+	eg
+		metadoc :: (doc) => markit('myword', doc.replace(/(\n|\r\n?)(\t|[ ]{4})/g, '\n'))
+	and `@import` this package.
+	
 
 @css
 	pre.my_box {line-height:1; font-size:smaller; font-family: Menlo, Consolas, Courier New, monospace}
