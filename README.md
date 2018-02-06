@@ -63,6 +63,6 @@ Useful, but optional, "features" are provided in packages. User documentation fo
  - `tsv.mmk` - support for simple tables using the "tab separated values" data format
  - `asciimath.mmk` - defines an [AsciiMath](http://asciimath.org) to MathML (part of the HTML5 standard) transform function and two pre-defined labels for use.
  - `box.mmk` - simple boxes and arrows diagrams using extended Unicode character set.
- - `critic.mmk` - use [Critic Markup](http://criticmarkup.com) notations for tracking changes MyWord content.
+ - `critic.mmk` - use [Critic Markup](http://criticmarkup.com) notations for tracking changes in MyWord content.
  - `toc.mmk` - add Tables of Contents to MyWord documents.
  - `demo.mmk` - useful example and demo notations for use in technical documents. Includes interactive demos for use in tutorials.
