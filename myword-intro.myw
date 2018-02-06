@@ -90,7 +90,6 @@ demo
 			box: A box in a box in a box...
 
 		More content text...
-
 &
 	box: ..  <- <div style='border:thin solid gray; margin:5pt 10pt'>
 
@@ -277,6 +276,7 @@ A block label can use any characters other than white-space, and the content of 
 A block label can be defined to represent *any* HTML element the author desires.
 
 For example, symbolic labels can be defined to represent HTML list elements and HTML list-item elements:
+
 demo
 	1..
 		- First numbered point
@@ -296,6 +296,7 @@ demo
 In a paragraph of prose an inline markup notation can use quote marks or brackets to delimit the content.
 
 Quote marks are defined with the same symbols before and after dots `..` that indicate the content:
+
 sect
 	demo
 		Some "quotes" for **bold words** and *italics*.
@@ -306,6 +307,7 @@ sect
 			" .. "     <- <q>
 
 Brackets are defined using mirror image open and close symbols:
+
 sect
 	demo
 		Some *(star struck)* text.
@@ -317,6 +319,7 @@ sect
 			*< .. >*  <- <cite class='book' style='color:firebrick'>
 
 By convention quote marks can be combined with parentheses in order to allow quote marks in the content:
+
 sect
 	demo
 		Some *(italic with nested **bold** text)*.
@@ -328,6 +331,7 @@ sect
 The [Critic Markup] notations have been designed to help with document editing. They use bracket notations that can be defined like this:
 &
 	[Critic Markup] <- link http://criticmarkup.com
+
 sect
 	demo
 		Don't say {--to people that --}the world owes you a living....
@@ -353,6 +357,7 @@ sect
 ###  Inline Keyword Labels
 
 The markup sheet has defined curly-brackets as a key-word notation with an `inline` type. This means that the first word of the content may be defined as a keyword notation. For example:
+
 sect
 	demo
 		Some {em for emphasis} markup.
@@ -389,6 +394,7 @@ The place-holder could have been defined directly as any HTML element (as in ear
 ###	Symbolic Entities
 
 Symbol characters can be defined as an entity without any content:
+
 sect
 	demo
 		It's Joe's <- nice apostrophes.
@@ -403,6 +409,7 @@ sect
 			<-   <- &larr;
 
 Any word that starts with a symbol character can be used as a markup notation to represent any replacement text:
+
 sect
 	demo
 		\top-hat :smiley: ^1
@@ -420,7 +427,9 @@ A markup notation can often be directly defined as an HTML (or XML) element, and
 However, sometimes the author may want the content to contain some other kind of markup language, or plain text without any markup language (so that markup notations will be presented as literal text). To do this the definition of a markup definition can name a type transform to specify how the content should be translated.
 
 For example, if back-tick quote marks are defined as a notation for plain text source code, then the content should be interpreted as literal text, regardless of any nested markup notations:
+
 demoH
+
 	Italics for maths *(`a*b+c*d`)*
 
 	Some *(``italic with `nested` text``)*.
@@ -433,24 +442,26 @@ demoH
 In this example star quotes are used for emphasis, and the back-ticks for plain text, with a `text` type. By default the content is interpreted as nested MyWord. But the definition for the back-tick quotes specify a `text` type transform so that the content is presented verbatim (which mimics Markdown).
 
 A block label may be used to present programming language code as `text`:
+
 sect
 	demoH
-		js
+		.js
 			// sample JavaScript ...
 
 			const greet = (who) =>
-				console.log(`Hello ${who}!`)
+			console.log(`Hello ${who}!`)
 
 			greet("World") // Hello World!
 
 		&
-			js ..  <- <pre class='js'> text
+			.js ..  <- <pre class='js'> text
 	&
 		@css .js {background:lemonchiffon;}
 
 The `text` type is plain source text, but in general the content text can be any type. A type transform can be used to translate any desired source text language into HTML.
 
 For example, MyWord can mimic the Markdown angle-bracket notation for a URL. In this case the content is a URL that is translated into an HTML link:
+
 sect
 	demoH
 		A URL <www.csszengarden.com> link.
@@ -468,6 +479,7 @@ sect
 The `linkURL` transform will check if the text content is a valid URL format. If it is, then the transform will generate an HTML link element. If not, then then the text will be translated as normal, as in the second example (since a URL can not contain white-space).
 
 Braces can be used as a markup notation for text that starts with a keyword label. The `inline` transform can be used to apply keyword definitions to the content of the braces:
+
 sect
 	demoH
 		Some {hot pepper curry}.
@@ -484,6 +496,7 @@ sect
 			.mild { color:green; }
 
 The place-holder notation is very similar. The square bracket notation uses an `asdefined` transform to find a definition that matches the content text:
+
 sect
 	demoH
 		The [Zen Garden] web-site.
@@ -499,7 +512,8 @@ sect
 
 Square brackets are a traditional notation that is used for various kinds of references. The MyWord place-holder notation follows this convention.
 
-Since *every* place-holder is expected to have it's own definition, any *undefined* place-holders can be highlighted. This very helpful for editing an incomplete draft:
+If *every* place-holder is expected to have it's own definition, then any *undefined* place-holders can be highlighted. This is very helpful for editing an incomplete draft:
+
 sect
 	demoH
 		The [Alice Through The Looking Glass] story.
@@ -519,7 +533,7 @@ Type transforms can be used to translate languages for a wide range of different
 
 MyWord documents are modular, they can include blocks of content from other files. An `include` transform can be used to include the content of a URL into a MyWord document.
 
-Most authors will not need to define a custom transform. However, MyWord makes it quite easy to define new transforms, but that is beyond this introduction document.
+Most authors will not need to define a custom transform. However, MyWord makes it quite easy to define new transforms, but that is beyond this introductory document.
 
 
 ##  Publishing MyWord Documents
@@ -531,6 +545,7 @@ Unlike `.html` and a few other file types, standard browsers don't recognize `.m
 A MyWord "translator" can generate an HTML host file given the URL of a MyWord source text.
 
 A minimal HTML host looks like:
+
 eg
 	<!DOCTYPE HTML>
 	<html>
@@ -546,6 +561,42 @@ eg
 A standard browser can load this HTML file, and the script will automatically load a markup sheet with definitions for the default lingo, and use that to translate the `myMyWordDoc.myw` source text.
 
 
+##	Getting Started
+
+The first thing you will need is a copy of the MyWord translator code. You can download these files from Github at: <https://github.com/ridgeworks/MyWord>. 
+
+There are several choices under the Github "Clone or download" button. If you click the "Download ZIP" option you should then have a web-site directory like this:
+
+.box
+	MyWord-master/
+	|
+	|-- LICENCE
+	|
+	|-- README.md
+	|
+	'-- dist/
+		|
+		|-- lib/
+		|
+		|-- pkgs/
+		|
+		|-- ReadMe.html
+		|
+		'-- ReadMe.myw
+
+& 
+	@import pkgs/box.mmk
+	@css pre.my_box {margin:0px; background:whitesmoke; padding-left:20px}
+
+The `dist/` directory web-site is ready for use, complete with a "ReadMe" file. A standard browser can load the `ReadMe.html` file, and that will translate and render the `ReadMe.myw` file.
+
+However, due to standard browser CORS policy, downloading script files using `file:` URLs can fail. This prevents opening local HTML files, e.g., by double-clicking on them in the OS GUI. Re-configuring the browser can workaround this issue, but the recommended option is to set up a local web server.
+
+The `ReadMe.html` host file loads the `lib/x-markup.js` script, and that will load other MyWord files from from the `lib/` directory. This script will also load and translate the `ReadMe.myw` file. All the necessary translation software is in the `lib/` directory. 
+
+Notice that when you edit the content of the `ReadMe.myw` file, you won't need to update the `ReadMe.html` file, re-loading the web page will show the latest version of the `ReadMe.myw` file.
+
+
 ##	Conclusion
 
 MyWord markup can be used in much the same way as a light-weight markup language such as Markdown. The MyWord markup notations can mimic the easy to read Markdown notations. The difference is that MyWord is extensible, and authors can define their own markup notations for their own purposes.
@@ -558,6 +609,5 @@ The MyWord notations can be defined in terms of HTML or XML, and custom text tra
 
 In fact, since a MyWord document (including the markup definitions) is easy to read as plain text, there is no essential external dependency at all.
 
-
 &
-	@import  MyWordDocStyle.mmk pkgs/demo.mmk
+	@import MyWordDocStyle.mmk pkgs/demo.mmk
