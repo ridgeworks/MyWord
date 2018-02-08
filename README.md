@@ -66,3 +66,5 @@ Useful, but optional, "features" are provided in packages. User documentation fo
  - `critic.mmk` - use [Critic Markup](http://criticmarkup.com) notations for tracking changes in MyWord content.
  - `toc.mmk` - add Tables of Contents to MyWord documents.
  - `demo.mmk` - useful example and demo notations for use in technical documents. Includes interactive demos for use in tutorials.
+
+Additional useful packages supporting features like syntax colouring, graphs, and music notations, can be found in the [MyWord-Package-Library](https://github.com/ridgeworks/MyWord-Package-Library). 
