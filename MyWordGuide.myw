@@ -2,7 +2,7 @@
 title>	A Guide to MyWord
 centreblock>
 	"Markup, your way"
-	Version 0.4, January 2018
+	Version 1.0, February 2018
 
 MyWord is a light-weight markup language focused on publishing content on the Web. The main distinguishing characteristic between MyWord and other markup languages (e.g., the many [Markdown] variants) is the ability for the user to easily define his own custom markup notations to match the needs of the document content. MyWord provides a default *lingo* (a set of notations) which can be used by anyone with some familiarity with Markdown, but these can be augmented by defining new notations or changed by overriding the defintions of existing notations.
 
