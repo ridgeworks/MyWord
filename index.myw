@@ -9,6 +9,11 @@ The MyWord reference document. (technical document)
 [Grit Grammar Parser]
 Details for building type defintions with Grit. (advanced topic)
 
+also:
+[MyWord Package Library]
+A GitHub repo containing additional packages not included in the formal release. 
+
 &	[Introduction To MyWord]  <- link myword-intro.html
-	[A Guide To MyWord]    <- link MyWordGuide.html
-	[Grit Grammar Parser]   <- link GritGrammarParser.html
+	[A Guide To MyWord]       <- link MyWordGuide.html
+	[Grit Grammar Parser]     <- link GritGrammarParser.html
+	[MyWord Package Library]  <- link https://github.com/ridgeworks/MyWord-Package-Library
