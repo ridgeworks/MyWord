@@ -1,6 +1,8 @@
 [MyWordDocStyle]
 #    MyWord Markup Language
 
+TOC> **Contents**
+
 A markup language enables authors to use annotations to *label* elements of text with their intended meaning. In MyWord documents the authors are free to choose their own *notations* to label text elements with their own meanings.
 
 MyWord documents do not depend on an external markup language specification to define the meaning of a notation. Different authors with different topics can select and evolve their own markup notations.
@@ -8,7 +10,7 @@ MyWord documents do not depend on an external markup language specification to d
 Here is an example of MyWord markup where the `##` symbol is used to label a header, and the `*` symbol is used as a quote mark notation for italics:
 
 demo
-	##  A Header Line
+	###  A Header Line
 
 	The *Alice In Wonderland* story.
 
@@ -53,7 +55,6 @@ For example, MyWord can mimic popular Markdown notations:
 
 sect
 	demo
-		##  Level 2 Header
 		###  Level 3 Header
 		####    Level 4 Header
 
@@ -563,9 +564,9 @@ A standard browser can load this HTML file, and the script will automatically lo
 
 ##	Getting Started
 
-The first thing you will need is a copy of the MyWord translator code. You can download these files from Github at: <https://github.com/ridgeworks/MyWord>. 
+A browser is required to view published MyWord documents but browser access to the local file system is commonly restricted for security reasons. Configuring the browser to get around this issue is possible, but it's often simpler to just run a local web server to serve MyWord content.
 
-There are several choices under the Github "Clone or download" button. If you click the "Download ZIP" option you should then have a web-site directory like this:
+The first step is to download the [current release of MyWord] or visit the [GitHub project site] for more choices. Uncompressed, the download should have a directory structure like:
 
 .box
 	MyWord-master/
@@ -584,18 +585,49 @@ There are several choices under the Github "Clone or download" button. If you cl
 		|
 		'-- ReadMe.myw
 
-& 
+Next create a directory to act as your server root directory. For the purposes of this exercise, we'll use `~/MyServer`, i.e., the directory `MyServer` in the top level user directory. Copy the contents of the MyWord release `dist` directory into it:
+
+.box
+	~/MyServer/
+	|
+	|-- lib/
+	|
+	|-- pkgs/
+	|
+	|-- ReadMe.html
+	|
+	'-- ReadMe.myw
+
+While many options for running a local server exist, a simple solution using [Node.js] and the [`local-web-server`] npm package. Download and install your platform specific version of Node from the web-site.
+
+The remaining steps to setup your local server require the use of a command line interface (CLI). If Node is properly installed, the Node Package Manager (`npm`) command will be available to the CLI. Use it to install the `local-web-server` package (command prompts are indicated by `$`, example output also shown):
+eg
+	$ npm install -g local-web-server
+
+	/usr/local/bin/ws -> /usr/local/lib/node_modules/local-web-server/bin/cli.js
+	+ local-web-server@2.4.0
+	added 160 packages in 9.829s
+Note: You may require root privileges to install `npm` packages on your computer. Prefixing the `npm` command with `sudo` will temporarily enable root privileges on Unix based systems.
+
+A local server can now be started using the `ws` command and specifying a server root directory:
+eg
+	$ ws -d ~/MyServer
+
+	Serving at http://localhost:8000, http://127.0.0.1:8000, http://192.168.1.9:8000
+
+To test that the server is running, try URL `localhost:8000` on your browser; you should see a view of the server root directory. Click on the `myword` directory and then on the `ReadMe.html` file to see the published view. To stop the server, type `Ctrl-c` on the CLI.
+
+Should you edit the content of the `ReadMe.myw` file, you won't need to update the `ReadMe.html` file; re-loading the web page will show the latest version of the MyWord document file. To add new content, copy the document `.myw` and host `.html` files to `~/MyServer`.
+
+There are many other options available with the `local-web-server`. By installing the [`myword` middleware] package, `local-web-server` can even be configured to serve MyWord files directly, with one-click, and without the need for an HTML "host" file. But any web server can be used to serve MyWord documents.
+&
 	@import pkgs/box.mmk
 	@css pre.my_box {margin:0px; background:whitesmoke; padding-left:20px}
-
-The `dist/` directory web-site is ready for use, complete with a "ReadMe" file. A standard browser can load the `ReadMe.html` file, and that will translate and render the `ReadMe.myw` file.
-
-However, due to standard browser CORS policy, downloading script files using `file:` URLs can fail. This prevents opening local HTML files, e.g., by double-clicking on them in the OS GUI. Re-configuring the browser can workaround this issue, but the recommended option is to set up a local web server.
-
-The `ReadMe.html` host file loads the `lib/x-markup.js` script, and that will load other MyWord files from from the `lib/` directory. This script will also load and translate the `ReadMe.myw` file. All the necessary translation software is in the `lib/` directory. 
-
-Notice that when you edit the content of the `ReadMe.myw` file, you won't need to update the `ReadMe.html` file, re-loading the web page will show the latest version of the `ReadMe.myw` file.
-
+	[current release of MyWord]  <- link https://github.com/ridgeworks/MyWord/archive/V1.0.zip
+	[GitHub project site]  <- link https://github.com/ridgeworks/MyWord
+	[Node.js]              <- link https://nodejs.org
+	[`local-web-server`]   <- link https://www.npmjs.com/package/local-web-server
+	[`myword` middleware]  <- link https://www.npmjs.com/package/lws-myword
 
 ##	Conclusion
 
@@ -610,4 +642,6 @@ The MyWord notations can be defined in terms of HTML or XML, and custom text tra
 In fact, since a MyWord document (including the markup definitions) is easy to read as plain text, there is no essential external dependency at all.
 
 &
-	@import MyWordDocStyle.mmk pkgs/demo.mmk
+	@import MyWordDocStyle.mmk pkgs/demo.mmk pkgs/toc.mmk
+	TOC> .. <- toc 2 2
+

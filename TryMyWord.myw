@@ -1,0 +1,60 @@
+[MyWordDocStyle]
+### Try MyWord
+
+Edit the text on the left and see the rendered result on the right. The {~button Toggle HTML Display} button below can be used to enable the display of the raw HTML that is generated.
+
+demoH
+	### A Header
+	Some *emphasis*, **bold**, and `code words`.
+	
+	> A blockquote like this
+	
+	#### Lists
+	Unordered:
+	- An item.
+	- Another item.
+	
+	Ordered:
+	1..
+		- First point...
+		- Second point...
+			*..	* First sub-point.
+				* Second bullet point.
+		- Third point.
+	
+	### Links
+	A url <http://www.csszengarden.com>.
+	
+	Or see [Zen Garden].
+	
+	
+	### Images
+	[OctoCat]
+
+	This is the **Go** gopher:[gopher]
+	
+	### Fenced blocks
+	``` go
+	package main
+	
+	import "fmt"
+	
+	func main() {
+		fmt.Println("Hello, 世界")
+	}
+	```
+	
+	&
+		[Zen Garden] <- link http://www.csszengarden.com
+		[OctoCat]    <- image images/octocat-icon.png
+		[gopher]     <- image images/gopher.png width=60 height=40 style='vertical-align:middle'
+		@css
+        	blockquote.my_blockquote { border-left: thick solid lightgrey; padding-left: 5pt; }
+
+
+[Return to MyWord]
+
+&
+	@import pkgs/demo.mmk MyWordDocStyle.mmk
+	~button .. <- <button disabled>
+	[Return to MyWord]  <- link index.html

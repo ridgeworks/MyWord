@@ -1,7 +1,12 @@
 The essence of any markup language is to enable an author to label pieces of text to enhance their presentation or convey special meaning. In MyWord the authors can define their own markup labels and embed any kind of markup language or notation. If this is your first encounter with MyWord, it is suggested that the documents be read in the order listed below.
 
+MyWord is built on standard Web tecnologies: JavaScript, HTML, and CSS. MyWord documents are just plain text files, composed using your favourite text editor. But a browser is required to render these documents. For security reasons, browsers frequently restrict access to the local file system, so the best way of "feeding" local MyWord content to the browser is by setting up a local web server. This server can be configured to display a files and directories view of some portion of the file system; double clicking on a MyWord document file will then render it (just like opening an HTML file). For more details on setting up a local web server for MyWord, see "Getting Started" in the [Introduction To MyWord].
+
 [Introduction To MyWord]
 An overview of common usage of MyWord as a lightweight markup language.
+
+[Try MyWord]
+An online "playground" for experimenting with MyWord.
 
 [A Guide To MyWord]
 The MyWord reference document. (technical document)
@@ -13,7 +18,10 @@ also:
 [MyWord Package Library]
 A GitHub repo containing additional packages not included in the formal release. 
 
-&	[Introduction To MyWord]  <- link myword-intro.html
+&
+	@import pkgs/demo.mmk
+	[Introduction To MyWord]  <- link myword-intro.html
+	[Try MyWord]              <- link TryMyWord.html
 	[A Guide To MyWord]       <- link MyWordGuide.html
 	[Grit Grammar Parser]     <- link GritGrammarParser.html
 	[MyWord Package Library]  <- link https://github.com/ridgeworks/MyWord-Package-Library
