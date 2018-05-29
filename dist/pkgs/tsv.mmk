@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `tsv.mmk`
 	
 	"[Tab-separated values]" (or `tsv`) is a common text format used for storing data in a tabular structure. The

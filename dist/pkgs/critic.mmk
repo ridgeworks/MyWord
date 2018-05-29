@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `critic.mmk`
 	
 	[CriticMarkup] defines a set of notations that authors and editors can use to track changes to plain text documents.

@@ -24,6 +24,31 @@
  */
 
 ;(function () {
+	
+	// if necessary, a shim for Array.flatten() 
+	if (typeof Array.prototype.flatten == 'undefined')
+		Array.prototype.flatten = function(depth) {
+			if ((typeof depth == 'undefined') || depth==1)
+				return [].concat.apply([], this)  // efficient shallow flatten
+			else if (depth == Infinity)
+				return flattenDeep(this)          // deep flatten
+			else if (depth > 1)                   // intermediate flatten
+				return this.reduce(
+					(acc, item) =>
+						acc.concat(Array.isArray(item) ? item.flatten(depth-1) : item),
+					[]
+					)
+			else return this                     // no flatten
+
+			function flattenDeep(arr) {  // could be made into an Array method
+				return arr.reduce(
+					(acc, item) =>
+						acc.concat(Array.isArray(item) ? flattenDeep(item) : item),
+					[]
+				)
+			} // flattenDeep(arr)
+		} // Array.prototype.flatten(depth)
+
 
 	/*
 	 *  0. I/O support: {
@@ -140,7 +165,7 @@
 			}
 		}
 	} (workerMode);
-
+	
 	if (workerMode) {                          // When used in Worker mode:
 		global = self; window = global           // "globals" for Worker unaware imports
 		onmessage = function (msg) {             // global onmessage handler
@@ -158,21 +183,7 @@
 	if (console) console.log("Worker:" + workerID);
 
 	/*
-	 *  2. Module utility functions
-	 */
-
-	// compileGrammar(grammar): utility to compile a Grit grammar and throw an Error if errors reprorted
-	function compileGrammar(grammar) {  // :: String -> undefined
-		var errors = grammar._compile();
-		if (errors.length > 0) {
-			errors.unshift(grammar._rules[0].name + " compile failed:");
-			throw new Error(errors.join('\n\t'))
-		}
-	}	// compileGrammar(grammar)
-
-
-	/*
-	 *  3. core object containing framework API : {
+	 *  2. core object containing framework API : {
 	 *        markit:           function(type, content, parms)         :: String -> String -> String -> String
 	 *        applyLabel:       function(label, content, defaultType)  :: String -> String -> String -> String
 	 *        newNode:          function(type, content, label)         :: String -> String -> String -> Node
@@ -321,7 +332,7 @@
 
 		/*
 		 *  Utility function to render a node list to a string using markit()
-		 *    render(aNode) ==> markit(node.type, node.content, node.label)
+		 *    render(aNode) ==> markit(anode.type, anode.content, anode.label)
 		 */
 		function renderNodes(nodeList) {       // :: [Node..] -> String
 			return renderNode(nodeList).join('')
@@ -338,33 +349,36 @@
 		 *  'metamark' parser for label and type defintions
 		 */
 
-		const metaword = new Grit(
-			// Note: this order is important because labeldef could match func/gram containing %ws<-%ws
-			"metaword   := (blank / fundef / gramdef / labeldef / uses / js / css / doc / comment / undefined)* ",
-			"blank      :~ [ \\t]* %nl                :: (_) => [] ",
-			"fundef     :~ (%name)\\s+:{2}(%block)    :: func(_,type,func) ",
-			"gramdef    :~ (%name)\\s+:%block         :: gram(rules,rule) ",
-			"labeldef   :~ (%word %line) %ws<- (?:%defsep(%tag))? (?:%defsep(%block))? (?: %nl | $) ",
-			"                                         :: label(def,label,tag,transform) ",
-			//"labeldef   :~ (%word(?: (?! %EQ) %ws %word)*) %EQ (?:%defsep(%tag))? (?:%defsep(%block))? %nl? ",
-			//"                                         :: label(def,label,tag,transform) ",
-			//"EQ         :~ %ws <- (?= %defsep (?: <[a-zA-Z] | &[#a-zA-Z0-9] | [a-zA-Z])) ",
-			"defsep     :~ (?:%ws?%nl)?%ws ",
-			"uses       :~ @import(\\s+%block)        :: uses(_,urls) ",
-			"js         :~ @javascript \\s+ (%block)  :: js(_,js) ",
-			"css        :~ @css \\s+ (%block)         :: css(_,css) ",
-			"doc        :~ @doc \\s+ (%block)         :: doc(_,doc) ",
-			"comment    :~ // %line (?: %nl | $)      :: (_) => [] ",
-			"undefined  :~ [ \\t]* [^\\n\\r]+         :: undefined(statement) ",
-			"tag        :~ (?: [<](?:[^>\\n\\r]|(?:%nl\\s))*[>]) | (?:&[#a-zA-Z0-9]*;) ",
-			"block      :~ %line %insetline* ",
-			"insetline  :~ (?: [ \\t]* %nl | (%ws %line)) ",
-			"word       :~ \\S+ ",
-			"name       :~ [a-zA-Z]\\w* ",
-			"line       :~ [^\\n\\r]* ",
-			"ws         :~ [ \\t]+ ",
-			"nl         :~ (?:\\r \\n? | \\n) "
-		);
+		/* Comments and alternatives:
+			// Note: metaword internal rule order is important because labeldef could match func/gram containing %ws<-%ws
+
+			//labeldef   :~ (%word(?: (?! %EQ) %ws %word)*) %EQ (?:%defsep(%tag))? (?:%defsep(%block))? %nl?
+			//                                         :: label(def,label,tag,transform)
+			//EQ         :~ %ws <- (?= %defsep (?: <[a-zA-Z] | &[#a-zA-Z0-9] | [a-zA-Z]))
+		*/
+		const metaword = Grit`
+			metaword   := (blank / fundef / gramdef / labeldef / uses / js / css / doc / comment / undefined)*
+			blank      :~ [ \t]* %nl                :: (_) => []
+			fundef     :~ (%name)\s+:{2}(%block)    :: func(_,type,func)
+			gramdef    :~ (%name)\s+:%block         :: gram(rules,rule)
+			labeldef   :~ (%word %line) %ws<- (?:%defsep(%tag))? (?:%defsep(%block))? (?: %nl | $)
+			                                        :: label(def,label,tag,transform)
+			defsep     :~ (?:%ws?%nl)?%ws
+			uses       :~ @import(\s+%block)        :: uses(_,urls)
+			js         :~ @javascript \s+ (%block)  :: js(_,js)
+			css        :~ @css \s+ (%block)         :: css(_,css)
+			doc        :~ @doc \s+ (%block)         :: doc(_,doc)
+			comment    :~ // %line (?: %nl | $)     :: (_) => []
+			undefined  :~ [ \t]* [^\n\r]+           :: undefined(statement)
+			tag        :~ (?: [<](?:[^>\n\r]|(?:%nl\s))*[>]) | (?:&[#a-zA-Z0-9]*;)
+			block      :~ %line %insetline*
+			insetline  :~ (?: [ \t]* %nl | (%ws %line))
+			word       :~ \S+
+			name       :~ [a-zA-Z]\w*
+			line       :~ [^\n\r]*
+			ws         :~ [ \t]+
+			nl         :~ (?:\r \n? | \n)
+		`;
 
 		metaword.label = function (definition, label, tagInfo, typeInfo) {
 			// label(def,label,tag,transform)
@@ -410,7 +424,6 @@
 		metaword.gram = function (rules, rule) {
 			try {
 				const gram = new Grit(rules);
-				compileGrammar(gram);
 				return addTransform(rule, function(content, parmString) {
 					// if (parmString)
 					// 	console.log("Warning: rule " + rule + " - transform parameters `" + parmString + "` will be ignored." )
@@ -450,12 +463,10 @@
 			//ES6:                        `Unrecognized metaword statement: ${statement}`)
 		}; // metaword.undefined(_, statement)
 
-		compileGrammar(metaword);  // errors will cause initialization to fail
-
 		function metamarkAdd(content) {
 			try {       // all exceptions turned into errorString's
 				//return metaword.flatten(metaword.parse(content)).join('')
-				return metaword.flatten(metaword.parse(content))
+				return metaword.parse(content)
 			} catch (err) {
 				return newNode('errorString', err.message)
 			}
@@ -584,40 +595,37 @@
 	} // makePat(pat, start, end)
 
 	/*
-	 *  4. Transform for type: myword
+	 *  3. Transform for type: myword
 	 *  create and translate prime syntax block elements
 	 *  Block labels are assumed to be type names (i.e., rule names) with prefix '.'; unlabelled content is 'markup'.
 	 */
 	
 	core.addBaseType('myword', function() {
 
-		// template string format, remove visual whitespace option (preserved in literal string format)
-		const myword = new Grit(`
+		const myword = Grit`
 			myword      := (metablock / markup)*
 			metablock   := metalabel sep line indentblock?     :: metablock(type, _, line, block)
 			markup      := content pmore* nl*                  :: (sline, lines, nls) => markit.newNode(
 			                                                         'markup',
 			                                                         [sline].concat(lines).concat(nls).join(''))
-			metalabel   :~ &(?!\\S)                            :: (_) => 'mmk'
-			sep         :~ [ \\t]*
+			metalabel   :~ &(?!\S)                             :: (_) => 'mmk'
+			sep         :~ [ \t]*
 			indentblock := (blkblank* insetline)*              :: (lines) => lines.reduce(
 			                                                         (acc, indented) => [acc, indented[0].join(''), indented[1]].join(''),
 			                                                         '')
 			insetline   :~ %inset (%line)                      :: (_,line) => line
-			line        :~ %content (?: %nl | $)               :: (s) => s
-			blkblank    :~ (?!%inset) [ \\t]* %nl              :: (s) => s
+			line        :~ %content (?: %nl | $)
+			blkblank    :~ (?!%inset) [ \t]* %nl
 			pmore       := nl* !metalabel content              :: (nls, _, content) => nls.concat(content).join('')
-			inset       :~ \\t | [ ]{4}
-			content     :~ (?:[^\\n\\r])*
-			nl          :~ (?: \\n | \\r\\n?)                  :: (nl) => nl
-		`);
+			inset       :~ \t | [ ]{4}
+			content     :~ (?:[^\n\r])*
+			nl          :~ (?: \n | \r\n?)
+		`;
 
 		myword.metablock = function(type, _, line, block)  {  // metablock  := metalabel sep line indentblock?
 			const content = (line.match(/^\\s+$/)?'':line) + (block ? block : '')
 			return [newNode('metamark', content), core.metamarkAdd(content)]
 		}
-
-		compileGrammar(myword); // verify grammar, or throw an error(fail initialization)
 
 		return (content) =>  markit('scope', renderNodes(myword.parse(content)), core.contextID())  // 'myword' transform
 
@@ -633,13 +641,13 @@
 
 
 	/*
-	 *  5. Transform for private type (can be used but not overridden): «markup»
+	 *  4. Transform for private type (can be used but not overridden): «markup»
 	 *  create and translate markup block elements; unlabelled content is 'paragraph' which contains 'prose'.
 	 */
 
 	core.addBaseType('«markup»', function() {
-		// template string form
-		const markup = new Grit(`
+
+		const markup = Grit`
 			markup       := (insetblock / labeledblock / fencedblock / blankline / paragraph)*
 			                                                    :: (nodes) => markit.renderNodes(nodes)
 			insetblock   := insetline indentblock?              :: (line, block) => markit.newNode(
@@ -648,10 +656,10 @@
 			                                                           '')
 			labeledblock := label sep line indentblock?         :: (label, _, line, block) => markit.newNode(
 			                                                           'labeledblock',
-			                                                           (line.match(/^\\s+$/)?'':line) + (block ? block : ''),
+			                                                           (line.match(/^\s+$/)?'':line) + (block ? block : ''),
 			                                                           label)
 			fencedblock  :~ (%fence) %sep (%line) ((?:(?!%fencend) %line)*) (?: $ | %fencend)
-			                                                    :: (_, _, infostring, content) => markit.newNode(
+			                                                    :: (_, __, infostring, content) => markit.newNode(
 			                                                           'fencedblock',
 			                                                            content,
 			                                                            infostring.trim())
@@ -664,20 +672,18 @@
 			                                                         (acc, indented) => [acc, indented[0].join(''), indented[1]].join(''),
 			                                                         '')
 			insetline    :~ %inset (%line)                      :: (_,line) => line
-			line         :~ [^\\n\\r]* (?: %nl | $)             :: (s) => s
-			label        :~ \\S+                                :: (s) => ((pat = s+' ..') =>
+			line         :~ [^\n\r]* (?: %nl | $)
+			label        :~ \S+                                 :: (s) => ((pat = s+' ..') =>
 			                                                        (markit.applyLabel(pat ,null) !== null) ? pat : null) ()
-			sep          :~ [ \\t]*
-			blkblank     :~ (?!%inset) %blank                   :: (s) => s
-			fence        :~ [~\\x60]{3,}
-			fencend      :~ \\1 %blank
-			inset        :~ \\t | [ ]{4}
-			blank        :~ [ \\t]* %nl                         :: (s) => s
-			nl           :~ (?: \\n | \\r\\n?)
-		`);
-		
-		compileGrammar(markup); // verify grammar, or throw an error(fail initialization)
-		
+			blkblank     :~ (?!%inset) %blank
+			fence        :~ [~\x60]{3,}
+			fencend      :~ \1 %sep (?: %nl | $)
+			inset        :~ \t | [ ]{4}
+			blank        :~ [ \t]* %nl
+			sep          :~ [ \t]*
+			nl           :~ (?: \n | \r\n?)
+		`;
+
 		return (content) =>  markup.parse(content)      // '«markup»' transform
 
 	}())  // addBaseType('«markup»', ...
@@ -707,8 +713,8 @@
 	 */
 
 	core.addBaseType('«prose»', function() {
-		// template string format, remove escape (preserved in literal string version)
-		const simpleProse = new Grit(`
+
+		const simpleProse = Grit`
 			prose    := (span / symbol / text / ctl)*            :: (nodes) => markit.renderNodes(nodes)
 			span     := sstart (nested/(!end content))+ end      :: span(bmark, xs, emark)
 			nested   := nstart (nested/notq)+ end
@@ -716,18 +722,17 @@
 			sstart   :~ %tag                                     :: s_begin
 			nstart   :~ %tag                                     :: n_begin
 			end      :~ %tag                                     :: end_
-			symbol   :~ %symchar [\\S]*                          :: symbol(symbol)
+			symbol   :~ %symchar [\S]*                           :: symbol(symbol)
 			text     :~ %symchar | [a-zA-Z0-9 ]+                 :: (c) => markit.newNode('text', c)
-			content  :~ [a-zA-Z0-9 ]+ | [\\s\\S]                 :: (x) => x
-			ctl      :~ (\\r\\n?) | [\\s\\S]                     :: (c, cr) => markit.newNode('ctrl', (cr)?'\\n':c)
-			tag      :~ [^a-zA-Z0-9\\s\\u0080-\\uffff]+
-			symchar  :~ [^a-zA-Z0-9\\x00-\\x20]
-		`);
-
+			content  :~ [a-zA-Z0-9 ]+ | [\s\S]
+			ctl      :~ (\r\n?) | [\s\S]                         :: (c, cr) => markit.newNode('ctrl', (cr)?'\n':c)
+			tag      :~ [^a-zA-Z0-9\s\u0080-\uffff]+
+			symchar  :~ [^a-zA-Z0-9\x00-\x20]
+		`;
 
 		simpleProse.span = function(bmark, xs, emark) {     // span := sstart (nested/(!end nota))+ end
 						                                    // => newNode('inlinenotation', xs, makePat(SPAN, bmark, emark))
-			return newNode('inlinenotation', this.flatten(xs).join(''), makePat(SPAN, bmark, emark))
+			return newNode('inlinenotation', xs.flatten(Infinity).join(''), makePat(SPAN, bmark, emark))
 		} // simpleProse.span(bmark, xs, emark)
 
 		var _qmarker	// save span begin and end (in closure)
@@ -805,8 +810,6 @@
 				end += _bracketsMap[begin[i]] || begin[i];
 			return end;
 		}
-
-		compileGrammar(simpleProse); // verify grammar, or throw an error (fail initialization)
 
 		return (content) => simpleProse.parse(content)  // 'prose' transform
 

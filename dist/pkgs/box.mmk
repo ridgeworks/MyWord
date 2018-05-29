@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `box.mmk`
 	
 	The `box` type provides support for simple box and arrow diagrams using Unicode box drawing characters. The
