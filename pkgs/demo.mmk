@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `demo.mmk`
 	
 	This package provides useful block notations for software documentation: examples and side-by-side demos. It

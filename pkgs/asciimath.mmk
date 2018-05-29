@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `asciimath.mmk`
 	
 	[AsciiMath] is a markup language for mathematics. This package defines two types: `asciimath` for MathML fragments
@@ -84,7 +84,7 @@ am     :: (content, mathattrs) =>
 			  ).join('')
 
 
-asciimath := E*                                 :: (Es) => this.flatten(Es).join('')
+asciimath := E*                                 :: (Es) => Es.flat(Infinity).join('')
 
     E           := ws (fraction / Sexp) ws      :: (ws1,exp,ws2) => [ws1, exp[0], ws2]
 

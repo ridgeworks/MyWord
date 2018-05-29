@@ -23,5 +23,5 @@ A GitHub repo containing additional packages not included in the formal release.
 	[Introduction To MyWord]  <- link myword-intro.html
 	[Try MyWord]              <- link TryMyWord.html
 	[A Guide To MyWord]       <- link MyWordGuide.html
-	[Grit Grammar Parser]     <- link GritGrammarParser.html
+	[Grit Grammar Parser]     <- link GritGrammarParser.md.html
 	[MyWord Package Library]  <- link https://github.com/ridgeworks/MyWord-Package-Library

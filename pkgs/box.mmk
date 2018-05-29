@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `box.mmk`
 	
 	The `box` type provides support for simple box and arrow diagrams using Unicode box drawing characters. The
@@ -71,7 +71,7 @@
 
 .box ..    <- box
 box        := bxline*                :: (blines) =>
-	                           `<pre class=my_box>${this.flatten(blines).join('')}</pre>`
+	                           `<pre class=my_box>${blines.flat(Infinity).join('')}</pre>`
 	bxline := (bxitem / txt)* nl?
 	bxitem := dblFlk / lftFlk / rgtFlk / vline / hline
 

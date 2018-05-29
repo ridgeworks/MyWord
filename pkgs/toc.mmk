@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `toc.mmk`
 	
 	This package generates a simple table of contents from elements with id attributes matching a specific pattern:

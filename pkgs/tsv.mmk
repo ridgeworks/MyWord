@@ -1,4 +1,4 @@
-@doc
+@doc .myw
 	####  Package `tsv.mmk`
 	
 	"[Tab-separated values]" (or `tsv`) is a common text format used for storing data in a tabular structure. The
@@ -22,7 +22,7 @@
 
 .tsv ..      <- tsv
 tsv          := row*             :: (rows) => `<table class=my_array>${rows.join('')}</table>`
-	row      := cell* nl?        :: (cells) => `<tr>${this.flatten(cells).join('')}</tr>`
+	row      := cell* nl?        :: (cells) => `<tr>${cells.flat(Infinity).join('')}</tr>`
 	cell     := item tsep?       :: (item) => `<td>${markit('prose',this.flatten(item).join(''))}</td>`
 	item     := (!delim char)+
 	delim    :~ %tsep | %nl

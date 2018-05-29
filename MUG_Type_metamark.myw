@@ -13,7 +13,7 @@ This section more formally and completely covers the `metamark` language. Syntac
 
 As can be seen in previous examples, `metamark` content does not normally generate any visible output, but it can produce HTML content in the form of `<style>` and `<script>` elements as well as any error messages produced by the processing of the meta-content.
 
-####  Type Defintions
+####  Type Definitions
 There are several examples of type definitions in earlier examples but so far only one form of the type definition has been used. For example, the `text` transform just specifies a function which maps content to rendered output:
 eg
 	text :: (txt) => txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -22,7 +22,7 @@ eg
 	TypeName :: (Content, ParameterString) => Expression..
 There is no universal meaning of `parameterString`; the function body defines the meaning. Parameter string values are frequently specified in notation definitions (see below).
 
-Internally, MyWord uses the [Grit] JavaScript module which defines a language for specifying grammars. It uses a grammar specification to generate a parser which can be used to parse content in the grammar. Most type definitions can be written using the simple functional form shown above, but here's a small example of what can be done using Grit rules to define a grammar for expressing simple chemical formulae:
+Internally, MyWord uses the [Grit] JavaScript module which defines a language for specifying grammars. (See also [Grit Repository].) It uses a grammar specification to generate a parser which can be used to parse content in the grammar. Most type definitions can be written using the simple functional form shown above, but here's a small example of what can be done using Grit rules to define a grammar for expressing simple chemical formulae:
 demo
 	Butane ~CH3CH2CH2CH3~
 
@@ -31,14 +31,18 @@ demo
 	&
 		~ .. ~  <- <span class=chem> chem
 
-		chem   := (num / char)* :: string
-		  char :~ \D*           :: string
+		chem   := (num / char)* :: (parts) => parts.flat().join('')
+		  char :~ \D*
 		  num  :~ \d+           :: (n) => `<sub>${n}</sub>`
 This defines an inline notation, '`~ .. ~`' for writing the formulae and a type `chem` for mapping the content of the notation to an HTML fragment. Notice there is just one type defined, the grammar rules for `char` and `num` are part of the `chem` definition since they're offset from the start of the line defining `chem`.
 
-The `:=` grammar rules are PEG rules, while the `:~` grammar rules are JavaScript regular expressions. The `::` introduces a semantic action that can use any JavaScript code to process the parse tree. `string` is a Grit built-in function (see the Grit documentation for details), but the semantic action for `num` is just an arrow function, which takes the matched input string as a parameter. The grammar rules provide a convenient way to automate the creation of a parser for a type.
+The `:=` grammar rules are PEG rules, while the `:~` grammar rules are JavaScript regular expressions. The `::` introduces a semantic action that can use any JavaScript code to process the parse tree. The parse tree for a PEG rule is a nested `Array` (see the [Grit] documentation for details) so it must be flattened and joined to produce a string. MyWord provides a polyfill for the proposed `Array.flat()` method to support this common requirement. (Note: `Array.flat()` takes an depth parameter which may be required for deeply nested arrays - see [Array.prototype.flat]).  
 
-####  Notation Defintions
+The default action for a regular expression rule (`:~`) is just the string match so the `char` rule doesn't need to define an action. To provide the `<sub>` HTML tags, the `num` rule requires an explicit action expressed as an arrow function, which takes the matched input string as a parameter. (Capture groups in regular expression rules, if present, are expressed as additonal parameters to the function.)  
+
+Grammar rules provide a convenient way to automate the creation of a parser for a type. However, types defined in this fashion cannot accommodate `parameterString`s. In this case, any parsing of the content must be implemented in the `transform`. 
+
+####  Notation Definitions
 The general form of a notation definition is defined by the following quasi-PEG rule:
 eg
 	notationDefintion := labelPattern '<-' (htmlTag / charReference)? (typeName parameterString?)?
@@ -198,6 +202,7 @@ MyWord is all about user defined notations so its predefined types do not suppor
 
 &
 	[Web Worker]  <- link https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers
+	[Array.prototype.flat]  <- link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat
 	[`marked.js`] <- link https://github.com/chjj/marked
 	[Worker Globals] <- link
 	        https://developer.mozilla.org/en-US/docs/Web/API/DedicatedWorkerGlobalScope
