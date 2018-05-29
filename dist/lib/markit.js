@@ -25,9 +25,9 @@
 
 ;(function () {
 	
-	// if necessary, a shim for Array.flatten() 
-	if (typeof Array.prototype.flatten == 'undefined')
-		Array.prototype.flatten = function(depth) {
+	// if necessary, a shim for Array.flat() 
+	if (typeof Array.prototype.flat == 'undefined')
+		Array.prototype.flat = function(depth) {
 			if ((typeof depth == 'undefined') || depth==1)
 				return [].concat.apply([], this)  // efficient shallow flatten
 			else if (depth == Infinity)
@@ -35,7 +35,7 @@
 			else if (depth > 1)                   // intermediate flatten
 				return this.reduce(
 					(acc, item) =>
-						acc.concat(Array.isArray(item) ? item.flatten(depth-1) : item),
+						acc.concat(Array.isArray(item) ? item.flat(depth-1) : item),
 					[]
 					)
 			else return this                     // no flatten
@@ -47,7 +47,7 @@
 					[]
 				)
 			} // flattenDeep(arr)
-		} // Array.prototype.flatten(depth)
+		} // Array.prototype.flat(depth)
 
 
 	/*
@@ -465,7 +465,6 @@
 
 		function metamarkAdd(content) {
 			try {       // all exceptions turned into errorString's
-				//return metaword.flatten(metaword.parse(content)).join('')
 				return metaword.parse(content)
 			} catch (err) {
 				return newNode('errorString', err.message)
@@ -732,7 +731,7 @@
 
 		simpleProse.span = function(bmark, xs, emark) {     // span := sstart (nested/(!end nota))+ end
 						                                    // => newNode('inlinenotation', xs, makePat(SPAN, bmark, emark))
-			return newNode('inlinenotation', xs.flatten(Infinity).join(''), makePat(SPAN, bmark, emark))
+			return newNode('inlinenotation', xs.flat(Infinity).join(''), makePat(SPAN, bmark, emark))
 		} // simpleProse.span(bmark, xs, emark)
 
 		var _qmarker	// save span begin and end (in closure)
